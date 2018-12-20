@@ -1,6 +1,6 @@
 ## The SocialSim Package API
 
-### Measurements
+#### Measurements
 
 Run a single measurement:
 
@@ -32,7 +32,7 @@ measurement_object = ss.MeasurementObject(dataset)
 measurement_names  = measurement_object.measurements()
 ```
 
-### Metrics
+#### Metrics
 
 Run metrics
 
@@ -60,7 +60,7 @@ metric  = run_metrics(simulation_measurement, ground_truth_measurement, measurem
 run_metrics(simulation_measurement, ground_truth_measurement)
 ```
 
-### Analysis of results
+#### Analysis of results
 
 Create measurement plots
 
@@ -80,7 +80,7 @@ ss.produce_report(measurements)
 ss.produce_report(metrics)
 ```
 
-### Orchestrator support
+#### Orchestrator support
 
 Run a complete scenario
 
@@ -95,7 +95,7 @@ challenge_event.run(task)
 
 _______________________________________________________________________________
 
-## Social Network Files:
+## Social Network Representation Files:
 
 Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
