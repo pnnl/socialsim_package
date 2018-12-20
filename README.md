@@ -101,15 +101,15 @@ header json as the first entry. The format is as follows:
 
 ```python
 {'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
                 .                                                               .
                 .                                                               .
                 .                                                               .
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
 ```
 
 ## Function Documentation
