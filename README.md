@@ -1,22 +1,24 @@
 Notes to contributors:
 
-##On function documentation:
+## On function documentation:
 
 All functions should follow the format shown below:
 
-    def f(x,y):
-        """
-        Description: A plain English description of what this function does and
-                     how it fits into the global package structure.
-        Inputs:
-            :x: (int) Plain English description of x.
-            :y: (int) Plain English description of y.
-        Outputs:
-            :z: (int) Plain English description of z.
-        """
-        z = x**2 + y**2
+```python
+def f(x,y):
+    """
+    Description: A plain English description of what this function does and
+                 how it fits into the global package structure.
+    Inputs:
+        :x: (int) Plain English description of x.
+        :y: (int) Plain English description of y.
+    Outputs:
+        :z: (int) Plain English description of z.
+    """
+    z = x**2 + y**2
 
-        return z
+    return z
+```
 
 On line length: Lines have a hard limit of 80 characters.
 
@@ -25,7 +27,7 @@ conventions.
 
 _______________________________________________________________________________
 
-##On submission files:
+## On submission files:
 
 Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
