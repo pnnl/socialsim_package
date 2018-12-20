@@ -1,9 +1,8 @@
-_______________________________________________________________________________
-
 Notes to contributors:
 
-On function documentation:
-    All functions should follow the format shown below:
+##On function documentation:
+
+All functions should follow the format shown below:
 
     def f(x,y):
         """
@@ -22,11 +21,11 @@ On function documentation:
 On line length: Lines have a hard limit of 80 characters.
 
 On everything else: Try to follow PEP8 where possible. Always follow local
-                    conventions.
+conventions.
 
 _______________________________________________________________________________
 
-Notes on submission files:
+##On submission files:
 
 Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
@@ -91,6 +90,7 @@ Run metrics
     run_metrics(simulation_measurement, ground_truth_measurement)
 
 Create measurement plots
+
     ss.plot(measurements)
 
 Create text file report for various outputs
@@ -108,9 +108,7 @@ Run a complete scenario
 
     challenge_event.run(task)
 
-
     Note:
-
         Tasks is a dict that looks like this:
 
             task = {'scenario':scenario,
