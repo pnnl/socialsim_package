@@ -92,10 +92,9 @@ task = {'scenario':scenario, 'platform':platform,
 
 challenge_event.run(task)
 ```
-
 _______________________________________________________________________________
 
-## Social Network Representation Files:
+## Social Network Representation Files
 
 Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
@@ -113,7 +112,7 @@ header json as the first entry. The format is as follows:
 {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
 ```
 
-## Function Documentation:
+## Function Documentation
 
 All functions should follow the format shown below:
 

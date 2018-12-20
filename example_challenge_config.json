@@ -1,0 +1,44 @@
+[
+    {
+        "scenario":1,
+        "platforms": {
+            "github":{
+                "domains":{
+                    "cve":["list", "of", "measurement", "names"],
+                    "cyber":["list", "of", "measurement", "names"],
+                    "crypto":["list", "of", "measurement", "names"]
+                }
+            },
+            "twitter":{
+                "domains":{
+                    "cve":["list", "of", "measurement", "names"],
+                    "cyber":["list", "of", "measurement", "names"],
+                    "crypto":["list", "of", "measurement", "names"]
+                }
+            },
+            "reddit":{
+                "domains":{
+                    "cve":["list", "of", "measurement", "names"],
+                    "cyber":["list", "of", "measurement", "names"],
+                    "crypto":["list", "of", "measurement", "names"]
+                }
+            }
+        }
+    },
+    {
+        "scenario":2,
+        "platforms": {
+            "github":{
+                "domains":{
+                    "cve":["list", "of", "measurement", "names"],
+                    "crypto":["list", "of", "measurement", "names"]
+                }
+            },
+            "twitter":{
+                "domains":{
+                    "cve":["list", "of", "measurement", "names"]
+                }
+            }
+        }
+    },
+]
