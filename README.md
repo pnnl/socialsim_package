@@ -31,23 +31,22 @@ Notes on submission files:
 Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
 
-{'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-                .                                                               .
-                .                                                               .
-                .                                                               .
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+    {'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain, 'platform': platform}
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+                    .                                                               .
+                    .                                                               .
+                    .                                                               .
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
+    {'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'actionSubType': value}
 
 
 Thoughts on workflow:
 
-
-
 Run a single measurement:
+
     import socialsim as ss
 
     dataset            = ss.load(directory)
@@ -133,5 +132,3 @@ Measurements list
         Node
         Community
         Population
-
-        
