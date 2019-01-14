@@ -1,4 +1,21 @@
-## The SocialSim Package API
+## Examples of the SocialSim Package API
+
+```python 
+metadata = ss.load_metadata(path)
+
+infospread_measurements    = ss.InfoSpreadMeasurements(dataset, metadata, configuration)
+cascade_measurements       = ss.CascadeMeasurements(dataset, configuration)
+network_measurements       = ss.NetworkMeasurements(dataset, configuration)
+crossplatform_measurements = ss.CrossPlatformMeasurements(dataset, configuration)
+
+measurements = ss.AllMeasurements(dataset, metadata, configuration)
+
+measurements_output = measurements.run()
+
+task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
+
+task_runner(dataset, configuration)
+```
 
 #### Measurements
 
@@ -79,19 +96,6 @@ ss.produce_report(measurements, metrics)
 ss.produce_report(measurements)
 ss.produce_report(metrics)
 ```
-
-#### Orchestrator support
-
-Run a complete scenario
-
-```python
-challenge_event = ss.challenge(config, ground_truth)
-
-task = {'scenario':scenario, 'platform':platform,
-        'domain':domain, 'data':data}
-
-challenge_event.run(task)
-```
 _______________________________________________________________________________
 
 ## Social Network Representation Files
@@ -154,36 +158,10 @@ Measurements list
         Community
         Population
 
-```python 
-
-metadata = ss.load_metadata(path)
-
-infospread_measurements    = ss.InfoSpreadMeasurements(dataset, metadata, configuration)
-cascade_measurements       = ss.CascadeMeasurements(dataset, configuration)
-network_measurements       = ss.NetworkMeasurements(dataset, configuration)
-crossplatform_measurements = ss.CrossPlatformMeasurements(dataset, configuration)
-
-measurements = ss.AllMeasurements(dataset, metadata, configuration)
-
-measurements_output = measurements.run()
-
-
-
-
-
-
-task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
-
-task_runner(dataset, info)
-
-
-
-
-```
-
-
-
-
+    Cross-Platform Measurements 
+        Node
+        Community
+        Population
 
 
 
