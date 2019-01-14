@@ -7,32 +7,21 @@ from ast import literal_eval
 # Internal imports
 from .record import RecordKeeper
 
-def run_measurements(simulation, ground_truth, measurements='all',
-                     log_file='socialsim_log.txt', save_to_file=True,
-                     output_directory=None):
-    """
-    Description:
+class TaskRunner:
+    def __init__(self, ground_truth, metadata, configuration):
+        pass
 
-    Inputs:
+    def __call__(self, dataset, configuration):
+        """
+        Description: Allows the class to be called as a function. Takes in a
+        dataset runs the specified measurements and metrics on the dataset given
+        the ground truth and metadata that initialized the TaskRunner.
 
-    Outputs:
+        Inputs:
+            :dataset:
+            :configuration:
 
-    """
-
-    return result
-
-def run_metrics(simulation_measurements, ground_truth_measurements,
-                metrics='all', log_file='socialsim_log.txt',
-                save_to_file=True, output_directory=None):
-    """
-    Description:
-
-    Inputs:
-
-    Outputs:
-
-    """
-    return result
-
-def output_report(simulation_measurements, ground_truth_measurements, metrics,
-                  output_directory=None)
+        Outputs:
+            :report:
+        """
+        return report
