@@ -14,8 +14,9 @@ class TaskRunner:
     def __call__(self, dataset, configuration):
         """
         Description: Allows the class to be called as a function. Takes in a
-        dataset runs the specified measurements and metrics on the dataset given
-        the ground truth and metadata that initialized the TaskRunner.
+            dataset runs the specified measurements and metrics on the dataset
+            given the ground truth and metadata that initialized the
+            TaskRunner.
 
         Inputs:
             :dataset:

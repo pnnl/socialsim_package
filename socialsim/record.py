@@ -41,13 +41,14 @@ class RecordKeeper:
     def toc(self, index):
         """
         Description: Stops the timer with the given index and returns the time
-                     since it started.
+            since it started.
 
         Inputs:
             :index: (int) The timer number.
 
         Outputs:
-            :index: delta_time (float) Timer in seconds since the timer started.
+            :index: delta_time (float) Timer in seconds since the timer
+                started.
 
         """
         end_time   = datetime.datetime.now()
