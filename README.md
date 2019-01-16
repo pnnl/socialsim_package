@@ -24,7 +24,7 @@ measurements_output = measurements.run()
 
 task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
 
-task_runner(dataset, configuration)
+results = task_runner(dataset, configuration)
 ```
 
 

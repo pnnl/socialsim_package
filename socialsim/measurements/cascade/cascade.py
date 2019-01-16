@@ -63,9 +63,9 @@ def igraph_wiener_index(graph):
 
 class Cascade:
     """
-        depth, max breadth, size and structural virality measurements from
-        Soroush Vosoughi, Deb Roy, and Sinan Aral.
-        The spread of true and false news online. Science. 2018
+    depth, max breadth, size and structural virality measurements from
+    Soroush Vosoughi, Deb Roy, and Sinan Aral.
+    The spread of true and false news online. Science. 2018
     """
 
     def __init__(self, main_df=None, parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",

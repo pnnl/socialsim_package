@@ -1,24 +1,21 @@
-from __future__ import print_function, division
-
 import pandas as pd
 import igraph as ig
-import snap as sn
+import snap   as sn
+import numpy  as np
+
 from time import time
-import numpy as np
 
 import community
 import tqdm
-
-from prettytable import PrettyTable
-from prettytable import MSWORD_FRIENDLY
-
 import os
+
+from ..measurements import MeasurementsBaseClass
 
 __all__ = ['GithubNetworkMeasurements',
            'TwitterNetworkMeasurements',
            'RedditNetworkMeasurements']
 
-class NetworkMeasurements(object):
+class NetworkMeasurements(MeasurementsBaseClass):
     """
     This class implements Network specific   measurements. It uses iGraph and SNAP libraries with Python interfaces.
     For installation information please visit the websites for the two packages.
@@ -26,7 +23,7 @@ class NetworkMeasurements(object):
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, data, test=False):
+    def __init__(self, dataset, test=False):
         self.main_df = data if isinstance(data, pd.DataFrame) else pd.read_csv(data)
 
         if test:
@@ -38,7 +35,6 @@ class NetworkMeasurements(object):
         self.preprocess()
 
         self.build_undirected_graph(self.main_df)
-
 
     def preprocess(self):
         return NotImplementedError()

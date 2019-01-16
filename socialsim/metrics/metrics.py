@@ -1,27 +1,46 @@
-from scipy.stats            import entropy
-from scipy.stats            import ks_2samp
-from scipy.stats            import spearmanr
-from scipy.stats            import pearsonr
-from sklearn.metrics        import r2_score
-from scipy.spatial.distance import euclidean
-
-import statsmodels.api as sm
-import fastdtw         as fdtw
-
-import pandas as pd
-import numpy  as np
-
-from matplotlib  import pyplot as plt
+from scipy.stats import entropy
+from scipy.stats import ks_2samp
+from scipy.stats import pearsonr
 from scipy.stats import iqr
 
+from scipy.spatial.distance import euclidean
+from sklearn.metrics        import r2_score
+
+import fastdtw as fdtw
+import pandas  as pd
+import numpy   as np
+
+"""
+
+Metrics list:
+
+absolute_difference
+absolute_percentage_error
+kl_divergence
+kl_divergence_smoothed
+dtw
+fast_dtw
+js_divergence
+rbo_for_te
+rbo_score
+rbo_weight
+rmse
+r2
+pearson
+ks_test
+"""
 
 def check_data_types(ground_truth, simulation):
     """
     Convert ground truth and simulation measurements to arrays if they are
         DataFrames
 
-    Inputs: Ground truth and simulation data as output by the meeasurement code
-    Outputs: Ground truth and simulation data in array format
+    Inputs:
+        :ground_truth: (unknown) Output of measurements code.
+        :simulation: (unknown) Output of measurements code.
+    Outputs:
+        :ground_truth: (np.array) Standardized ground truth measurements data.
+        :simulation: (np.array) Standardized simulation measurements data.
     """
 
     if isinstance(ground_truth, pd.DataFrame):
@@ -45,9 +64,8 @@ def get_hist_bins(ground_truth, simulation, method='auto'):
     simulation: Simulation measurement
     method: Method of bin calculation corresponding the np.histogram bin argument
 
-
     Outputs:
-    Bin edges
+        :bins: ()
 
     """
 
@@ -57,6 +75,40 @@ def get_hist_bins(ground_truth, simulation, method='auto'):
 
     return (bins)
 
+
+def join_dfs(ground_truth,simulation,join='inner',fill_value=0):
+
+    """
+    Join the simulation and ground truth data frames
+
+    Inputs:
+    ground_truth - Ground truth measurement data frame with measurement in the
+        "value" column
+    simulation - Simulation measurement data frame with measurement in the
+        "value" column
+    join - Join method (inner, outer, left, right)
+    fill_value - Value for filling NAs or method for filling in NAs
+        (e.g. "ffill" for forward fill)
+    """
+
+    df = ground_truth.merge(simulation,
+                            on = [c for c in ground_truth.columns if c != 'value'],
+                            suffixes = ('_gt','_sim'),
+                            how=join)
+    df = df.sort_values([c for c in ground_truth.columns if c != 'value'])
+
+    try:
+        float(fill_value)
+        df = df.fillna(fill_value)
+    except ValueError:
+        df = df.fillna(method=fill_value)
+
+    return(df)
+
+"""
+The remaining functions are metrics used in comparing the output of the
+measurements code.
+"""
 
 def absolute_difference(ground_truth, simulation):
     """
@@ -132,8 +184,8 @@ def kl_divergence(ground_truth, simulation, discrete=False):
 
 def kl_divergence_smoothed(ground_truth, simulation, alpha=0.01, discrete=False):
     """
-    Smoothed version of the KL divergence which smooths the simulation output to prevent
-    infinities in the KL divergence output
+    Smoothed version of the KL divergence which smooths the simulation output
+    to prevent infinities in the KL divergence output
 
     Additional input:
     alpha - smoothing parameter
@@ -341,7 +393,6 @@ def rbo_score(ground_truth, simulation, p=0.95):
     l, L = ll
     if s == 0: return 0
 
-
     # Calculate the overlaps at ranks 1 through s
     # (the shorter of the two lists)
 
@@ -363,8 +414,9 @@ def rbo_score(ground_truth, simulation, p=0.95):
 
     return rbo_score
 
-# Weight given to the top d ranks for a given p
+
 def rbo_weight(d, p):
+    # Weight given to the top d ranks for a given p
     sum1 = 0.0
     for i in range(1, d):
         sum1 += np.power(p, i) / float(i)
@@ -402,9 +454,6 @@ def rmse(ground_truth, simulation, join='inner', fill_value=0, relative=False):
             return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean())
         else:
             iq_range = float(iqr(df['value_gt'].values))
-
-            print('iqr')
-            print(iq_range)
 
             if iq_range > 0:
                 return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean()) / iq_range
@@ -489,54 +538,3 @@ def ks_test(ground_truth, simulation):
         return ks_2samp(ground_truth,simulation).statistic
     except:
         return None
-
-
-def join_dfs(ground_truth,simulation,join='inner',fill_value=0):
-
-    """
-    Join the simulation and ground truth data frames
-
-    Inputs:
-    ground_truth - Ground truth measurement data frame with measurement in the
-        "value" column
-    simulation - Simulation measurement data frame with measurement in the
-        "value" column
-    join - Join method (inner, outer, left, right)
-    fill_value - Value for filling NAs or method for filling in NAs
-        (e.g. "ffill" for forward fill)
-    """
-
-    df = ground_truth.merge(simulation,
-                            on = [c for c in ground_truth.columns if c != 'value'],
-                            suffixes = ('_gt','_sim'),
-                            how=join)
-    df = df.sort_values([c for c in ground_truth.columns if c != 'value'])
-
-    try:
-        float(fill_value)
-        df = df.fillna(fill_value)
-    except ValueError:
-        df = df.fillna(method=fill_value)
-
-    return(df)
-
-def get_metric_scores(ground_truth, simulation, measurement, metric, measurement_kwargs={}, metric_kwargs={}):
-    """
-    Function to combine measurement and metric computations
-
-    :param ground_truth: pandas dataframe of ground truth
-    :param simulation: pandas dataframe of simulation
-    :param measurement: measurement function
-    :param metric: metric function
-    :return: metric computation for measurements calculated from gold and simulation
-
-    """
-    print("Calculating {} for {}".format(metric.__name__, measurement.__name__))
-    measurement_on_gt = measurement(ground_truth, **measurement_kwargs)
-    measurement_on_sim = measurement(simulation, **measurement_kwargs)
-
-
-    metric_results = metric(measurement_on_gt, measurement_on_sim,
-        **metric_kwargs)
-
-    return measurement_on_gt, measurement_on_sim, metric_results

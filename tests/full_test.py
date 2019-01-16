@@ -5,8 +5,30 @@ ground_truth = ss.load_data('test_data/ground_truth.json')
 
 print(simulation.head())
 
-simulation   = simulation[simulation['Platform']=='twitter']
-ground_truth = ground_truth[ground_truth['platform']=='twitter']
+for platform in ['twitter','github','reddit']:
 
-simulation_measurements   = CascadeMeasurements(simulation)
-ground_truth_measurements = CascadeMeasurements(ground_truth)
+    print('\n\n\n')
+    print('-'*80)
+    print('Running tests on '+platform)
+    print('-'*80)
+
+    simulation_subset   = simulation[simulation['platform']==platform]
+    ground_truth_subset = ground_truth[ground_truth['platform']==platform]
+
+    print('Subsets assigned.')
+    print('-'*80)
+
+    simulation_measurements   = ss.CascadeMeasurements(simulation_subset)
+    ground_truth_measurements = ss.CascadeMeasurements(ground_truth_subset)
+
+    print('Cascade measurements initialized.')
+    print('-'*80)
+
+    simulation_measurements   = ss.NetworkMeasurements(simulation_subset)
+    ground_truth_measurements = ss.NetworkMeasurements(ground_truth_subset)
+
+    print('Network measurements initialized.')
+    print('-'*80)
+
+    simulation_measurements   = ss.InfospreadMeasurements(simulation_subset)
+    ground_truth_measurements = ss.InfospreadMeasurements(ground_truth_subset)

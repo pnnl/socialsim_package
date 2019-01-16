@@ -5,6 +5,14 @@ import numpy  as np
 from ast import literal_eval
 
 # Internal imports
+import metrics
+
+from measurements import InfospreadMeasurements
+from measurements import CascadeMeasurements
+from measurements import NetworkMeasurements
+from measurements import GroupFormationMeasurements
+from measurements import CrossPlatformMeasurements
+
 from .record import RecordKeeper
 
 class TaskRunner:
@@ -41,11 +49,12 @@ class TaskRunner:
                 status on the success or failure of individual function calls.
         """
 
-        for measurement in configuration.keys():
-
-            measurement_configuration = configuration[measurement]
-
-
 
 
         return report
+
+    def _run_measurements_and_metrics(self, dataset, configuration):
+
+
+
+        return results, logs
