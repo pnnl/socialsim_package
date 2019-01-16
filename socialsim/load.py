@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import csv
 import os
+import sys
 
 def load_data(filepath, ignore_first_line=True, name_mappings=None):
     """
@@ -10,8 +11,6 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None):
 
     Input:
         :filepath: (str) The filepath to the submission file.
-        :meta_data: (bool) A True/False value indicating the presence of a
-            meta data json on the first line of the submission file.
         :name_mappings: (dict) A dictionary where the keys are existing names
             and the values are new names to replace the existing names.
 
@@ -25,11 +24,13 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None):
         if meta_data:
             raise ERROR
 
-        dataset = _load_csv(filepath)
+        dataset = _load_csv(filepath, ignore_first_line)
 
     elif filetype=='json':
 
-        dataset = _load_json(filepath, meta_data)
+        dataset = _load_json(filepath, ignore_first_line)
+
+    dataset = convert_datetime(dataset)
 
     return dataset
 
@@ -62,6 +63,18 @@ def _load_json(filepath, ignore_first_line):
         :dataset: (pandas dataframe) The loaded dataframe object.
     """
 
+    dataset = []
+
+    with open(filepath, 'r') as file:
+        for line_number, line in enumerate(file):
+
+            if line_number==0 and ignore_first_line:
+                continue
+
+            dataset.append(json.loads(line))
+
+    dataset = pd.DataFrame(dataset)
+
     return dataset
 
 def validate_dataset(filepath):
@@ -77,3 +90,18 @@ def validate_dataset(filepath):
     """
 
     return check
+
+def convert_datetime(dataset):
+    """
+    NOTE: THIS FUNCTION SHOULD BE OPTIMIZED WITH DASK
+
+    Description:
+
+    Input:
+
+    Output:
+    """
+
+    dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
+
+    return dataset

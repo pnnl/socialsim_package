@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pysal
 
-from .validators import check_empty
-from .validators import check_root_only
+from ..validators import check_empty
+from ..validators import check_root_only
 
 from igraph import Graph
 
@@ -71,17 +71,21 @@ class Cascade:
     def __init__(self, main_df=None, parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  timestamp_col="nodeTime", user_col="nodeUserID", community_col="communityID"):
         """
-        main_df: df containing all tweets in the RT cascade of the original tweet
+        Description:
+
+        Input:
+        :main_df: (pd.DataFrame) Dataset containing all tweets in the RT
+            cascade of the original tweet.
         parent_node: name of the column containg the uid of the node who was retweeted from (None for cascade root)
         node: name of the column containg the uid of the node who retweeted from node in parent_node
         timestamp: time of the original tweet/retweet
         """
         self.parent_node_col = parent_node_col
-        self.node_col = node_col
-        self.root_node_col = root_node_col
-        self.timestamp_col = timestamp_col
-        self.user_col = user_col
-        self.community_col = community_col
+        self.node_col        = node_col
+        self.root_node_col   = root_node_col
+        self.timestamp_col   = timestamp_col
+        self.user_col        = user_col
+        self.community_col   = community_col
 
         if main_df is not None:
 
@@ -379,8 +383,7 @@ class SingleCascadeMeasurements:
         pass
 
 
-class CascadeCollectionMeasurements:
-
+class CascadeMeasurements:
     def __init__(self, main_df, parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  timestamp_col="nodeTime", user_col="nodeUserID",
                  filter_on_col=None, filter_in_list=[]):
@@ -390,14 +393,14 @@ class CascadeCollectionMeasurements:
         node: name of the column containg the uid of the node who retweeted from node in parent_node
         timestamp: time of the original tweet/retweet
         """
-        self.main_df = main_df
-        self.root_node_col = root_node_col
+        self.main_df         = main_df
+        self.root_node_col   = root_node_col
         self.parent_node_col = parent_node_col
-        self.node_col = node_col
-        self.timestamp_col = timestamp_col
-        self.user_col = user_col
-        self.filter_on_col = filter_on_col
-        self.filter_in_list = filter_in_list
+        self.node_col        = node_col
+        self.timestamp_col   = timestamp_col
+        self.user_col        = user_col
+        self.filter_on_col   = filter_on_col
+        self.filter_in_list  = filter_in_list
         if len(self.main_df) > 0:
             # for reddit community measurements
             if self.filter_on_col is not None and len(filter_in_list) > 0:

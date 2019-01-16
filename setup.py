@@ -12,7 +12,7 @@ package_structure = ['socialsim',
 ]
 
 setup(name='socialsim',
-      version='0.0.1',
+      version='0.1.0',
       packages=package_structure,
       license='License to be determined at a future date',
       url='URL to be determined at a future date',

@@ -9,6 +9,18 @@ from .record import RecordKeeper
 
 class TaskRunner:
     def __init__(self, ground_truth, metadata, configuration):
+        """
+        Description: Initializes the TaskRunner object. Stores the metadata and
+            ground_truth objects and defines all measurements and metrics
+            specified by the configuration dictionary.
+
+        Inputs:
+            :ground_truth:
+            :metadata:
+            :configuration:
+        Outputs:
+            None
+        """
         pass
 
     def __call__(self, dataset, configuration):
@@ -19,10 +31,21 @@ class TaskRunner:
             TaskRunner.
 
         Inputs:
-            :dataset:
-            :configuration:
+            :dataset: (pd.DataFrame) The dataset to run the given measurements
+                and metrics on.
+            :configuration: (dict) The configuration information in the form of
+                a nested dictionary.
 
         Outputs:
-            :report:
+            :report: (dict) A summary of the run including all results and
+                status on the success or failure of individual function calls.
         """
+
+        for measurement in configuration.keys():
+
+            measurement_configuration = configuration[measurement]
+
+
+
+
         return report

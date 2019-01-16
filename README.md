@@ -1,6 +1,6 @@
 ## Examples of the SocialSim Package API
 
-```python 
+```python
 metadata = ss.load_metadata(path)
 
 infospread_measurements    = ss.InfoSpreadMeasurements(dataset, metadata, configuration)
@@ -12,10 +12,53 @@ measurements = ss.AllMeasurements(dataset, metadata, configuration)
 
 measurements_output = measurements.run()
 
+
+
+
+
+
+
+
+
+
+
 task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
 
 task_runner(dataset, configuration)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### Measurements
 
@@ -158,10 +201,7 @@ Measurements list
         Community
         Population
 
-    Cross-Platform Measurements 
+    Cross-Platform Measurements
         Node
         Community
         Population
-
-
-

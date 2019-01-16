@@ -6,13 +6,16 @@ socialsim\record.py
 socialsim\run.py
 socialsim\utils.py
 socialsim\measurements\__init__.py
+socialsim\measurements\validators.py
 socialsim\measurements\cascade\__init__.py
 socialsim\measurements\cascade\cascade.py
 socialsim\measurements\cross_platform\__init__.py
+socialsim\measurements\cross_platform\cross_platform.py
 socialsim\measurements\group_formation\__init__.py
+socialsim\measurements\group_formation\group_formation.py
 socialsim\measurements\infospread\__init__.py
+socialsim\measurements\infospread\infospread.py
 socialsim\measurements\infospread\infospread_community.py
-socialsim\measurements\infospread\infospread_measurements.py
 socialsim\measurements\infospread\infospread_node.py
 socialsim\measurements\infospread\infospread_population.py
 socialsim\measurements\network\__init__.py

@@ -1,1 +1,1 @@
-from infospread_measurements import InfospreadMeasurements
+from .infospread import InfospreadMeasurements
