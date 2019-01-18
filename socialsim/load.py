@@ -114,7 +114,7 @@ def convert_datetime(dataset, verbose):
     """
 
     if verbose:
-        print('Converting strings to datetime objects...', end='')
+        print('Converting strings to datetime objects...', end='', flush=True)
 
     dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
 
@@ -124,7 +124,7 @@ def convert_datetime(dataset, verbose):
     return dataset
 
 def _count_number_of_lines(filepath):
-    count = 0
+    count = -1
     for line in open(filepath):
         count += 1
     return count

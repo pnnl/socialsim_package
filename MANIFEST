@@ -19,6 +19,7 @@ socialsim/measurements/infospread/infospread.py
 socialsim/measurements/infospread/infospread_community.py
 socialsim/measurements/infospread/infospread_node.py
 socialsim/measurements/infospread/infospread_population.py
+socialsim/measurements/infospread/metadata.py
 socialsim/measurements/network/__init__.py
 socialsim/measurements/network/network.py
 socialsim/metrics/__init__.py
