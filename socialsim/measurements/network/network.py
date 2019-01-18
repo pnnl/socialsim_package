@@ -26,12 +26,7 @@ class NetworkMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, test=False):
         self.main_df = dataset
 
-        self.preprocess()
-
         self.build_undirected_graph(self.main_df)
-
-    def preprocess(self):
-        return NotImplementedError()
 
     def build_undirected_graph(self, df):
         return NotImplementedError()
@@ -52,7 +47,7 @@ class NetworkMeasurements(MeasurementsBaseClass):
         return ig.Graph.assortativity_degree(self.gUNig)
 
     def number_of_connected_components(self):
-        return len(ig.Graph.components(self.gUNig,mode="WEAK"))
+        return len(ig.Graph.components(self.gUNig, mode="WEAK"))
 
     def average_clustering_coefficient(self):
         return sn.GetClustCfAll(self.gUNsn, sn.TFltPrV())[0]
@@ -71,7 +66,6 @@ class NetworkMeasurements(MeasurementsBaseClass):
     def community_modularity(self):
         return ig.Graph.modularity(self.gUNig,ig.Graph.community_multilevel(self.gUNig))
 
-
     def get_parent_uids(self,df, parent_node_col="parentID", node_col="nodeID", root_node_col="rootID", user_col="nodeUserID"):
         """
         :return: adds parentUserID column with user id of the parent if it exits in df
@@ -85,18 +79,12 @@ class NetworkMeasurements(MeasurementsBaseClass):
         return df
 
 class GithubNetworkMeasurements(NetworkMeasurements):
-
     def __init__(self, project_on='nodeID', weighted=False, **kwargs):
         self.project_on = project_on
-        self.weighted = weighted
+        self.weighted   = weighted
         super(GithubNetworkMeasurements, self).__init__(**kwargs)
 
-    def preprocess(self):
-        pass
-
     def build_undirected_graph(self, df):
-
-        #self.main_df = pd.read_csv(data)
         self.main_df = self.main_df[['nodeUserID','nodeID']]
 
         left_nodes = np.array(self.main_df['nodeUserID'].unique().tolist())
@@ -104,7 +92,7 @@ class GithubNetworkMeasurements(NetworkMeasurements):
         el = self.main_df.apply(tuple, axis=1).tolist()
         edgelist = list(set(el))
 
-        #iGraph Graph object construction
+        #iGraph graph object construction
         B = ig.Graph.TupleList(edgelist, directed=False)
         names = np.array(B.vs["name"])
         types = np.isin(names,right_nodes)
@@ -117,30 +105,30 @@ class GithubNetworkMeasurements(NetworkMeasurements):
         else:
             self.gUNig = p2
 
-        #self.gUNig = B.bipartite_projection(multiplicity=False, which = 0)
-
-
         #SNAP graph object construction
         self.gUNsn = sn.TUNGraph.New()
         for v in self.gUNig.vs:
             self.gUNsn.AddNode(v.index)
         for e in self.gUNig.es:
             self.gUNsn.AddEdge(e.source,e.target)
-
 
 class TwitterNetworkMeasurements(NetworkMeasurements):
     def __init__(self, **kwargs):
         super(TwitterNetworkMeasurements, self).__init__(**kwargs)
 
-    def preprocess(self):
-        pass
-
     def build_undirected_graph(self, df):
+        """
+        Description:
 
+        Input:
+
+        Output:
+
+        """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
         edgelist = df[['nodeUserID','parentUserID']].apply(tuple,axis=1).tolist()
 
-        #iGraph Graph object construction
+        #iGraph graph object construction
         self.gUNig = ig.Graph.TupleList(edgelist, directed=False)
 
         #SNAP graph object construction
@@ -148,18 +136,29 @@ class TwitterNetworkMeasurements(NetworkMeasurements):
         for v in self.gUNig.vs:
             self.gUNsn.AddNode(v.index)
         for e in self.gUNig.es:
-            self.gUNsn.AddEdge(e.source,e.target)
-
+            self.gUNsn.AddEdge(e.source, e.target)
 
 class RedditNetworkMeasurements(NetworkMeasurements):
     def __init__(self, **kwargs):
+        """
+        Description:
+
+        Input:
+
+        Output:
+
+        """
         super(RedditNetworkMeasurements, self).__init__(**kwargs)
 
-    def preprocess(self):
-        pass
+    def build_undirected_graph(self, df):
+        """
+        Description:
 
-    def build_undirected_graph(self,df):
+        Input:
 
+        Output:
+
+        """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
         edgelist = df[['nodeUserID','parentUserID']].apply(tuple,axis=1).tolist()
 
@@ -171,4 +170,4 @@ class RedditNetworkMeasurements(NetworkMeasurements):
         for v in self.gUNig.vs:
             self.gUNsn.AddNode(v.index)
         for e in self.gUNig.es:
-            self.gUNsn.AddEdge(e.source,e.target)
+            self.gUNsn.AddEdge(e.source, e.target)
