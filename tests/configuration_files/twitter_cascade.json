@@ -1,0 +1,20 @@
+{
+    "node":{
+        "cascade_max_depth_over_time": {
+            "scale":"node",
+            "node_type":"Cascade",
+            "measurement":"get_node_level_measurements",
+            "measurement_args":{
+                "single_cascade_measurement":"cascade_timeseries_of",
+                "attribute": "depth",
+                "time_granularity": "D"},
+            "metrics":{}
+        }
+    },
+    "community":{
+
+    },
+    "population":{
+
+    }
+}
