@@ -18,7 +18,7 @@ class MeasurementsBaseClass:
         self.timer = RecordKeeper('measurements_log.txt')
 
         self.measurements  = []
-        for scale in ["node", "community", "population"]:
+        for scale in configuration.keys():
             for name in configuration[scale].keys():
                 self.measurements.append(name)
 
@@ -41,16 +41,16 @@ class MeasurementsBaseClass:
         results = {}
         logs    = {}
 
-        for scale in configuration.keys():
+        for scale in self.configuration.keys():
             scale_results = {}
             scale_logs    = {}
 
-            for name in configuration[scale].keys():
-                result, log = _evaluate_measurement(configuration[scale][name],
-                    timing)
+            for name in self.configuration[scale].keys():
+                result, log = self._evaluate_measurement(
+                    self.configuration[scale][name], timing)
 
-                scale_results.update({'name':result})
-                scale_logs.update({'name':log})
+                scale_results.update({name:result})
+                scale_logs.update({name:log})
 
             results.update({scale:scale_results})
             logs.update({scale:scale_logs})

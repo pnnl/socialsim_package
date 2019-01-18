@@ -5,6 +5,8 @@ from .infospread_node       import InfospreadNode
 from .infospread_population import InfospreadPopulation
 from .infospread_community  import InfospreadCommunity
 
+from ..measurements import MeasurementsBaseClass
+
 class InfospreadMeasurements(MeasurementsBaseClass, InfospreadNode,
     InfospreadPopulation, InfospreadCommunity):
     def __init__(self, dataset, configuration, metadata, content_node_ids=[],
@@ -21,8 +23,7 @@ class InfospreadMeasurements(MeasurementsBaseClass, InfospreadNode,
         Output:
             None
         """
-        super(MeasurementsBaseClass, self).__init__(dataset, configuration,
-            metadata)
+        MeasurementsBaseClass.__init__(self, dataset, configuration)
 
         self.platform = platform
 
@@ -72,7 +73,6 @@ class InfospreadMeasurements(MeasurementsBaseClass, InfospreadNode,
 
         # For community measurements
         self.community_dict_file = community_dictionary
-        print('getting communities...')
         if self.platform == 'github':
             self.communityDF = self.getCommmunityDF(community_col='community')
         elif self.platform == 'reddit':

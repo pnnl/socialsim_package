@@ -75,15 +75,26 @@ class CascadeMeasurements(MeasurementsBaseClass):
     @check_empty(default=None)
     def get_node_level_measurements(self, single_cascade_measurement, **kwargs):
         """
-        :param single_cascade_measurement: function to obtain the single cascade level timeseries/distribution measurement
-        :return: dict
-                 key: rootID,
-                 value: dataframe for depth based and timeseries measurements and single value for gini/palma measurements
-                 returned by the cascade_measurement function
+        Description:
+
+        Input:
+            :single_cascade_measurement: function to obtain the single cascade
+                level timeseries/distribution measurement
+
+        Output:
+            :result: (dict) A dictionary with the following properties:
+                keys: rootID,
+                values: dataframe for depth based and timeseries measurements
+                and single value for gini/palma measurements returned by the
+                cascade_measurement function
         """
-        # print(single_cascade_measurement)
-        return {cascade_identifier: getattr(scm, single_cascade_measurement)(**kwargs)
-                for cascade_identifier, scm in self.scms.items()}
+        result = {}
+        for cascade_identifier, scm in self.scms.items():
+            attribute   = getattr(scm, single_cascade_measurement)(**kwargs)
+            update_dict = {cascade_identifier: attribute}
+            result.update(update_dict)
+
+        return result
 
     def split_communities(self, data, community_grouper):
 
