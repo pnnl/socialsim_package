@@ -337,12 +337,6 @@ class CascadeMeasurements(MeasurementsBaseClass):
         """
         pass
 
-    def original_tweet_ratio(self):
-        """
-        Twitter only measurement
-        """
-        get_original_tweet_ratio(self.main_df, self.node_col, self.root_node_col)
-
 
 
 class Cascade:
@@ -503,13 +497,6 @@ class Cascade:
         return lifetime
 
 
-    def get_cascade_original_tweet_ratio(self):
-        """
-        Twitter only measurement
-        """
-        get_original_tweet_ratio(self.main_df, self.node_col, self.root_node_col)
-
-
 class SingleCascadeMeasurements:
     """
     measurements for a cascade i.e. node level measurements
@@ -604,6 +591,13 @@ class SingleCascadeMeasurements:
     @check_empty(default=None)
     def get_depth_based_measurements(self):
         """
+        Description:
+
+        Input:
+
+        Output:
+
+
         :return: pandas dataframe with "breadth", "size", "structural_virality", "unique_nodes", "new_node_ratio" at each depth
         """
         self.main_df["depth"] = -1
@@ -674,12 +668,6 @@ class SingleCascadeMeasurements:
     def node_participation(self):
         return self.main_df.groupby(self.main_df[self.user_col]).size().reset_index(name='counts')['counts'].values
 
-    def fraction_of_nodes_with_outside_links(self):
-        """
-        ???
-        """
-        pass
-
 
 def palma_ratio(values):
     values = np.sort(np.array(values))
@@ -693,19 +681,6 @@ def palma_ratio(values):
     except ZeroDivisionError:
         return None
     return p
-
-
-def get_original_tweet_ratio(main_df, node_col, root_node_col):
-    original_tweets_count = len(main_df[main_df[node_col]==main_df[root_node_col]])
-    replies_count         = len(main_df[main_df["actionType"] == "reply"])
-    retweets_count        = len(main_df[main_df["actionType"] == "retweet"])
-
-    numerator   = original_tweets_count+replies_count
-    denominator = original_tweets_count+replies_count+retweets_count
-
-    original_tweet_ratio = numerator / denominator
-
-    return original_tweet_ratio
 
 
 def igraph_from_pandas_edgelist(df, source, target, directed):
