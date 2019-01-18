@@ -1,6 +1,22 @@
 {
     "node":{
+        "user_activity_timeline": {
+            "question": "19",
+            "scale": "node",
+            "node_type":"user",
+            "measurement": "getUserActivityTimeline",
+            "measurement_args":{
+                "eventTypes":[
+                    "tweet",
+                    "retweet",
+                    "quote",
+                    "reply"
+                ]
+            },
+            "metrics": {
 
+            }
+        }
     },
     "community":{
 

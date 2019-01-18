@@ -29,7 +29,9 @@ class TaskRunner:
         Outputs:
             None
         """
-        pass
+        self.ground_truth  = ground_truth
+        self.metadata      = metadata
+        self.configuration = configuration
 
     def __call__(self, dataset, configuration):
         """
@@ -49,12 +51,8 @@ class TaskRunner:
                 status on the success or failure of individual function calls.
         """
 
-
-
         return report
 
     def _run_measurements_and_metrics(self, dataset, configuration):
-
-
 
         return results, logs

@@ -30,6 +30,11 @@ pearson
 ks_test
 """
 
+def run_metrics(simulation, ground_truth, configuration):
+
+
+    return results, logs
+    
 def check_data_types(ground_truth, simulation):
     """
     Convert ground truth and simulation measurements to arrays if they are
