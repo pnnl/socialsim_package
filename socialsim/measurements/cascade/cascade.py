@@ -61,6 +61,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         'get_cascades_distribution_measurements'
         ]
 
+
     def preprocess_and_create_nx_dict(self):
         self.scms = {}
         for cascade_identifier, cascade_df in self.main_df.groupby(self.root_node_col):
@@ -71,6 +72,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                                                                           node_col=self.node_col,
                                                                           timestamp_col=self.timestamp_col,
                                                                           user_col=self.user_col)
+
 
     @check_empty(default=None)
     def get_node_level_measurements(self, single_cascade_measurement, **kwargs):
@@ -96,11 +98,13 @@ class CascadeMeasurements(MeasurementsBaseClass):
 
         return result
 
+
     def split_communities(self, data, community_grouper):
 
         return {
         community: data[data[community_grouper] == community][[c for c in data.columns if c != community_grouper]] for
         community in data[community_grouper].unique()}
+
 
     @check_empty(default=None)
     def get_cascades_distribution_measurements(self):
@@ -122,6 +126,13 @@ class CascadeMeasurements(MeasurementsBaseClass):
 
         self.cascade_distribution_measurement_df = pd.DataFrame(cascades_distribution_measurements, columns=cols)
 
+    """
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    The methods below this line are all measurement functions.
+    """
     def cascade_collection_distribution_of(self, attribute, community_grouper=None):
         """
         :param attribute: "depth", "size", "breadth", "structural_virality", "lifetime"
@@ -140,6 +151,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                     df.columns = ['content', 'value']
                     meas[community] = df
         return meas
+
 
     @check_empty(default=None)
     def get_cascade_collection_timeline_timeseries(self, time_granularity="M",
@@ -173,6 +185,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                 temporal_measurements = {}
 
         return temporal_measurements
+
 
     @check_empty(default=None)
     def get_cascade_collection_size_timeseries(self, time_granularity="M",
@@ -209,6 +222,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                     meas = {}
             return meas
 
+
     @check_empty(default=None)
     def get_community_users_count_timeseries(self, time_granularity="M",
         community_grouper=None):
@@ -239,6 +253,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                                                                                                    "unique_users",
                                                                                                    "new_user_ratio"])
 
+
     def community_users_count(self, attribute, time_granularity,
         community_grouper):
         """
@@ -258,6 +273,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         else:
             return None
 
+
     @check_empty(default=None)
     def cascade_collection_initialization_gini(self, community_grouper=None):
         if not community_grouper:
@@ -273,6 +289,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
             return meas
         else:
             return None
+
 
     @check_empty(default=None)
     @check_root_only(default=None)
@@ -292,6 +309,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         else:
             return None
 
+
     @check_empty(default=None)
     def cascade_collection_participation_gini(self, community_grouper=None):
         if not community_grouper:
@@ -305,6 +323,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
             return meas
         else:
             return None
+
 
     @check_empty(default=None)
     @check_root_only(default=None)
@@ -321,6 +340,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         else:
             return None
 
+
     @check_empty(default=None)
     @check_root_only(default=1.0)
     def fraction_of_nodes_in_lcc(self, community_grouper=None):
@@ -336,18 +356,19 @@ class CascadeMeasurements(MeasurementsBaseClass):
         else:
             return None
 
+
     def fraction_of_isolated_nodes(self):
         """
         not applicable since we do not consider isolated nodes as cascades
         """
         pass
 
+
     def fraction_of_nodes_with_outside_links(self):
         """
         We might not have url information in simulations
         """
         pass
-
 
 
 class Cascade:
@@ -428,7 +449,13 @@ class Cascade:
             igraph_add_edges_to_existing_graph(self.cascade_nx, df, source=self.node_col, target=self.parent_node_col)
             self.main_df = pd.concat([self.main_df, df])
 
-
+    """
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    The methods below this line are all measurement functions.
+    """
     def get_depth_of_each_node(self):
         if 'depth' in self.main_df.columns:
             pass
@@ -566,6 +593,14 @@ class SingleCascadeMeasurements:
                                root_node_col=self.root_node_col, timestamp_col=self.timestamp_col,
                                user_col=self.user_col)
 
+
+    """
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
+    The methods below this line are all measurement functions.
+    """
     @check_empty(default=None)
     def get_temporal_measurements(self, time_granularity="M"):
         """
