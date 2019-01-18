@@ -5,13 +5,13 @@ import numpy  as np
 from ast import literal_eval
 
 # Internal imports
-import metrics
+from .metrics import metrics
 
-from measurements import InfospreadMeasurements
-from measurements import CascadeMeasurements
-from measurements import NetworkMeasurements
-from measurements import GroupFormationMeasurements
-from measurements import CrossPlatformMeasurements
+from .measurements import InfospreadMeasurements
+from .measurements import CascadeMeasurements
+from .measurements import NetworkMeasurements
+from .measurements import GroupFormationMeasurements
+from .measurements import CrossPlatformMeasurements
 
 from .record import RecordKeeper
 

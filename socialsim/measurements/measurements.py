@@ -1,30 +1,41 @@
+from ..record import RecordKeeper
+
 class MeasurementsBaseClass:
     def __init__(self, dataset, configuration, log_file='measurements_log.txt'):
         """
-        Description:
+        Description: Base class for all measurements classes. Contains methods
+            necessary for running all measurements.
 
         Input:
-            :dataset:
-            :configuration:
+            :dataset: (pd.DataFrame) The dataset to run measurements on.
+            :configuration: (dict) A configuration dictionary specifying what
+                measurements to run and what arguments to use.
 
         Output:
         """
-
         self.dataset       = dataset
         self.configuration = configuration
         self.timer = RecordKeeper('measurements_log.txt')
 
+        self.measurements  = []
+        for scale in ["node", "community", "population"]:
+            for name in configuration[scale].keys():
+                self.measurements.append(name)
+
     def run(self, measurements_subset=None, timing=False):
         """
-        Description:
+        Description: Runs a measurement or a set of measurements on the given
+            dataset.
 
         Input:
-            :measurements_subset:
-            :timing:
+            :measurements_subset: (list) A list of strings specifying which
+                measurements to run.
+            :timing: (bool) If true then timing is run and included in the log
+                output.
 
         Output:
-            :results:
-            :logs:
+            :result: The output of the measurement functions.
+            :log: The log indicating the status of results and timing.
 
         """
         results = {}
@@ -46,31 +57,42 @@ class MeasurementsBaseClass:
 
         return results, logs
 
-    def _evaluate_measurement(self, configuration, stiming):
+    def _evaluate_measurement(self, configuration, timing):
         """
-        Description: Evaluates
+        Description: Evaluates a single measurement given the configuration
+            information.
 
         Input:
-            :configuration:
-            :timing:
+            :configuration: (dict) Contains the measurement name and arguments
+                to be used when running the measurement.
+            :timing: (bool) If true then timing is run and included in the log
+                output.
 
         Output:
-            :result:
-            :log:
+            :result: The output of the measurement function.
+            :log: The log indicating the status of the result and timing.
         """
+        log = {}
 
+        # unpack the configuration dictionary
         function_name      = configuration['measurement']
         function_arguments = configuration['measurement_args']
 
-        self.timer.tic(1)
+        # get the requested method from the instantiated measurement class
+        function = getattr(self, function_name)
+
+        # Evaluate the function with the given arguments
+        if timing:
+            self.timer.tic(1)
 
         try:
-            result = self.measurements[function_name](**function_arguments)
-        except:
+            result = function(**function_arguments)
+        except Exception as error:
             result = function_name+' failed to run.'
+            log.update({'Error': error})
 
-        delta_time = self.timer.toc(1)
-
-        log = {'run_time': delta_time}
+        if timing:
+            delta_time = self.timer.toc(1)
+            log.update({'run_time': delta_time})
 
         return result, log

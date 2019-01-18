@@ -5,7 +5,7 @@ import csv
 import os
 import sys
 
-def load_data(filepath, ignore_first_line=True, name_mappings=None):
+def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True):
     """
     Description:
 
@@ -28,9 +28,9 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None):
 
     elif filetype=='json':
 
-        dataset = _load_json(filepath, ignore_first_line)
+        dataset = _load_json(filepath, ignore_first_line, verbose)
 
-    dataset = convert_datetime(dataset)
+    dataset = convert_datetime(dataset, verbose)
 
     return dataset
 
@@ -50,7 +50,7 @@ def _load_csv(filepath, ignore_first_line):
 
     return dataset
 
-def _load_json(filepath, ignore_first_line):
+def _load_json(filepath, ignore_first_line, verbose):
     """
     Description: Loads a dataset from a json file.
 
@@ -65,13 +65,24 @@ def _load_json(filepath, ignore_first_line):
 
     dataset = []
 
+    if verbose:
+        print('Loading dataset at '+filepath)
+        total_line_numbers = _count_number_of_lines(filepath)
+
     with open(filepath, 'r') as file:
         for line_number, line in enumerate(file):
 
             if line_number==0 and ignore_first_line:
                 continue
 
+            if verbose:
+                print(line_number / total_line_numbers, end='\r')
+
             dataset.append(json.loads(line))
+
+    if verbose:
+        print(' '*100, end='\r')
+        print(line_number / total_line_numbers)
 
     dataset = pd.DataFrame(dataset)
 
@@ -91,7 +102,7 @@ def validate_dataset(filepath):
 
     return check
 
-def convert_datetime(dataset):
+def convert_datetime(dataset, verbose):
     """
     NOTE: THIS FUNCTION SHOULD BE OPTIMIZED WITH DASK
 
@@ -102,6 +113,20 @@ def convert_datetime(dataset):
     Output:
     """
 
+    if verbose:
+        print('Converting strings to datetime objects...', end='')
+
     dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
 
+    if verbose:
+        print('Done')
+
     return dataset
+
+def _count_number_of_lines(filepath):
+    count = 0
+    for line in open(filepath):
+        count += 1
+    return count
+
+    return count

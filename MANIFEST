@@ -6,6 +6,7 @@ socialsim/record.py
 socialsim/run.py
 socialsim/utils.py
 socialsim/measurements/__init__.py
+socialsim/measurements/measurements.py
 socialsim/measurements/validators.py
 socialsim/measurements/cascade/__init__.py
 socialsim/measurements/cascade/cascade.py

@@ -1,6 +1,13 @@
 from functools import wraps
 
 def check_empty(default=None):
+    """
+    Description:
+
+    Input:
+
+    Output:
+    """
     def wrap(func):
         @wraps(func)
         def wrapped_f(self, *args, **kwargs):
@@ -13,7 +20,12 @@ def check_empty(default=None):
 
 def check_root_only(default=None):
     """
-    check if it is a single node cascade
+    Description: Check if it is a single node cascade.
+
+    Input:
+
+    Output:
+    
     """
     def wrap(func):
         @wraps(func)

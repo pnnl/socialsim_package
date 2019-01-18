@@ -24,13 +24,7 @@ class NetworkMeasurements(MeasurementsBaseClass):
     SNAP Python at https://snap.stanford.edu/snappy/
     """
     def __init__(self, dataset, test=False):
-        self.main_df = data if isinstance(data, pd.DataFrame) else pd.read_csv(data)
-
-        if test:
-            print('Running test version of network measurements')
-            self.main_df = self.main_df.head(1000)
-
-        assert self.main_df is not None and len(self.main_df) > 0, 'Problem with the dataframe creation'
+        self.main_df = dataset
 
         self.preprocess()
 

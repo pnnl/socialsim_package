@@ -483,13 +483,13 @@ def r2(ground_truth, simulation, join='inner', fill_value=0):
         return None
 
     if type(ground_truth) is list:
-    	ground_truth = np.nan_to_num(ground_truth)
-    	simulation = np.nan_to_num(simulation)
+        ground_truth = np.nan_to_num(ground_truth)
+        simulation = np.nan_to_num(simulation)
 
         ground_truth = ground_truth[np.isfinite(ground_truth)]
         simulation = simulation[np.isfinite(simulation)]
 
-    	return np.sqrt(((np.asarray(ground_truth) - np.asarray(simulation)) ** 2).mean())
+        return np.sqrt(((np.asarray(ground_truth) - np.asarray(simulation)) ** 2).mean())
 
     ground_truth = ground_truth[np.isfinite(ground_truth.value)]
     simulation = simulation[np.isfinite(simulation.value)]
