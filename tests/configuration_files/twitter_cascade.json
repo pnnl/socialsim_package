@@ -8,7 +8,31 @@
                 "single_cascade_measurement":"cascade_timeseries_of",
                 "attribute": "depth",
                 "time_granularity": "D"},
-            "metrics":{}
+            "metrics":{
+                "rmse":{
+                    "metric":"rmse",
+                    "metric_args":{
+                        "join":"outer",
+                        "fill_value":"ffill"
+                    }
+                },
+                "nrmse":{
+                    "metric": "rmse",
+                    "metric_args":{
+                        "relative":true,
+                        "join":"outer",
+                        "fill_value":"ffill"
+                    }
+                },
+                "r2":{
+                    "metric":"r2",
+                    "metric_args":{
+                        "join":"outer",
+                        "fill_value":"ffill"
+                    }
+                }
+            },
+            "temporal_vs_batch":"Temporal"
         }
     },
     "community":{

@@ -1,4 +1,5 @@
 import datetime
+import os
 
 class RecordKeeper:
     def __init__(self, log_file='evaluation_log.txt'):
@@ -20,7 +21,7 @@ class RecordKeeper:
         log_line += ' | '
         log_line += message + '\n'
 
-        with open(self.log_file, 'a') as f:
+        with open(self.log_file, 'a+') as f:
             f.write(log_line)
 
     def tic(self, index):
@@ -53,7 +54,7 @@ class RecordKeeper:
         """
         end_time   = datetime.datetime.now()
         start_time = self.timesheet[index][0]
-        delta_time = end_time - start_time
+        delta_time = (end_time - start_time).total_seconds()
 
         self.timesheet[index] = [start_time, end_time, delta_time]
 
