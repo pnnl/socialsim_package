@@ -2,8 +2,7 @@ import socialsim as ss
 
 import json
 
-dataset = ss.load_data('../test_data/simulation.json')
-dataset = dataset[dataset['platform']=='twitter']
+dataset = ss.load_data('../test_data/twitter_data_sample.json')
 
 with open('../configuration_files/twitter_network.json') as f:
     configuration = json.load(f)
