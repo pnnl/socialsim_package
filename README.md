@@ -1,4 +1,64 @@
-## The SocialSim Package API
+## Examples of the SocialSim Package API
+
+```python
+metadata = ss.load_metadata(path)
+
+infospread_measurements    = ss.InfoSpreadMeasurements(dataset, metadata, configuration)
+cascade_measurements       = ss.CascadeMeasurements(dataset, configuration)
+network_measurements       = ss.NetworkMeasurements(dataset, configuration)
+crossplatform_measurements = ss.CrossPlatformMeasurements(dataset, configuration)
+
+measurements = ss.AllMeasurements(dataset, metadata, configuration)
+
+measurements_output = measurements.run()
+
+
+
+
+
+
+
+
+
+
+
+task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
+
+results = task_runner(dataset, configuration)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### Measurements
 
@@ -8,7 +68,7 @@ Run a single measurement:
 import socialsim as ss
 
 dataset            = ss.load(directory)
-measurement_object = ss.MeasurementObject(Dataset)
+measurement_object = ss.MeasurementObject(Dataset, config_file)
 measurement        = measurement_object.run(measurement_name)
 ```
 
@@ -18,7 +78,7 @@ Run all measurements
 import socialsim as ss
 
 dataset            = ss.load(directory)
-measurement_object = ss.MeasurementObject()
+measurement_object = ss.MeasurementObject(dataset, config_file)
 measurements       = measurement_object.run()
 ```
 
@@ -79,19 +139,6 @@ ss.produce_report(measurements, metrics)
 ss.produce_report(measurements)
 ss.produce_report(metrics)
 ```
-
-#### Orchestrator support
-
-Run a complete scenario
-
-```python
-challenge_event = ss.challenge(config, ground_truth)
-
-task = {'scenario':scenario, 'platform':platform,
-        'domain':domain, 'data':data}
-
-challenge_event.run(task)
-```
 _______________________________________________________________________________
 
 ## Social Network Representation Files
@@ -100,16 +147,16 @@ Submission files are made of individual json dictionaries on each line with a
 header json as the first entry. The format is as follows:
 
 ```python
-{'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
                 .                                                               .
                 .                                                               .
                 .                                                               .
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
 ```
 
 ## Function Documentation
@@ -139,11 +186,6 @@ conventions.
 
 _______________________________________________________________________________
 
-
-
-
-
-
 Measurements list
 
     Baseline Measurements
@@ -155,6 +197,11 @@ Measurements list
         Population
 
     Cascade Measurements
+        Node
+        Community
+        Population
+
+    Cross-Platform Measurements
         Node
         Community
         Population

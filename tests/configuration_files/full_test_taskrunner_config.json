@@ -1,0 +1,177 @@
+{
+    "github":{
+        "infospread":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "cascade":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "network":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        }
+    },
+    "reddit":{
+        "infospread":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "cascade":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "network":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        }
+    },
+    "twitter":{
+        "infospread":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "cascade":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "network":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        }
+    },
+    "telegram":{
+        "infospread":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "cascade":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "network":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        }
+    },
+    "cross_platform":{
+        "infospread":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "cascade":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        },
+        "network":{
+            "node":{
+
+            },
+            "community":{
+
+            },
+            "population":{
+
+            }
+        }
+    }
+}

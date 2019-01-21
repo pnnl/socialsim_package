@@ -1,84 +1,100 @@
-class MeasurementsBaseclass:
-    def __init__(self, dataset):
+from ..record import RecordKeeper
+
+class MeasurementsBaseClass:
+    def __init__(self, dataset, configuration, log_file='measurements_log.txt'):
         """
-        Description:
+        Description: Base class for all measurements classes. Contains methods
+            necessary for running all measurements.
 
-        Inputs:
+        Input:
+            :dataset: (pd.DataFrame) The dataset to run measurements on.
+            :configuration: (dict) A configuration dictionary specifying what
+                measurements to run and what arguments to use.
 
-        Outputs:
+        Output:
+        """
+        self.dataset       = dataset
+        self.configuration = configuration
+        self.timer = RecordKeeper('measurements_log.txt')
+
+        self.measurements  = []
+        for scale in configuration.keys():
+            for name in configuration[scale].keys():
+                self.measurements.append(name)
+
+    def run(self, measurements_subset=None, timing=False):
+        """
+        Description: Runs a measurement or a set of measurements on the given
+            dataset.
+
+        Input:
+            :measurements_subset: (list) A list of strings specifying which
+                measurements to run.
+            :timing: (bool) If true then timing is run and included in the log
+                output.
+
+        Output:
+            :result: The output of the measurement functions.
+            :log: The log indicating the status of results and timing.
 
         """
+        results = {}
+        logs    = {}
 
-        if not self.verify_dataset(dataset):
-            raise Exception('Dataset failed verification.')
+        for scale in self.configuration.keys():
+            scale_results = {}
+            scale_logs    = {}
 
-    def names(self):
+            for name in self.configuration[scale].keys():
+                result, log = self._evaluate_measurement(
+                    self.configuration[scale][name], timing)
+
+                scale_results.update({name:result})
+                scale_logs.update({name:log})
+
+            results.update({scale:scale_results})
+            logs.update({scale:scale_logs})
+
+        return results, logs
+
+    def _evaluate_measurement(self, configuration, timing):
         """
-        Description:
+        Description: Evaluates a single measurement given the configuration
+            information.
 
-        Inputs:
+        Input:
+            :configuration: (dict) Contains the measurement name and arguments
+                to be used when running the measurement.
+            :timing: (bool) If true then timing is run and included in the log
+                output.
 
-        Outputs:
-
+        Output:
+            :result: The output of the measurement function.
+            :log: The log indicating the status of the result and timing.
         """
+        log = {}
 
-        raise NotImplementedError
+        # unpack the configuration dictionary
+        function_name      = configuration['measurement']
+        function_arguments = configuration['measurement_args']
 
-    def verify_dataset(self, dataset):
-        """
-        Description: This verifies that a dataset has the required fields.
+        # get the requested method from the instantiated measurement class
+        function = getattr(self, function_name)
 
-        Inputs:
-            dataset: (pandas dataframe) The dataframe represenation of the
-                     submission.
+        # Evaluate the function with the given arguments
+        if timing:
+            self.timer.tic(1)
 
-        Outputs:
-            check: (bool) A True/False value indicating the success or failer
-                   of the test.
+        try:
+            result = function(**function_arguments)
+            log.update({'status' : 'success'})
+        except Exception as error:
+            result = function_name+' failed to run.'
+            log.update({'status' : 'failure'})
+            log.update({'error'  : error})
 
-        """
+        if timing:
+            delta_time = self.timer.toc(1)
+            log.update({'run_time': delta_time})
 
-        check = True
-
-        return check
-
-class Measurement:
-    def __init__(self):
-        """
-        Description:
-
-        Inputs:
-
-        Outputs:
-        """
-
-        self.scale = None
-        self.name  = 'measurement base class'
-
-    def __call__(self, *args, **kwargs):
-        """
-        Description: Allows the measurement class to be called like a function.
-                     See self.run().
-
-        Inputs:
-            Same as the run function
-
-        Outputs:
-            Same as the run function
-        """
-
-        self.result = self.run(*args, **kwargs)
-
-        return self.result
-
-    def run(self, dataset):
-        """
-        Description: Runs the measurement on the given dataset.
-
-        Inputs:
-            :dataset: (pd.DataFrame) The dataset object.
-
-        Outputs:
-        """
-
-        raise NotImplementedError
+        return result, log

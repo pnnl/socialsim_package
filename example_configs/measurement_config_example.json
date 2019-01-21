@@ -1,0 +1,25 @@
+{
+    "node":{
+        "user_activity_timeline": {
+            "measurement": "getUserActivityTimeline",
+            "question": "19",
+            "scale": "node",
+            "node_type":"user",
+            "measurement_args":{
+                "eventTypes":contribution_events
+            },
+            "metrics":{
+                "rmse":{"function": "rmse", "relative":false},
+                "nrmse":{"function": "rmse", "relative":true},
+                "ks_test":{"function": "ks_test"},
+                "dtw":{}
+            }
+        }
+    },
+    "community":{
+
+    },
+    "population":{
+
+    }
+}

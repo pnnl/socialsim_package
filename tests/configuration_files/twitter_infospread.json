@@ -1,0 +1,44 @@
+{
+    "node":{
+        "user_activity_timeline": {
+            "question": "19",
+            "scale": "node",
+            "node_type":"user",
+            "measurement": "getUserActivityTimeline",
+            "measurement_args":{
+                "eventTypes":[
+                    "tweet",
+                    "retweet",
+                    "quote",
+                    "reply"
+                ]
+            },
+            "metrics": {
+
+            }
+        }
+    },
+    "community":{
+
+    },
+    "population":{
+        "user_unique_content": {
+            "question": "17",
+            "scale": "population",
+            "node_type": "user",
+            "measurement": "getUserUniqueContent",
+            "measurement_args":{
+                "eventTypes": [
+                    "tweet",
+                    "retweet",
+                    "quote",
+                    "reply"
+                ],
+                "content_field":"root"
+            },
+            "metrics": {
+                
+            }
+        }
+    }
+}

@@ -1,5 +1,6 @@
 import json
 import random
+import time
 import string
 
 """
@@ -13,40 +14,59 @@ TODO:
 
 """
 
-def randomword(length):
+def random_word(length):
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(length))
+
+def random_datetime():
+
+    start  = "1/1/2008 1:30 PM"
+    end    = "1/1/2009 4:50 AM"
+    format = '%m/%d/%Y %I:%M %p'
+    prop   = random.random()
+    stime  = time.mktime(time.strptime(start, format))
+    etime  = time.mktime(time.strptime(end, format))
+    ptime  = stime + prop * (etime - stime)
+
+    datetime = time.strftime(format, time.localtime(ptime))
+
+    return datetime
+
+def random_platform():
+    platforms = ['reddit', 'twitter', 'github', 'telegram']
+
+    platform = random.choice(platforms)
+
+    return platform
 
 def generate_test_data(n, filename, header=None):
     with open(filename,'a+') as file:
 
-        if not header is None:
+        if header is not None:
             file.write(json.dumps(header)+'\n')
 
         for i in range(n):
             if i%1000==0:
                 print(i/n)
 
-            line = {'nodeID'        : randomword(10),
-                    'nodeUserID'    : randomword(10),
-                    'rootID'        : randomword(10),
-                    'parentID'      : randomword(10),
-                    'nodeTime'      : randomword(10),
-                    'actionType'    : randomword(10),
-                    'actionSubType' : randomword(10)}
+            line = {'nodeID'        : random_word(10),
+                    'nodeUserID'    : random_word(10),
+                    'rootID'        : random_word(10),
+                    'parentID'      : random_word(10),
+                    'nodeTime'      : random_datetime(),
+                    'actionType'    : random_word(10),
+                    'actionSubType' : random_word(10),
+                    'platform'      : random_platform()}
 
             file.write(json.dumps(line)+'\n')
 
 if __name__=='__main__':
     header = {'identifier' : 'test_submission',
               'team'       : 'testers',
-              'scenario'   : '1',
-              'domain'     : 'cve',
-              'platform'   : 'github'}
+              'scenario'   : '1'}
 
-    test_files = {'small_test_submission.json' : 10000,
-                  'medium_test_submission.json': 100000,
-                  'large_test_submission.json' : 1000000}
+    test_files = {'ground_truth.json' : 100000,
+                  'simulation.json'   : 100000}
 
     for filename, n in test_files.items():
         generate_test_data(n, filename, header=header)

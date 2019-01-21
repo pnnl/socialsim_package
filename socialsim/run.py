@@ -5,34 +5,54 @@ import numpy  as np
 from ast import literal_eval
 
 # Internal imports
+from .metrics import metrics
+
+from .measurements import InfospreadMeasurements
+from .measurements import CascadeMeasurements
+from .measurements import NetworkMeasurements
+from .measurements import GroupFormationMeasurements
+from .measurements import CrossPlatformMeasurements
+
 from .record import RecordKeeper
 
-def run_measurements(simulation, ground_truth, measurements='all',
-                     log_file='socialsim_log.txt', save_to_file=True,
-                     output_directory=None):
-    """
-    Description:
+class TaskRunner:
+    def __init__(self, ground_truth, metadata, configuration):
+        """
+        Description: Initializes the TaskRunner object. Stores the metadata and
+            ground_truth objects and defines all measurements and metrics
+            specified by the configuration dictionary.
 
-    Inputs:
+        Inputs:
+            :ground_truth:
+            :metadata:
+            :configuration:
+        Outputs:
+            None
+        """
+        self.ground_truth  = ground_truth
+        self.metadata      = metadata
+        self.configuration = configuration
 
-    Outputs:
+    def __call__(self, dataset, measurements_subset=None, run_metrics=True):
+        """
+        Description: Allows the class to be called as a function. Takes in a
+            dataset runs the specified measurements and metrics on the dataset
+            given the ground truth and metadata that initialized the
+            TaskRunner.
 
-    """
+        Inputs:
+            :dataset: (pd.DataFrame) The dataset to run the given measurements
+                and metrics on.
+            :configuration: (dict) The configuration information in the form of
+                a nested dictionary.
 
-    return result
+        Outputs:
+            :report: (dict) A summary of the run including all results and
+                status on the success or failure of individual function calls.
+        """
 
-def run_metrics(simulation_measurements, ground_truth_measurements,
-                metrics='all', log_file='socialsim_log.txt',
-                save_to_file=True, output_directory=None):
-    """
-    Description:
+        return report
 
-    Inputs:
+    def _run_measurements_and_metrics(self, dataset, configuration):
 
-    Outputs:
-
-    """
-    return result
-
-def output_report(simulation_measurements, ground_truth_measurements, metrics,
-                  output_directory=None)
+        return results, logs
