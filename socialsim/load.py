@@ -76,13 +76,13 @@ def _load_json(filepath, ignore_first_line, verbose):
                 continue
 
             if verbose:
-                print(line_number / total_line_numbers, end='\r')
+                print(100.0*(line_number / total_line_numbers), end='\r')
 
             dataset.append(json.loads(line))
 
     if verbose:
         print(' '*100, end='\r')
-        print(line_number / total_line_numbers)
+        print(int(100.0*(line_number / total_line_numbers)))
 
     dataset = pd.DataFrame(dataset)
 
@@ -116,7 +116,13 @@ def convert_datetime(dataset, verbose):
     if verbose:
         print('Converting strings to datetime objects...', end='', flush=True)
 
-    dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
+    try:
+        dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'], unit='s')
+    except:
+        try:
+            dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'], unit='ms')
+        except:
+            dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
 
     if verbose:
         print('Done')
