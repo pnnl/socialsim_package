@@ -33,7 +33,7 @@ class TaskRunner:
         self.metadata      = metadata
         self.configuration = configuration
 
-    def __call__(self, dataset, configuration):
+    def __call__(self, dataset, measurements_subset=None, run_metrics=True):
         """
         Description: Allows the class to be called as a function. Takes in a
             dataset runs the specified measurements and metrics on the dataset
