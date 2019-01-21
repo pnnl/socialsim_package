@@ -9,9 +9,9 @@ from ..measurements import MeasurementsBaseClass
 
 class InfospreadMeasurements(MeasurementsBaseClass, InfospreadNode,
     InfospreadPopulation, InfospreadCommunity):
-    def __init__(self, dataset, configuration, metadata, content_node_ids=[],
+    def __init__(self, dataset, configuration, metadata, platform, content_node_ids=[],
         user_node_ids=[], metaContentData=False, metaUserData=False,
-        community_dictionary='', platform='github'):
+        community_dictionary=''):
         """
         Description:
 

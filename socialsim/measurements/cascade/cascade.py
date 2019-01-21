@@ -447,7 +447,7 @@ class Cascade:
                 directed=False)
         else:
             igraph_add_edges_to_existing_graph(self.cascade_nx, df, source=self.node_col, target=self.parent_node_col)
-            self.main_df = pd.concat([self.main_df, df])
+            self.main_df = pd.concat([self.main_df, df], sort=True)
 
     """
     ----------------------------------------------------------------------------
@@ -554,14 +554,6 @@ class SingleCascadeMeasurements:
             self.community = main_df[self.community_col].values[0]
         else:
             self.community = ''
-
-        try:
-            main_df[self.timestamp_col] = pd.to_datetime(main_df[self.timestamp_col], unit='s')
-        except:
-            try:
-                main_df[self.timestamp_col] = pd.to_datetime(main_df[self.timestamp_col], unit='ms')
-            except:
-                main_df[self.timestamp_col] = pd.to_datetime(main_df[self.timestamp_col])
 
         self.cascade = Cascade(parent_node_col=self.parent_node_col, node_col=self.node_col,
                                root_node_col=self.root_node_col, timestamp_col=self.timestamp_col,

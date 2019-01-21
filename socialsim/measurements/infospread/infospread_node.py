@@ -1,7 +1,5 @@
 import pandas as pd
 
-from ..measurements import MeasurementsBaseClass
-
 class InfospreadNode:
     def __init__(self):
         """
@@ -19,12 +17,18 @@ class InfospreadNode:
     def determineDf(self, users, eventTypes):
         """
         This function selects a subset of the full data set for a selected set of users and event types.
-        Inputs: users - A boolean or a list of users.  If it is list of user ids (login_h) the data frame is subset on only this list of users.
-                        If it is True, then the pre-selected node-level subset is used.  If False, then all users are included.
-                eventTypes - A list of event types to include in the data set
+        Input:
+            :users: (bool or list) A boolean or a list of users.  If it is list
+                of user ids the data frame is subset on only this list of
+                users. If it is True, then the pre-selected node-level subset
+                is used. If False, then all users are included.
+            :eventTypes: (list) A list of event types to include in the data set
 
-        Output: A data frame with only the selected users and event types.
+        Output:
+            :df: (pd.DataFrame) A dataset with only the selected users and
+                event types.
         """
+
         if users==True:
             df = self.selectedUsers
         elif users!=False:
@@ -57,7 +61,6 @@ class InfospreadNode:
             :measurements: A dictionary with a data frame for each user with
                 two columns: data and event counts
         """
-
         df = self.determineDf(selectedUsers, eventTypes)
 
         df['value'] = 1

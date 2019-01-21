@@ -23,7 +23,9 @@ class NetworkMeasurements(MeasurementsBaseClass):
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, dataset, test=False):
+    def __init__(self, dataset, configuration, test=False, log_file='network_measurements_log.txt'):
+        super(NetworkMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+
         self.main_df = dataset
 
         self.build_undirected_graph(self.main_df)

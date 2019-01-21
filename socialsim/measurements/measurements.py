@@ -87,9 +87,11 @@ class MeasurementsBaseClass:
 
         try:
             result = function(**function_arguments)
+            log.update({'status' : 'success'})
         except Exception as error:
             result = function_name+' failed to run.'
-            log.update({'Error': error})
+            log.update({'status' : 'failure'})
+            log.update({'error'  : error})
 
         if timing:
             delta_time = self.timer.toc(1)
