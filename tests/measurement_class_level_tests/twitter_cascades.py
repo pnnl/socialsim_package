@@ -4,14 +4,19 @@ import json
 
 dataset = ss.load_data('../test_data/twitter_data_sample.json')
 
-with open('../configuration_files/twitter_cascade.json') as f:
+configuration_file = '../configuration_files/twitter/twitter_cascade_config.json'
+with open(configuration_file) as f:
     configuration = json.load(f)
 
-print(configuration)
+measurements  = ss.CascadeMeasurements(dataset, configuration)
+results, logs = measurements.run(timing=True, verbose=True)
 
-measurements = ss.CascadeMeasurements(dataset, configuration)
+for scale in logs.keys():
+    for measurement in logs[scale].keys():
 
-results, logs = measurements.run(timing=True)
+        print(logs[scale][measurement])
 
-#print(results)
-print(logs)
+
+for scale in results.keys():
+    for measurement in results[scale].keys():
+        print(type(results[scale][measurement]))

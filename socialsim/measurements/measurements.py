@@ -22,7 +22,7 @@ class MeasurementsBaseClass:
             for name in configuration[scale].keys():
                 self.measurements.append(name)
 
-    def run(self, measurements_subset=None, timing=False):
+    def run(self, measurements_subset=None, timing=False, verbose=False):
         """
         Description: Runs a measurement or a set of measurements on the given
             dataset.
@@ -46,6 +46,11 @@ class MeasurementsBaseClass:
             scale_logs    = {}
 
             for name in self.configuration[scale].keys():
+                if verbose:
+                    print('SOCIALSIM MEASUREMENTS | Running '+scale+' '+name)
+        
+
+
                 result, log = self._evaluate_measurement(
                     self.configuration[scale][name], timing)
 

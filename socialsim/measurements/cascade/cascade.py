@@ -10,6 +10,8 @@ from ..validators   import check_empty
 from ..validators   import check_root_only
 from ..measurements import MeasurementsBaseClass
 
+import sys
+
 class CascadeMeasurements(MeasurementsBaseClass):
     def __init__(self, main_df, configuration, parent_node_col="parentID",
         node_col="nodeID", root_node_col="rootID", timestamp_col="nodeTime",
@@ -91,10 +93,25 @@ class CascadeMeasurements(MeasurementsBaseClass):
                 cascade_measurement function
         """
         result = {}
+
+        print('HELLO -----------------------------------------------------')
+
+        count = 0
+
         for cascade_identifier, scm in self.scms.items():
+
+            print(cascade_identifier, scm)
+
             attribute   = getattr(scm, single_cascade_measurement)(**kwargs)
             update_dict = {cascade_identifier: attribute}
             result.update(update_dict)
+
+            if count > 30:
+                sys.exit()
+
+            count = count + 1 
+
+        print('-'*80)
 
         return result
 
@@ -617,13 +634,22 @@ class SingleCascadeMeasurements:
 
     def cascade_timeseries_of(self, attribute, time_granularity):
         """
-        :param attribute: "depth", "breadth", "size", "structural_virality", "unique_nodes", "new_node_ratio"
-        :param time_granularity: "Y", "M", "D", "H" [years/months/days/hours]
-        """
+        Description:
+
+        Input:
+            :attribute: (str) Could be any of the following: "depth", 
+                "breadth", "size", "structural_virality", "unique_nodes", 
+                "new_node_ratio"
+
+            :time_granularity: (str) Again, could be any of the following: 
+                "Y", "M", "D", "H". 
+        """ 
         if time_granularity not in self.temporal_measurements:
             self.get_temporal_measurements(time_granularity)
+
         meas = self.temporal_measurements[time_granularity][['timestamp', attribute]]
         meas.columns = ['timestamp','value']
+
         return meas
 
     @check_empty(default=None)

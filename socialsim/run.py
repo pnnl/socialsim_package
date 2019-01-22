@@ -13,7 +13,7 @@ from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
 
-from .load import _load_measurements
+from .load import load_measurements
 
 from .record import RecordKeeper
 
