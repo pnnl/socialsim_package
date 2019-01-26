@@ -32,10 +32,11 @@ class TaskRunner:
         """
 
         if ground_truth is str:
-            self.ground_truth = _load_measurements(ground_truth)
+            self.ground_truth_results = _load_measurements(ground_truth)
         else:
-            self.ground_truth  = ground_truth
+            self.ground_truth  = self.run(ground_truth)
 
+        self.ground_truth  = ground_truth
         self.metadata      = metadata
         self.configuration = configuration
 
@@ -59,64 +60,20 @@ class TaskRunner:
 
         return report
 
-    def run(self, dataset, configuration):
+    def run(self):
         """
         Description: This function runs the measurements and metrics code at
             accross all measurement types. It does not deal with multiple
             platforms.
 
         """
-        measurements = {
-            'infospread'      : InfospreadMeasurements,
-            'cascade'         : CascadeMeasurements,
-            'network'         : NetworkMeasurements,
-            'group_formation' : GroupFormationMeasurements
-        }
-
-        simulation_results = {}
-        simulation_logs    = {}
-
-
-        # Loop over platforms
-        for platform in configuration.keys():
-            platform_results = {}
-            platform_logs    = {}
-
-            # Loop over measurement types
-            for measurement_type in configuration[platform].keys():
-                if measurement_type=='infospread':
-                    Measurement = InfospreadMeasurements
-                elif measurement_type=='cascade':
-                    Measurement = CascadeMeasurements
-                elif measurement_type=='network':
-                    Measurement = NetworkMeasurements
-                elif measurement_type=='cross_platform':
-                    Measurement = CrossPlatformMeasurements
-
-                # Get data and configuration subset
-                configuration_subset = configuration[platform][measurement_type]
-                dataset_subset = dataset[dataset['platform']==platform]
-
-                # Instantiate measurement object
-                measurement = Measurement(dataset_subset, configuration_subset)
-
-                # Run the specified measurements
-                results, logs = measurement.run()
-
-                # Log the results at the measurement type level
-                platform_results.update({measurement_type:results})
-                platform_logs.update({measurement_type:logs})
-
-            # Log the results at the platform level
-            simulation_results.update({platform:platform_results})
-            simulation_logs.update({platform:platform_logs})
+        self.simulation_results, self.simulation_logs = run_measurements(dataset, configuration)
 
         # Get the ground truth measurement results
         ground_truth_results = self.ground_truth_results
 
         # Run metrics to compare simulation and ground truth results
-        metrics, metric_logs = run_metrics(simulation_results,
-            ground_truth_results, configuration)
+        metrics, metric_logs = run_metrics(self.simulation_results, self.ground_truth_results, configuration)
 
         # Log results at the task level
         results = [simulation_results, ground_truth_results, metrics]
@@ -124,13 +81,68 @@ class TaskRunner:
 
         return results, logs
 
-def run_metrics(simulation_results, ground_truth_results, configuration):
+def run_measurements(dataset, configuration):
+    """
+    Description: Takes in a dataset and a configuration file and runs the
+        specified measurements.
+
+    Input:
+
+    Output:
+    """
+    measurements = {
+        'infospread'      : InfospreadMeasurements,
+        'cascade'         : CascadeMeasurements,
+        'network'         : NetworkMeasurements,
+        'group_formation' : GroupFormationMeasurements
+    }
+
+    results = {}
+    logs    = {}
+
+    # Loop over platforms
+    for platform in configuration.keys():
+        platform_results = {}
+        platform_logs    = {}
+
+        # Loop over measurement types
+        for measurement_type in configuration[platform].keys():
+            if measurement_type=='infospread':
+                Measurement = InfospreadMeasurements
+            elif measurement_type=='cascade':
+                Measurement = CascadeMeasurements
+            elif measurement_type=='network':
+                Measurement = NetworkMeasurements
+            elif measurement_type=='cross_platform':
+                Measurement = CrossPlatformMeasurements
+
+            # Get data and configuration subset
+            configuration_subset = configuration[platform][measurement_type]
+            dataset_subset = dataset[dataset['platform']==platform]
+
+            # Instantiate measurement object
+            measurement = Measurement(dataset_subset, configuration_subset)
+
+            # Run the specified measurements
+            results, logs = measurement.run()
+
+            # Log the results at the measurement type level
+            platform_results.update({measurement_type:results})
+            platform_logs.update({measurement_type:logs})
+
+        # Log the results at the platform level
+        results.update({platform:platform_results})
+        logs.update({platform:platform_logs})
+
+    return results, logs
+
+def run_metrics(simulation, ground_truth, configuration):
     """
     Description: Takes in simulation and ground truth measurement results and a
         configuration file and runs all the specified metrics on the
         measurements.
 
-        TODO: Add error handling at each level of loop 
+        TODO: Add error handling at each level of loop
 
     Input:
         :simulation_results:
@@ -138,28 +150,17 @@ def run_metrics(simulation_results, ground_truth_results, configuration):
         :configuration:
 
     Output:
-        :results
+        :results:
+        :logs:
     """
 
-    for platform in configuration.keys():
-        platform_results = {}
-        platform_logs    = {}
+    metrics_object = ss.metrics(simulation, ground_truth, configuration)
 
-        # Loop over measurement types
-        for measurement_type in configuration[platform].keys():
-
-            # Loop over actual measurements 
-            for measurement in configuration[platform][measurement_type].keys():
-
-                # Get simulation and ground truth measurement
-                simulation_measurement   = simulation_results[platform][measurement_type][measurement]
-                ground_truth_measurement = ground_truth_results[platform][measurement_type][measurement]
-                configuration_subset     = configuration[platform][measurement_type][measurement]
-
-                metric_result, log = _evaluate_metric_list(simulation_measurement, ground_truth_measurement, configuration_subset)
+    results, logs = metrics_object.run()
 
     return results, logs
 
+# ALMOST CERTAINLY MOVING TO metrics.py
 def _evaluate_metric_list(simulation_result, ground_truth_result, configuration):
     """
     Description:
@@ -183,12 +184,6 @@ def _evaluate_metric_list(simulation_result, ground_truth_result, configuration)
         except Exception as error:
             result = function_name+' failed to run.'
 
-
         if timing:
-            
-
-        
-
-
 
     return result, log

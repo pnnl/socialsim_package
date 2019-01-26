@@ -29,15 +29,109 @@ pearson
 ks_test
 """
 
-
 class Metrics:
-    def __init__():
+    def __init__(ground_truth, simulation, configuration):
+        """
+        Description:
+
+        Input:
+            :ground_truth_measurements:
+            :simulation_measurements:
+            :configuration:
+
+        Output:
+            None
+
         """
 
-
-        """
+        self.ground_truth  = ground_truth
+        self.simulation    = simulation
+        self.configuration = configuration
 
         pass
+
+    def run(measurement_subset=None):
+        """
+        Description: This runs all measurement outputs through the metrics
+            specified in the configuration json.
+
+        Input:
+            :measurement_subset: (list) The measurements to run metrics on. If
+                None then metrics are run on all measurements.
+
+        Output:
+            :results: (dict)
+            :logs: (dict)
+
+        """
+
+        results = {}
+        logs    = {}
+
+        for platform in self.configuration.keys():
+            platform_ground_truth  = self.ground_truth[platform]
+            platform_simulation    = self.simulation[platform]
+            platform_configuration = self.configuration[platform]
+
+            platform_results = {}
+            platform_logs    = {}
+
+            for measurement_type in platform_configuration:
+                measurement_type_ground_truth  = platform_ground_truth[measurement_type]
+                measurement_type_simulation    = platform_simulation[measurement_type]
+                measurement_type_configuration = platform_configuration[measurement_type]
+
+                measurement_type_results = {}
+                measurement_type_logs    = {}
+
+                for scale in measurement_type_configuration.keys():
+                    scale_ground_truth  = measurement_type_ground_truth[scale]
+                    scale_simulation    = measurement_type_simulation[scale]
+                    scale_configuration = measurement_type_configuration[scale]
+
+                    scale_results = {}
+                    scale_logs    = {}
+
+                    for measurement in scale_configuration.keys():
+                        ground_truth  = scale_ground_truth[measurement]
+                        simulation    = scale_simulation[measuremnt]
+                        configuration = scale_configuration[measurement]
+
+                        result, log = _evaluate_metrics(ground_truth, simulation, configuration)
+
+                        scale_results.update({measurement:result})
+                        scale_logs.update({measurement:log})
+
+                    measurement_type_results.update({scale:scale_results})
+                    measurement_type_logs.update({scale:scale_logs})
+
+                platform_results.update({measurement_type:measurement_type_results})
+                platform_logs.update({measurement_type:measurement_type_logs})
+
+            results.update({platform:platform_results})
+            logs.update({platform:platform_logs})
+
+        return results, logs
+
+
+    def _evaluate_metrics(ground_truth, simulation, configuration):
+        """
+        Description: Evaluate metrics on a single measurement.
+
+        Input:
+            :ground_truth:
+            :simulation:
+            :configuration:
+
+        Output:
+
+        """
+        result = {}
+        log    = {}
+
+
+
+        return result, log
 
     def check_data_types(ground_truth, simulation):
         """
@@ -235,7 +329,6 @@ class Metrics:
         Dynamic Time Warping implemenation
         """
 
-
         df = join_dfs(ground_truth,simulation,join='outer',fill_value=0.0)
 
         try:
@@ -281,7 +374,6 @@ class Metrics:
         simulation - simulation measurement
         base - the logarithmic base to use
         """
-
 
         if simulation is None or len(simulation) == 0 or ground_truth is None or len(ground_truth) == 0:
             return None
@@ -404,10 +496,8 @@ class Metrics:
 
             x_d[i] = len(set(x).intersection(set(y)))
 
-
         for i in range(1,s+1):
             rbo_score += (float(x_d[i])/float(i)) * pow(p, (i-1))
-
 
         rbo_score = rbo_score * (1 - p)
 
