@@ -13,8 +13,7 @@ from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
 
-from .load import load_measurements
-
+from .load   import load_measurements
 from .record import RecordKeeper
 
 class TaskRunner:
@@ -77,10 +76,13 @@ class TaskRunner:
         simulation_results = {}
         simulation_logs    = {}
 
+
+        # Loop over platforms
         for platform in configuration.keys():
             platform_results = {}
             platform_logs    = {}
 
+            # Loop over measurement types
             for measurement_type in configuration[platform].keys():
                 if measurement_type=='infospread':
                     Measurement = InfospreadMeasurements
@@ -91,33 +93,44 @@ class TaskRunner:
                 elif measurement_type=='cross_platform':
                     Measurement = CrossPlatformMeasurements
 
+                # Get data and configuration subset
                 configuration_subset = configuration[platform][measurement_type]
                 dataset_subset = dataset[dataset['platform']==platform]
+
+                # Instantiate measurement object
                 measurement = Measurement(dataset_subset, configuration_subset)
 
+                # Run the specified measurements
                 results, logs = measurement.run()
 
+                # Log the results at the measurement type level
                 platform_results.update({measurement_type:results})
                 platform_logs.update({measurement_type:logs})
 
+            # Log the results at the platform level
             simulation_results.update({platform:platform_results})
             simulation_logs.update({platform:platform_logs})
 
+        # Get the ground truth measurement results
         ground_truth_results = self.ground_truth_results
 
+        # Run metrics to compare simulation and ground truth results
         metrics, metric_logs = run_metrics(simulation_results,
             ground_truth_results, configuration)
 
+        # Log results at the task level
         results = [simulation_results, ground_truth_results, metrics]
         logs    = [simulation_logs, ground_truth_logs, metrics_logs]
 
         return results, logs
 
-def _run_metrics(simulation_results, ground_truth_results, configuration):
+def run_metrics(simulation_results, ground_truth_results, configuration):
     """
     Description: Takes in simulation and ground truth measurement results and a
         configuration file and runs all the specified metrics on the
         measurements.
+
+        TODO: Add error handling at each level of loop 
 
     Input:
         :simulation_results:
@@ -128,9 +141,26 @@ def _run_metrics(simulation_results, ground_truth_results, configuration):
         :results
     """
 
+    for platform in configuration.keys():
+        platform_results = {}
+        platform_logs    = {}
+
+        # Loop over measurement types
+        for measurement_type in configuration[platform].keys():
+
+            # Loop over actual measurements 
+            for measurement in configuration[platform][measurement_type].keys():
+
+                # Get simulation and ground truth measurement
+                simulation_measurement   = simulation_results[platform][measurement_type][measurement]
+                ground_truth_measurement = ground_truth_results[platform][measurement_type][measurement]
+                configuration_subset     = configuration[platform][measurement_type][measurement]
+
+                metric_result, log = _evaluate_metric_list(simulation_measurement, ground_truth_measurement, configuration_subset)
+
     return results, logs
 
-def _run_metric(simulation_result, ground_truth_result, configuration):
+def _evaluate_metric_list(simulation_result, ground_truth_result, configuration):
     """
     Description:
 
@@ -138,5 +168,27 @@ def _run_metric(simulation_result, ground_truth_result, configuration):
 
     Output:
     """
+
+    # Loop over metrics
+    for metric in configuration['metrics'].keys():
+
+        # Get metric name and arguments
+        metric_name = configuration['metrics'][metric]['metric']
+        metric_args = configuration['metrics'][metric]['metric_args']
+
+        metric_function = getattr(metrics, metric_name)
+
+        try:
+            result = metric_function(**metric_args)
+        except Exception as error:
+            result = function_name+' failed to run.'
+
+
+        if timing:
+            
+
+        
+
+
 
     return result, log

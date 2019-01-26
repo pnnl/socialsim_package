@@ -1,5 +1,7 @@
 import socialsim as ss
 
+import numpy as np
+
 import json
 
 dataset = ss.load_data('../test_data/twitter_data_sample.json')
@@ -19,4 +21,10 @@ for scale in logs.keys():
 
 for scale in results.keys():
     for measurement in results[scale].keys():
-        print(type(results[scale][measurement]))
+
+        if type(results[scale][measurement]) is np.float64:
+            print(results[scale][measurement])
+        else:
+            print(type(results[scale][measurement]))
+
+
