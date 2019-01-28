@@ -1,559 +1,519 @@
 {
     "baseline": {
-        "node": [
-            {
-                "content_diffusion_delay": {
-                    "scale": "node",
-                    "node_type": "content",
-                    "measurement": "getContentDiffusionDelay",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "comment"
-                        ],
-                        "time_bin": "h"
+        "node": {
+            "content_diffusion_delay": {
+                "scale": "node",
+                "node_type": "content",
+                "measurement": "getContentDiffusionDelay",
+                "measurement_args": {
+                    "eventTypes": [
+                        "comment"
+                    ],
+                    "time_bin": "h"
+                },
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
                     },
-                    "metrics": {
-                        "ks_test": {
-                            "metric": "ks_test",
-                            "metric_args": {}
-                        },
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "content_growth": {
-                    "scale": "node",
-                    "node_type": "content",
-                    "measurement": "getContentGrowth",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "post",
-                            "comment"
-                        ],
-                        "time_bin": "h"
-                    },
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "dtw": {
-                            "metric": "dtw",
-                            "metric_args": {}
+            "content_growth": {
+                "scale": "node",
+                "node_type": "content",
+                "measurement": "getContentGrowth",
+                "measurement_args": {
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "time_bin": "h"
+                },
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
                         }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "dtw": {
+                        "metric": "dtw",
+                        "metric_args": {}
                     }
                 }
             },
-            {
-                "content_contributors": {
-                    "scale": "node",
-                    "node_type": "content",
-                    "measurement": "getContributions",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "post",
-                            "comment"
-                        ]
-                    },
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "dtw": {
-                            "metric": "dtw",
-                            "metric_args": {}
+            "content_contributors": {
+                "scale": "node",
+                "node_type": "content",
+                "measurement": "getContributions",
+                "measurement_args": {
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ]
+                },
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
                         }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "dtw": {
+                        "metric": "dtw",
+                        "metric_args": {}
                     }
                 }
             }
-        ],
-        "population": [
-            {
-                "content_liveliness_distribution": {
-                    "scale": "population",
-                    "node_type": "content",
-                    "measurement": "getDistributionOfEventsByContent",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "comment"
-                        ],
-                        "content_field": "root"
+        },
+        "population": {
+            "content_liveliness_distribution": {
+                "scale": "population",
+                "node_type": "content",
+                "measurement": "getDistributionOfEventsByContent",
+                "measurement_args": {
+                    "eventTypes": [
+                        "comment"
+                    ],
+                    "content_field": "root"
+                },
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
+                        }
                     },
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
-                        },
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "r2": {
-                            "metric": "r2",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0
-                            }
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            {
-                "content_liveliness_topk": {
-                    "scale": "population",
-                    "node_type": "content",
-                    "measurement": "getTopKContent",
-                    "measurement_args": {
-                        "k": 5,
-                        "eventTypes": [
-                            "comment"
-                        ],
-                        "content_field": "root"
-                    },
-                    "metrics": {
-                        "rbo": {
-                            "metric": "rbo",
-                            "metric_args": {
-                                "p": 0.95
-                            }
+            "content_liveliness_topk": {
+                "scale": "population",
+                "node_type": "content",
+                "measurement": "getTopKContent",
+                "measurement_args": {
+                    "k": 5,
+                    "eventTypes": [
+                        "comment"
+                    ],
+                    "content_field": "root"
+                },
+                "metrics": {
+                    "rbo": {
+                        "metric": "rbo",
+                        "metric_args": {
+                            "p": 0.95
                         }
                     }
                 }
             },
-            {
-                "content_activity_disparity_gini_comment": {
-                    "scale": "population",
-                    "node_type": "content",
-                    "measurement": "getGiniCoef",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "comment"
-                        ]
+            "content_activity_disparity_gini_comment": {
+                "scale": "population",
+                "node_type": "content",
+                "measurement": "getGiniCoef",
+                "measurement_args": {
+                    "eventTypes": [
+                        "comment"
+                    ]
+                },
+                "metrics": {
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     },
-                    "metrics": {
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        },
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        }
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     }
                 }
             },
-            {
-                "content_activity_disparity_palma_comment": {
-                    "scale": "population",
-                    "node_type": "content",
-                    "measurement": "getPalmaCoef",
-                    "measurement_args": {
-                        "eventTypes": [
-                            "comment"
-                        ]
+            "content_activity_disparity_palma_comment": {
+                "scale": "population",
+                "node_type": "content",
+                "measurement": "getPalmaCoef",
+                "measurement_args": {
+                    "eventTypes": [
+                        "comment"
+                    ]
+                },
+                "metrics": {
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     },
-                    "metrics": {
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        },
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        }
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     }
                 }
             }
-        ]
+        }
     },
     "cascade": {
-        "community": [
-            {
-                "community_max_depth_distribution": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_distribution_of",
-                    "measurement_args": {
-                        "attribute": "depth",
-                        "community_grouper": "communityID"
-                    },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+        "community": {
+            "community_max_depth_distribution": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_distribution_of",
+                "measurement_args": {
+                    "attribute": "depth",
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "community_max_breadth_distribution": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_distribution_of",
-                    "measurement_args": {
-                        "attribute": "breadth",
-                        "community_grouper": "communityID"
-                    },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+            "community_max_breadth_distribution": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_distribution_of",
+                "measurement_args": {
+                    "attribute": "breadth",
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "community_structural_virality_distribution": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_distribution_of",
-                    "measurement_args": {
-                        "attribute": "structural_virality",
-                        "community_grouper": "communityID"
-                    },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+            "community_structural_virality_distribution": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_distribution_of",
+                "measurement_args": {
+                    "attribute": "structural_virality",
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "community_cascade_size_distribution": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_distribution_of",
-                    "measurement_args": {
-                        "attribute": "size",
-                        "community_grouper": "communityID"
-                    },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+            "community_cascade_size_distribution": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_distribution_of",
+                "measurement_args": {
+                    "attribute": "size",
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "community_cascade_lifetime_distribution": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_distribution_of",
-                    "measurement_args": {
-                        "attribute": "lifetime",
-                        "community_grouper": "communityID"
+            "community_cascade_lifetime_distribution": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_distribution_of",
+                "measurement_args": {
+                    "attribute": "lifetime",
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
-                    "temporal_vs_batch": "Temporal",
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "r2": {
-                            "metric": "r2",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0
-                            }
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            {
-                "community_cascade_size_timeseries": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "get_cascade_collection_size_timeseries",
-                    "measurement_args": {
-                        "community_grouper": "communityID",
-                        "time_granularity": "D"
+            "community_cascade_size_timeseries": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "get_cascade_collection_size_timeseries",
+                "measurement_args": {
+                    "community_grouper": "communityID",
+                    "time_granularity": "D"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
-                    "temporal_vs_batch": "Temporal",
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "r2": {
-                            "metric": "r2",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0
-                            }
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            {
-                "community_cascade_lifetime_timeseries": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "get_cascade_collection_timeline_timeseries",
-                    "measurement_args": {
-                        "community_grouper": "communityID",
-                        "time_granularity": "D"
-                    },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "js_divergence": {
-                            "metric": "js_divergence",
-                            "metric_args": {
-                                "discrete": false,
-                                "base": 2.0
-                            }
+            "community_cascade_lifetime_timeseries": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "get_cascade_collection_timeline_timeseries",
+                "measurement_args": {
+                    "community_grouper": "communityID",
+                    "time_granularity": "D"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
                         }
                     }
                 }
             },
-            {
-                "community_unique_users_by_time": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "community_users_count",
-                    "measurement_args": {
-                        "attribute": "unique_users",
-                        "community_grouper": "communityID",
-                        "time_granularity": "D"
+            "community_unique_users_by_time": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "community_users_count",
+                "measurement_args": {
+                    "attribute": "unique_users",
+                    "community_grouper": "communityID",
+                    "time_granularity": "D"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
-                    "temporal_vs_batch": "Temporal",
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "r2": {
-                            "metric": "r2",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0
-                            }
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            {
-                "community_new_user_ratio_by_time": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "community_users_count",
-                    "measurement_args": {
-                        "attribute": "new_user_ratio",
-                        "community_grouper": "communityID",
-                        "time_granularity": "D"
+            "community_new_user_ratio_by_time": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "community_users_count",
+                "measurement_args": {
+                    "attribute": "new_user_ratio",
+                    "community_grouper": "communityID",
+                    "time_granularity": "D"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
-                    "temporal_vs_batch": "Temporal",
-                    "metrics": {
-                        "rmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "nrmse": {
-                            "metric": "rmse",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0,
-                                "relative": false
-                            }
-                        },
-                        "r2": {
-                            "metric": "r2",
-                            "metric_args": {
-                                "join": "inner",
-                                "fill_value": 0
-                            }
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            {
-                "community_cascade_initialization_gini": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_initialization_gini",
-                    "measurement_args": {
-                        "community_grouper": "communityID"
+            "community_cascade_initialization_gini": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_initialization_gini",
+                "measurement_args": {
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        }
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     }
                 }
             },
-            {
-                "community_cascade_initialization_palma": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_initialization_palma",
-                    "measurement_args": {
-                        "community_grouper": "communityID"
+            "community_cascade_initialization_palma": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_initialization_palma",
+                "measurement_args": {
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        }
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     }
                 }
             },
-            {
-                "community_cascade_participation_gini": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_participation_gini",
-                    "measurement_args": {
-                        "community_grouper": "communityID"
+            "community_cascade_participation_gini": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_participation_gini",
+                "measurement_args": {
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        }
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     }
                 }
             },
-            {
-                "community_cascade_participation_palma": {
-                    "scale": "community",
-                    "node_type": "Cascade",
-                    "measurement": "cascade_collection_participation_palma",
-                    "measurement_args": {
-                        "community_grouper": "communityID"
+            "community_cascade_participation_palma": {
+                "scale": "community",
+                "node_type": "Cascade",
+                "measurement": "cascade_collection_participation_palma",
+                "measurement_args": {
+                    "community_grouper": "communityID"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     },
-                    "temporal_vs_batch": "Batch",
-                    "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
-                        }
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
                     }
                 }
             }
-        ]
+        }
     }
 }
