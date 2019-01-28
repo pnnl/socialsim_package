@@ -49,8 +49,6 @@ class MeasurementsBaseClass:
                 if verbose:
                     print('SOCIALSIM MEASUREMENTS | Running '+scale+' '+name)
         
-
-
                 result, log = self._evaluate_measurement(
                     self.configuration[scale][name], timing)
 
@@ -80,11 +78,22 @@ class MeasurementsBaseClass:
         log = {}
 
         # unpack the configuration dictionary
-        function_name      = configuration['measurement']
-        function_arguments = configuration['measurement_args']
+        function_name = configuration['measurement']
+
+        if 'measurement_args' in configuration.keys():
+            function_arguments = configuration['measurement_args']
+        else:
+            fucntion_arguments = {}
 
         # get the requested method from the instantiated measurement class
-        function = getattr(self, function_name)
+        try:
+            function = getattr(self, function_name)
+        except Exception as error:
+            result = function_name+' was not found.'
+            log.update({'status' : 'failure'})
+            log.update({'error'  : error})
+            
+            return result, log
 
         # Evaluate the function with the given arguments
         if timing:

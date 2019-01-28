@@ -11,10 +11,10 @@ from ..validators   import check_root_only
 from ..measurements import MeasurementsBaseClass
 
 class CascadeMeasurements(MeasurementsBaseClass):
-    def __init__(self, main_df, configuration, parent_node_col="parentID",
-        node_col="nodeID", root_node_col="rootID", timestamp_col="nodeTime",
-        user_col="nodeUserID", filter_on_col=None, filter_in_list=[],
-        log_file='cascade_measurements_log.txt'):
+    def __init__(self, main_df, configuration, metadata, platform, 
+        parent_node_col="parentID", node_col="nodeID", root_node_col="rootID", 
+        timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None, 
+        filter_in_list=[], log_file='cascade_measurements_log.txt'):
         """
         Description:
 
@@ -140,6 +140,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         """
         if self.cascade_distribution_measurement_df is None:
             self.get_cascades_distribution_measurements()
+
         if not community_grouper:
             meas = self.cascade_distribution_measurement_df[["rootID", attribute]]
             meas.columns = ['content', 'value']
@@ -147,8 +148,9 @@ class CascadeMeasurements(MeasurementsBaseClass):
             meas = {}
             for community in self.cascade_distribution_measurement_df[community_grouper].unique():
                 if community != '':
-                    df = self.cascade_distribution_measurement_df[
-                        self.cascade_distribution_measurement_df[community_grouper] == community][["rootID", attribute]]
+                    df = self.cascade_distribution_measuremnt_df
+
+                    df = df[df[community_grouper] == community][["rootID", attribute]]
                     df.columns = ['content', 'value']
                     meas[community] = df
         return meas

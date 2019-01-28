@@ -30,7 +30,7 @@ ks_test
 """
 
 class Metrics:
-    def __init__(ground_truth, simulation, configuration):
+    def __init__(self, ground_truth, simulation, configuration):
         """
         Description:
 
@@ -50,7 +50,7 @@ class Metrics:
 
         pass
 
-    def run(measurement_subset=None):
+    def run(self, measurement_subset=None, timing=False):
         """
         Description: This runs all measurement outputs through the metrics
             specified in the configuration json.
@@ -85,19 +85,37 @@ class Metrics:
                 measurement_type_logs    = {}
 
                 for scale in measurement_type_configuration.keys():
-                    scale_ground_truth  = measurement_type_ground_truth[scale]
-                    scale_simulation    = measurement_type_simulation[scale]
+                    
+                    if type(measurement_type_ground_truth) is str:
+                        scale_ground_truth = measurement_type_ground_truth
+                    else:
+                        scale_ground_truth = measurement_type_ground_truth[scale]
+
+                    if type(measurement_type_simulation) is str:
+                        scale_simulation = measurement_type_simulation
+                    else:
+                        scale_simulation = measurement_type_simulation[scale]
+
                     scale_configuration = measurement_type_configuration[scale]
 
                     scale_results = {}
                     scale_logs    = {}
 
                     for measurement in scale_configuration.keys():
-                        ground_truth  = scale_ground_truth[measurement]
-                        simulation    = scale_simulation[measuremnt]
+
+                        if type(scale_ground_truth) is str:
+                            ground_truth = scale_ground_truth
+                        else:
+                            ground_truth = scale_ground_truth[measurement]
+
+                        if type(scale_simulation) is str:
+                            simulation = scale_simulation
+                        else:
+                            simulation = scale_simulation[measurement]
+
                         configuration = scale_configuration[measurement]
 
-                        result, log = _evaluate_metrics(ground_truth, simulation, configuration)
+                        result, log = self._evaluate_metrics(ground_truth, simulation, configuration, timing)
 
                         scale_results.update({measurement:result})
                         scale_logs.update({measurement:log})
@@ -114,7 +132,7 @@ class Metrics:
         return results, logs
 
 
-    def _evaluate_metrics(ground_truth, simulation, configuration):
+    def _evaluate_metrics(self, ground_truth, simulation, configuration, timing):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -126,14 +144,52 @@ class Metrics:
         Output:
 
         """
-        result = {}
-        log    = {}
+        log = {}
 
+        if type(ground_truth) is str:
+            log.update({'status' : 'failure'})
+            result = ground_truth
 
+            return result, log
+
+        if type(simulation) is str:
+            log.update({'status' : 'failure'})
+            result = simulation
+    
+            return result, log
+
+        # Loop over metrics
+        for metric in configuration['metrics'].keys():
+
+            # Get metric name and arguments
+            metric_name = configuration['metrics'][metric]['metric']
+
+            if 'metric_args' in configuration.keys():
+                metric_args = configuration['metrics'][metric]['metric_args']
+            else:
+                metric_args = {}
+
+            try:
+                metric_function = getattr(self, metric_name)
+            except Exception as error:
+                result = metric_name+' was not found.'
+                log.update({'status' : 'failure'})
+                log.update({'error'  : error})
+
+                return result, log
+
+            try:
+                result = metric_function(**metric_args)
+            except Exception as error:
+                result = metric_name+' failed to run.'
+
+            if timing:
+                pass
 
         return result, log
 
-    def check_data_types(ground_truth, simulation):
+
+    def check_data_types(self, ground_truth, simulation):
         """
         Convert ground truth and simulation measurements to arrays if they are
             DataFrames
@@ -157,7 +213,7 @@ class Metrics:
         return ground_truth, simulation
 
 
-    def get_hist_bins(ground_truth, simulation, method='auto'):
+    def get_hist_bins(self, ground_truth, simulation, method='auto'):
         """
         Calculate bins for combined ground truth and simulation data sets to
         use consistent bins for distributional comparisons
@@ -179,7 +235,7 @@ class Metrics:
         return (bins)
 
 
-    def join_dfs(ground_truth,simulation,join='inner',fill_value=0):
+    def join_dfs(self, ground_truth, simulation, join='inner', fill_value=0):
 
         """
         Join the simulation and ground truth data frames
@@ -213,7 +269,7 @@ class Metrics:
     measurements code.
     """
 
-    def absolute_difference(ground_truth, simulation):
+    def absolute_difference(self, ground_truth, simulation):
         """
         Absolute difference between ground truth simulation measurement
         Meant for scalar valued measurements
@@ -226,7 +282,7 @@ class Metrics:
             return None
 
 
-    def absolute_percentage_error(ground_truth, simulation):
+    def absolute_percentage_error(self, ground_truth, simulation):
         """
         Absolute percentage error between ground truth simulation measurement
         Meant for scalar valued measurements
@@ -241,7 +297,7 @@ class Metrics:
             return None
 
 
-    def kl_divergence(ground_truth, simulation, discrete=False):
+    def kl_divergence(self, ground_truth, simulation, discrete=False):
         """
         KL Divergence between the ground truth and simulation data
         Meant for distributional measurements
@@ -285,7 +341,7 @@ class Metrics:
             return None
 
 
-    def kl_divergence_smoothed(ground_truth, simulation, alpha=0.01, discrete=False):
+    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, discrete=False):
         """
         Smoothed version of the KL divergence which smooths the simulation output
         to prevent infinities in the KL divergence output
@@ -324,7 +380,7 @@ class Metrics:
             return None
 
 
-    def dtw(ground_truth, simulation):
+    def dtw(self, ground_truth, simulation):
         """
         Dynamic Time Warping implemenation
         """
@@ -347,7 +403,7 @@ class Metrics:
         return dist
 
 
-    def fast_dtw(ground_truth, simulation):
+    def fast_dtw(self, ground_truth, simulation):
         """
         Fast Dynamic Time Warping implemenation
         """
@@ -364,7 +420,7 @@ class Metrics:
         return dist
 
 
-    def js_divergence(ground_truth, simulation, discrete=False, base=2.0):
+    def js_divergence(self, ground_truth, simulation, discrete=False, base=2.0):
         """
         Jensen-Shannon Divergence implemenation
         A symmetric variant on KL Divergence which also avoids infinite outputs
@@ -423,7 +479,7 @@ class Metrics:
             return None
 
 
-    def rbo_for_te(ground_truth,simulation,idx,wt,ct):
+    def rbo_for_te(self, ground_truth,simulation,idx,wt,ct):
 
         ground_truth = ground_truth[idx]
 
@@ -454,7 +510,7 @@ class Metrics:
         return metric
 
 
-    def rbo_score(ground_truth, simulation, p=0.95):
+    def rbo_score(self, ground_truth, simulation, p=0.95):
         """
         Rank biased overlap (RBO) implementation
         http://codalism.com/research/papers/wmz10_tois.pdf
@@ -504,7 +560,7 @@ class Metrics:
         return rbo_score
 
 
-    def rbo_weight(d, p):
+    def rbo_weight(self, d, p):
         # Weight given to the top d ranks for a given p
         sum1 = 0.0
         for i in range(1, d):
@@ -515,7 +571,7 @@ class Metrics:
         return wt
 
 
-    def rmse(ground_truth, simulation, join='inner', fill_value=0, relative=False):
+    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, relative=False):
         """
         Root mean squared error
 
@@ -552,7 +608,7 @@ class Metrics:
             return None
 
 
-    def r2(ground_truth, simulation, join='inner', fill_value=0):
+    def r2(self, ground_truth, simulation, join='inner', fill_value=0):
         """
         R-squared value between ground truth and simulation
 
@@ -591,7 +647,7 @@ class Metrics:
             return r2_score(df["value_gt"],df["value_sim"])
 
 
-    def pearson(ground_truth, simulation, join='inner', fill_value=0):
+    def pearson(self, ground_truth, simulation, join='inner', fill_value=0):
         """
         Pearson correlation coefficient between simulation and ground truth
 
@@ -612,7 +668,7 @@ class Metrics:
             return None
 
 
-    def ks_test(ground_truth, simulation):
+    def ks_test(self, ground_truth, simulation):
         """
         Kolmogorov-Smirnov test
         Meant for measurements which are continous or numeric distributions

@@ -5,7 +5,7 @@ import csv
 import os
 import sys
 
-def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True):
+def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True, short=False):
     """
     Description:
 
@@ -17,7 +17,7 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True
     Output:
         :dataset: (pandas dataframe) The loaded dataframe object.
     """
-    dataset = _load_json(filepath, ignore_first_line, verbose)
+    dataset = _load_json(filepath, ignore_first_line, verbose, short)
     dataset = convert_datetime(dataset, verbose)
     check   = validate_dataset(dataset, verbose)
 
@@ -26,7 +26,7 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True
     else:
         return 'Dataset validation failed.'
 
-def _load_json(filepath, ignore_first_line, verbose):
+def _load_json(filepath, ignore_first_line, verbose, short):
     """
     Description: Loads a dataset from a json file.
 
@@ -43,7 +43,11 @@ def _load_json(filepath, ignore_first_line, verbose):
 
     if verbose:
         print('Loading dataset at '+filepath)
-        total_line_numbers = _count_number_of_lines(filepath)
+        
+        if short:
+            total_line_numbers = 1000
+        else:
+            total_line_numbers = _count_number_of_lines(filepath)
 
     with open(filepath, 'r') as file:
         for line_number, line in enumerate(file):
@@ -55,6 +59,10 @@ def _load_json(filepath, ignore_first_line, verbose):
                 print(100.0*(line_number / total_line_numbers), end='\r')
 
             dataset.append(json.loads(line))
+
+            if short:
+                if len(dataset)==1000:
+                    break
 
     if verbose:
         print(' '*100, end='\r')
