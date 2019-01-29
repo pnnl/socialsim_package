@@ -1,117 +1,17 @@
 {
-    "baseline": {
+    "cascade": {
         "node": {
-            "content_diffusion_delay": {
+            "cascade_max_depth_over_time": {
                 "scale": "node",
-                "node_type": "content",
-                "measurement": "getContentDiffusionDelay",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "comment"
-                    ],
-                    "time_bin": "h"
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "depth",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "ks_test": {
-                        "metric": "ks_test",
-                        "metric_args": {}
-                    },
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    }
-                }
-            },
-            "content_growth": {
-                "scale": "node",
-                "node_type": "content",
-                "measurement": "getContentGrowth",
-                "measurement_args": {
-                    "eventTypes": [
-                        "post",
-                        "comment"
-                    ],
-                    "time_bin": "h"
-                },
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "dtw": {
-                        "metric": "dtw",
-                        "metric_args": {}
-                    }
-                }
-            },
-            "content_contributors": {
-                "scale": "node",
-                "node_type": "content",
-                "measurement": "getContributions",
-                "measurement_args": {
-                    "eventTypes": [
-                        "post",
-                        "comment"
-                    ]
-                },
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "dtw": {
-                        "metric": "dtw",
-                        "metric_args": {}
-                    }
-                }
-            }
-        },
-        "population": {
-            "content_liveliness_distribution": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getDistributionOfEventsByContent",
-                "measurement_args": {
-                    "eventTypes": [
-                        "comment"
-                    ],
-                    "content_field": "root"
-                },
-                "metrics": {
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    },
                     "rmse": {
                         "metric": "rmse",
                         "metric_args": {
@@ -137,79 +37,390 @@
                     }
                 }
             },
-            "content_liveliness_topk": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getTopKContent",
+            "cascade_breadth_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "k": 5,
-                    "eventTypes": [
-                        "comment"
-                    ],
-                    "content_field": "root"
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "breadth",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "rbo": {
-                        "metric": "rbo",
+                    "rmse": {
+                        "metric": "rmse",
                         "metric_args": {
-                            "p": 0.95
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            "content_activity_disparity_gini_comment": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getGiniCoef",
+            "cascade_structural_virality_over_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "comment"
-                    ]
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "structural_virality",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
-                        "metric_args": {}
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_size_over_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "size",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_uniq_users_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "unique_nodes",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_new_user_ratio_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "new_node_ratio",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_breadth_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "breadth"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_new_user_ratio_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "new_node_ratio"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_uniq_users_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "unique_nodes"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_participation_gini": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_participation_gini"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
                     "absolute_percentage_error": {
                         "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
                         "metric_args": {}
                     }
                 }
             },
-            "content_activity_disparity_palma_comment": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getPalmaCoef",
+            "cascade_participation_palma": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "comment"
-                    ]
+                    "single_cascade_measurement": "cascade_participation_palma"
                 },
+                "temporal_vs_batch": "Batch",
                 "metrics": {
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
-                        "metric_args": {}
-                    },
                     "absolute_percentage_error": {
                         "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
                         "metric_args": {}
                     }
                 }
             }
         }
     },
-    "cascade": {
+    "baseline": {
         "community": {
-            "community_max_depth_distribution": {
+            "community_gini": {
                 "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_distribution_of",
+                "node_type": "content",
+                "measurement": "getCommunityGini",
                 "measurement_args": {
-                    "attribute": "depth",
-                    "community_grouper": "communityID"
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "community_field": "subreddit",
+                    "content_field": "root"
                 },
-                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    },
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "community_palma": {
+                "scale": "community",
+                "node_type": "content",
+                "measurement": "getCommunityPalma",
+                "measurement_args": {
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "community_field": "subreddit",
+                    "content_field": "root"
+                },
+                "metrics": {
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    },
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "community_event_proportions": {
+                "scale": "community",
+                "node_type": "content",
+                "measurement": "getProportion",
+                "measurement_args": {
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "community_field": "subreddit"
+                },
                 "metrics": {
                     "js_divergence": {
                         "metric": "js_divergence",
@@ -220,72 +431,40 @@
                     }
                 }
             },
-            "community_max_breadth_distribution": {
+            "community_contributing_users": {
                 "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_distribution_of",
+                "node_type": "user",
+                "measurement": "contributingUsers",
                 "measurement_args": {
-                    "attribute": "breadth",
-                    "community_grouper": "communityID"
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "community_field": "subreddit"
                 },
-                "temporal_vs_batch": "Batch",
                 "metrics": {
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    },
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
                     }
                 }
             },
-            "community_structural_virality_distribution": {
+            "community_num_user_actions": {
                 "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_distribution_of",
+                "node_type": "user",
+                "measurement": "getNumUserActions",
                 "measurement_args": {
-                    "attribute": "structural_virality",
-                    "community_grouper": "communityID"
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "unit": "D",
+                    "community_field": "subreddit"
                 },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    }
-                }
-            },
-            "community_cascade_size_distribution": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_distribution_of",
-                "measurement_args": {
-                    "attribute": "size",
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    }
-                }
-            },
-            "community_cascade_lifetime_distribution": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_distribution_of",
-                "measurement_args": {
-                    "attribute": "lifetime",
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Temporal",
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
@@ -303,60 +482,10 @@
                             "relative": false
                         }
                     },
-                    "r2": {
-                        "metric": "r2",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0
-                        }
-                    }
-                }
-            },
-            "community_cascade_size_timeseries": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "get_cascade_collection_size_timeseries",
-                "measurement_args": {
-                    "community_grouper": "communityID",
-                    "time_granularity": "D"
-                },
-                "temporal_vs_batch": "Temporal",
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
+                    "dtw": {
+                        "metric": "dtw",
+                        "metric_args": {}
                     },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "r2": {
-                        "metric": "r2",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0
-                        }
-                    }
-                }
-            },
-            "community_cascade_lifetime_timeseries": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "get_cascade_collection_timeline_timeseries",
-                "measurement_args": {
-                    "community_grouper": "communityID",
-                    "time_granularity": "D"
-                },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
                     "js_divergence": {
                         "metric": "js_divergence",
                         "metric_args": {
@@ -366,150 +495,35 @@
                     }
                 }
             },
-            "community_unique_users_by_time": {
+            "community_burstiness": {
                 "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "community_users_count",
+                "node_type": "content",
+                "measurement": "burstsInCommunityEvents",
                 "measurement_args": {
-                    "attribute": "unique_users",
-                    "community_grouper": "communityID",
-                    "time_granularity": "D"
+                    "eventTypes": [
+                        "post",
+                        "comment"
+                    ],
+                    "community_field": "subreddit"
                 },
-                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "r2": {
-                        "metric": "r2",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0
-                        }
-                    }
-                }
-            },
-            "community_new_user_ratio_by_time": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "community_users_count",
-                "measurement_args": {
-                    "attribute": "new_user_ratio",
-                    "community_grouper": "communityID",
-                    "time_granularity": "D"
-                },
-                "temporal_vs_batch": "Temporal",
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "r2": {
-                        "metric": "r2",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0
-                        }
-                    }
-                }
-            },
-            "community_cascade_initialization_gini": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_initialization_gini",
-                "measurement_args": {
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
-                    "absolute_percentage_error": {
-                        "metric": "absolute_percentage_error",
-                        "metric_args": {}
-                    },
                     "absolute_difference": {
                         "metric": "absolute_difference",
                         "metric_args": {}
-                    }
-                }
-            },
-            "community_cascade_initialization_palma": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_initialization_palma",
-                "measurement_args": {
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
+                    },
                     "absolute_percentage_error": {
                         "metric": "absolute_percentage_error",
-                        "metric_args": {}
-                    },
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
                         "metric_args": {}
                     }
                 }
             },
-            "community_cascade_participation_gini": {
+            "community_user_burstiness": {
                 "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_participation_gini",
-                "measurement_args": {
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Batch",
+                "node_type": "user",
+                "measurement": "getUserBurstByCommunity",
                 "metrics": {
-                    "absolute_percentage_error": {
-                        "metric": "absolute_percentage_error",
-                        "metric_args": {}
-                    },
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
-                        "metric_args": {}
-                    }
-                }
-            },
-            "community_cascade_participation_palma": {
-                "scale": "community",
-                "node_type": "Cascade",
-                "measurement": "cascade_collection_participation_palma",
-                "measurement_args": {
-                    "community_grouper": "communityID"
-                },
-                "temporal_vs_batch": "Batch",
-                "metrics": {
-                    "absolute_percentage_error": {
-                        "metric": "absolute_percentage_error",
-                        "metric_args": {}
-                    },
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
+                    "ks_test": {
+                        "metric": "ks_test",
                         "metric_args": {}
                     }
                 }

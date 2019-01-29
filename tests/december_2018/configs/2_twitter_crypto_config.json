@@ -1,126 +1,17 @@
 {
-    "baseline": {
+    "cascade": {
         "node": {
-            "content_diffusion_delay": {
+            "cascade_max_depth_over_time": {
                 "scale": "node",
-                "node_type": "content",
-                "measurement": "getContentDiffusionDelay",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "reply",
-                        "retweet",
-                        "quote"
-                    ],
-                    "time_bin": "h",
-                    "content_field": "root"
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "depth",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "ks_test": {
-                        "metric": "ks_test",
-                        "metric_args": {}
-                    },
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    }
-                }
-            },
-            "content_growth": {
-                "scale": "node",
-                "node_type": "content",
-                "measurement": "getContentGrowth",
-                "measurement_args": {
-                    "eventTypes": [
-                        "tweet",
-                        "retweet",
-                        "quote",
-                        "reply"
-                    ],
-                    "time_bin": "h",
-                    "content_field": "root"
-                },
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "dtw": {
-                        "metric": "dtw",
-                        "metric_args": {}
-                    }
-                }
-            },
-            "content_contributors": {
-                "scale": "node",
-                "node_type": "content",
-                "measurement": "getContributions",
-                "measurement_args": {
-                    "eventTypes": [
-                        "tweet",
-                        "retweet",
-                        "quote",
-                        "reply"
-                    ],
-                    "content_field": "root"
-                },
-                "metrics": {
-                    "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "nrmse": {
-                        "metric": "rmse",
-                        "metric_args": {
-                            "join": "inner",
-                            "fill_value": 0,
-                            "relative": false
-                        }
-                    },
-                    "dtw": {
-                        "metric": "dtw",
-                        "metric_args": {}
-                    }
-                }
-            }
-        },
-        "population": {
-            "content_popularity_distribution": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getDistributionOfEventsByContent",
-                "measurement_args": {
-                    "eventTypes": [
-                        "retweet"
-                    ],
-                    "content_field": "root"
-                },
-                "metrics": {
-                    "js_divergence": {
-                        "metric": "js_divergence",
-                        "metric_args": {
-                            "discrete": false,
-                            "base": 2.0
-                        }
-                    },
                     "rmse": {
                         "metric": "rmse",
                         "metric_args": {
@@ -146,57 +37,318 @@
                     }
                 }
             },
-            "content_popularity_topk": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getTopKContent",
+            "cascade_breadth_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "k": 10,
-                    "eventTypes": [
-                        "retweet"
-                    ],
-                    "content_field": "root"
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "breadth",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "rbo": {
-                        "metric": "rbo",
+                    "rmse": {
+                        "metric": "rmse",
                         "metric_args": {
-                            "p": 0.95
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
                         }
                     }
                 }
             },
-            "content_activity_disparity_gini_retweet": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getGiniCoef",
+            "cascade_structural_virality_over_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "retweet"
-                    ],
-                    "nodeType": "root"
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "structural_virality",
+                    "time_granularity": "H"
                 },
+                "temporal_vs_batch": "Temporal",
                 "metrics": {
-                    "absolute_difference": {
-                        "metric": "absolute_difference",
-                        "metric_args": {}
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
                     },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_size_over_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "size",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_uniq_users_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "unique_nodes",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_new_user_ratio_by_time": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_timeseries_of",
+                    "attribute": "new_node_ratio",
+                    "time_granularity": "H"
+                },
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_breadth_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "breadth"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_new_user_ratio_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "new_node_ratio"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_uniq_users_by_depth": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_depth_by",
+                    "attribute": "unique_nodes"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "cascade_participation_gini": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
+                "measurement_args": {
+                    "single_cascade_measurement": "cascade_participation_gini"
+                },
+                "temporal_vs_batch": "Batch",
+                "metrics": {
                     "absolute_percentage_error": {
                         "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
                         "metric_args": {}
                     }
                 }
             },
-            "content_activity_disparity_palma_retweet": {
-                "scale": "population",
-                "node_type": "content",
-                "measurement": "getPalmaCoef",
+            "cascade_participation_palma": {
+                "scale": "node",
+                "node_type": "Cascade",
+                "measurement": "get_node_level_measurements",
                 "measurement_args": {
-                    "eventTypes": [
-                        "retweet"
-                    ],
-                    "nodeType": "root"
+                    "single_cascade_measurement": "cascade_participation_palma"
                 },
+                "temporal_vs_batch": "Batch",
                 "metrics": {
                     "absolute_percentage_error": {
                         "metric": "absolute_percentage_error",
