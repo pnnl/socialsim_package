@@ -2,6 +2,8 @@ import pandas as pd
 import pickle as pkl
 
 from ..measurements import MeasurementsBaseClass
+from ..validators   import check_empty
+from ..validators   import check_root_only
 
 class InfospreadMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, metadata, platform, content_node_ids=[],
@@ -85,40 +87,39 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         Output:
         Edit columns, convert date, sort by date
         """
+
+        mapping = {'actionType'   : 'event',
+                   'nodeID'       : 'content',
+                   'nodeTime'     : 'time',
+                   'nodeUserID'   : 'user'}
+
         if self.platform=='reddit':
-            mapping = {'actionType'   : 'event',
-                       'communityID'  : 'subreddit',
-                       'keywords'     : 'keywords',
-                       'nodeID'       : 'content',
-                       'nodeTime'     : 'time',
-                       'nodeUserID'   : 'user',
-                       'parentID'     : 'parent',
-                       'rootID'       : 'root'}
+            mapping.update({'communityID' : 'subreddit',
+                            'keywords'    : 'keywords',
+                            'parentID'    : 'parent',
+                            'rootID'      : 'root'})
         elif self.platform=='twitter':
-            mapping = {'actionType'   : 'event',
-                       'nodeID'       : 'content',
-                       'nodeTime'     : 'time',
-                       'nodeUserID'   : 'user',
-                       'parentID'     : 'parent',
-                       'rootID'       : 'root'}
+            mapping.update({'parentID' : 'parent',
+                            'rootID'   : 'root'})
         elif self.platform=='github':
-            mapping = {'nodeID'       : 'content',
-                       'nodeUserID'   : 'user',
-                       'actionType'   : 'event',
-                       'nodeTime'     : 'time',
-                       'actionSubType': 'action',
-                       'status'       : 'merged'}
+            mapping.update({'actionSubType' : 'action',
+                            'status'        : 'merged'})
 
         df = df.rename(index=str, columns=mapping)
 
         df = df[df.event.isin(self.popularity_events + self.contribution_events)]
 
-        df = df.sort_values(by='time')
+        df = df.sort_values(by='time')              # These two steps should get moved into the data loading process.
         df = df.assign(time=df.time.dt.floor('h'))
+
         return df
 
 
     def preprocessContentMeta(self, df):
+        """
+        TODO: MOVE TO LOAD METADATA
+        """
+
         try:
             df.columns = ['content', 'created_at', 'owner_id', 'language']
         except:
@@ -132,6 +133,10 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
 
     def preprocessUserMeta(self, df):
+        """
+        TODO: MOVE TO LOAD METADATA
+        """
+
         try:
             df.columns = ['user', 'created_at', 'location', 'company']
         except:
@@ -145,6 +150,10 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
 
     def readPickleFile(self, ipFile):
+        """
+        TODO: MOVE TO LOAD METADATA
+        """
+
         with open(ipFile, 'rb') as handle:
             obj = pkl.load(handle)
 
@@ -152,6 +161,10 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
 
     def loadMetaData(self):
+        """
+        TODO: MOVE TO LOAD METADATA
+        """
+
         """
         This method splits the user meta data into location and creation date data frames
         """
@@ -163,7 +176,11 @@ class InfospreadMeasurements(MeasurementsBaseClass):
                 self.locations_df = self.userMetaData[['user','location']]
 
 
-    def loadCommunities(self,path,content_field='content'):
+    def loadCommunities(self, path, content_field='content'):
+        """
+        TODO: MOVE TO LOAD METADATA
+        """
+
         """
         This method loads the community dictionary from the specified pickle file.
         The pickle file should contain a dictionary of the format
@@ -180,7 +197,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             self.comDic = {"topic":{"all":self.main_df[content_field].unique()}}
 
 
-    def getCommmunityDF(self,community_col='subreddit'):
+    def getCommmunityDF(self, community_col='subreddit'):
         if community_col in self.main_df.columns:
             return self.main_df.copy()
         elif community_col != '':
@@ -190,7 +207,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             dfs = []
 
             content_community_types = ['topic',"language"]
-            user_community_types = ['city','country','company',"locations"]
+            user_community_types    = ['city','country','company',"locations"]
 
             #content-focused communities
             for community in content_community_types:

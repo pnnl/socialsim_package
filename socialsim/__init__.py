@@ -6,3 +6,5 @@ from .measurements import CascadeMeasurements
 from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
+
+from .visualization import generate_plot
