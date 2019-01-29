@@ -5,7 +5,7 @@ import numpy  as np
 from ast import literal_eval
 
 # Internal imports
-from .metrics import metrics
+from .metrics import Metrics
 
 from .measurements import InfospreadMeasurements
 from .measurements import CascadeMeasurements
@@ -13,6 +13,7 @@ from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
 
+from .load   import load_measurements
 from .record import RecordKeeper
 
 class TaskRunner:
@@ -29,9 +30,17 @@ class TaskRunner:
         Outputs:
             None
         """
+
+        # Set object variables
         self.ground_truth  = ground_truth
         self.metadata      = metadata
         self.configuration = configuration
+
+        if ground_truth is str:
+            self.ground_truth_results, self.ground_truth_logs = _load_measurements(ground_truth)
+        else:
+            self.ground_truth_results, self.ground_truth_logs = run_measurements(ground_truth, configuration)
+
 
     def __call__(self, dataset, measurements_subset=None, run_metrics=True):
         """
@@ -50,9 +59,120 @@ class TaskRunner:
             :report: (dict) A summary of the run including all results and
                 status on the success or failure of individual function calls.
         """
-
         return report
 
-    def _run_measurements_and_metrics(self, dataset, configuration):
+    def run(self, dataset):
+        """
+        Description: This function runs the measurements and metrics code at
+            accross all measurement types. It does not deal with multiple
+            platforms.
+
+        """
+        configuration = self.configuration
+
+        simulation_results, simulation_logs = run_measurements(dataset, configuration)
+
+        # Get the ground truth measurement results
+        ground_truth_results = self.ground_truth_results
+        ground_truth_logs    = self.ground_truth_logs
+
+        # Run metrics to compare simulation and ground truth results
+        metrics, metrics_logs = run_metrics(simulation_results, ground_truth_results, configuration)
+
+        # Log results at the task level
+        results = [simulation_results, ground_truth_results, metrics]
+        logs    = [simulation_logs, ground_truth_logs, metrics_logs]
 
         return results, logs
+
+def run_measurements(dataset, configuration):
+    """
+    Description: Takes in a dataset and a configuration file and runs the
+        specified measurements.
+
+    Input:
+
+    Output:
+    """
+    measurements = {
+        'infospread'      : InfospreadMeasurements,
+        'cascade'         : CascadeMeasurements,
+        'network'         : NetworkMeasurements,
+        'group_formation' : GroupFormationMeasurements
+    }
+
+    results = {}
+    logs    = {}
+
+    # Loop over platforms
+    for platform in configuration.keys():
+        platform_results = {}
+        platform_logs    = {}
+
+        # Loop over measurement types
+        for measurement_type in configuration[platform].keys():
+            if measurement_type=='infospread' or measurement_type=='baseline':
+                Measurement = InfospreadMeasurements
+            elif measurement_type=='cascade':
+                Measurement = CascadeMeasurements
+            elif measurement_type=='network':
+                Measurement = NetworkMeasurements
+            elif measurement_type=='cross_platform':
+                Measurement = CrossPlatformMeasurements
+            else:
+                print('No measurements found for '+measurement_type)
+
+            # Get data and configuration subset
+            configuration_subset = configuration[platform][measurement_type]
+            dataset_subset = dataset[dataset['platform']==platform]
+
+            metadata=None
+
+            try:
+                # Instantiate measurement object
+                measurement = Measurement(dataset_subset, configuration_subset, metadata, platform)
+
+                try: 
+                    # Run the specified measurements
+                    measurement_results, measurement_logs = measurement.run()
+                except Exception as error:
+                    measurement_logs    = {'status': 'Measurments object failed to run.', 'error': error}
+                    measurement_results = 'Object failed to run measurements.'
+ 
+            except Exception as error:
+                measurement_logs    = {'status': 'Failed to instantiate measurements object', 'error': error}
+                measurement_results = measurement_type+' failed to instantiate.'            
+
+            # Log the results at the measurement type level
+            platform_results.update({measurement_type:measurement_results})
+            platform_logs.update({measurement_type:measurement_logs})
+
+        # Log the results at the platform level
+        results.update({platform:platform_results})
+        logs.update({platform:platform_logs})
+
+    return results, logs
+
+def run_metrics(simulation, ground_truth, configuration):
+    """
+    Description: Takes in simulation and ground truth measurement results and a
+        configuration file and runs all the specified metrics on the
+        measurements.
+
+        TODO: Add error handling at each level of loop
+
+    Input:
+        :simulation_results:
+        :ground_truth_results:
+        :configuration:
+
+    Output:
+        :results:
+        :logs:
+    """
+
+    metrics_object = Metrics(simulation, ground_truth, configuration)
+
+    results, logs = metrics_object.run()
+
+    return results, logs

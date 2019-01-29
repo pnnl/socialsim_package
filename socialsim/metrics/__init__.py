@@ -1,3 +1,6 @@
+from .metrics import Metrics
+
+"""
 from .metrics import absolute_difference
 from .metrics import absolute_percentage_error
 from .metrics import kl_divergence
@@ -12,3 +15,4 @@ from .metrics import rmse
 from .metrics import r2
 from .metrics import pearson
 from .metrics import ks_test
+"""

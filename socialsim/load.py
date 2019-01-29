@@ -5,7 +5,7 @@ import csv
 import os
 import sys
 
-def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True):
+def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True, short=False):
     """
     Description:
 
@@ -17,40 +17,16 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True
     Output:
         :dataset: (pandas dataframe) The loaded dataframe object.
     """
-
-    filetype = filepath[-4:]
-
-    if filetype=='.csv':
-        if meta_data:
-            raise ERROR
-
-        dataset = _load_csv(filepath, ignore_first_line)
-
-    elif filetype=='json':
-
-        dataset = _load_json(filepath, ignore_first_line, verbose)
-
+    dataset = _load_json(filepath, ignore_first_line, verbose, short)
     dataset = convert_datetime(dataset, verbose)
+    check   = validate_dataset(dataset, verbose)
 
-    return dataset
+    if check:
+        return dataset
+    else:
+        return 'Dataset validation failed.'
 
-def _load_csv(filepath, ignore_first_line):
-    """
-    Description: Loads a dataset from a csv file.
-
-    Input:
-        :filepath: (str) The filepath to the submission file. The submission
-            file should have a header.
-        :ignore_first_line: (bool) A True/False value. If True the first line
-            is skipped.
-
-    Output:
-        :dataset: (pandas dataframe) The loaded dataframe object.
-    """
-
-    return dataset
-
-def _load_json(filepath, ignore_first_line, verbose):
+def _load_json(filepath, ignore_first_line, verbose, short):
     """
     Description: Loads a dataset from a json file.
 
@@ -67,7 +43,11 @@ def _load_json(filepath, ignore_first_line, verbose):
 
     if verbose:
         print('Loading dataset at '+filepath)
-        total_line_numbers = _count_number_of_lines(filepath)
+        
+        if short:
+            total_line_numbers = 1000
+        else:
+            total_line_numbers = _count_number_of_lines(filepath)
 
     with open(filepath, 'r') as file:
         for line_number, line in enumerate(file):
@@ -80,6 +60,10 @@ def _load_json(filepath, ignore_first_line, verbose):
 
             dataset.append(json.loads(line))
 
+            if short:
+                if len(dataset)==1000:
+                    break
+
     if verbose:
         print(' '*100, end='\r')
         print(int(100.0*(line_number / total_line_numbers)))
@@ -88,7 +72,7 @@ def _load_json(filepath, ignore_first_line, verbose):
 
     return dataset
 
-def validate_dataset(filepath):
+def validate_dataset(filepath, verbose):
     """
     Description: Checks a json submission file and for required fields.
 
@@ -100,12 +84,12 @@ def validate_dataset(filepath):
                 the validation.
     """
 
+    check = True
+
     return check
 
 def convert_datetime(dataset, verbose):
     """
-    NOTE: THIS FUNCTION SHOULD BE OPTIMIZED WITH DASK
-
     Description:
 
     Input:
@@ -128,6 +112,12 @@ def convert_datetime(dataset, verbose):
         print('Done')
 
     return dataset
+
+def load_measurements(directory):
+
+
+    return measurements
+
 
 def _count_number_of_lines(filepath):
     count = -1

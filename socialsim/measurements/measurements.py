@@ -15,14 +15,14 @@ class MeasurementsBaseClass:
         """
         self.dataset       = dataset
         self.configuration = configuration
-        self.timer = RecordKeeper('measurements_log.txt')
+        self.record_keeper = RecordKeeper('measurements_log.txt')
 
         self.measurements  = []
         for scale in configuration.keys():
             for name in configuration[scale].keys():
                 self.measurements.append(name)
 
-    def run(self, measurements_subset=None, timing=False):
+    def run(self, measurements_subset=None, timing=False, verbose=False):
         """
         Description: Runs a measurement or a set of measurements on the given
             dataset.
@@ -46,6 +46,9 @@ class MeasurementsBaseClass:
             scale_logs    = {}
 
             for name in self.configuration[scale].keys():
+                if verbose:
+                    print('SOCIALSIM MEASUREMENTS | Running '+scale+' '+name)
+        
                 result, log = self._evaluate_measurement(
                     self.configuration[scale][name], timing)
 
@@ -75,26 +78,41 @@ class MeasurementsBaseClass:
         log = {}
 
         # unpack the configuration dictionary
-        function_name      = configuration['measurement']
-        function_arguments = configuration['measurement_args']
+        function_name = configuration['measurement']
+
+        if 'measurement_args' in configuration.keys():
+            function_arguments = configuration['measurement_args']
+        else:
+            fucntion_arguments = {}
 
         # get the requested method from the instantiated measurement class
-        function = getattr(self, function_name)
+        try:
+            function = getattr(self, function_name)
+        except Exception as error:
+            result = function_name+' was not found.'
+            log.update({'status' : 'failure'})
+            log.update({'error'  : error})
+            
+            return result, log
 
         # Evaluate the function with the given arguments
         if timing:
-            self.timer.tic(1)
+            self.record_keeper.tic(1)
 
         try:
             result = function(**function_arguments)
             log.update({'status' : 'success'})
+
+            self.record_keeper.update(function_name+' complete.')
         except Exception as error:
             result = function_name+' failed to run.'
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
 
+            self.record_keeper.update(function_name+' exited with error: '+error)
+
         if timing:
-            delta_time = self.timer.toc(1)
+            delta_time = self.record_keeper.toc(1)
             log.update({'run_time': delta_time})
 
         return result, log

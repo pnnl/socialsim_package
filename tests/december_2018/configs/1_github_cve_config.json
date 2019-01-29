@@ -1,0 +1,292 @@
+{
+    "baseline": {
+        "population": {
+            "user_unique_content": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getUserUniqueContent",
+                "measurement_args": {
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent"
+                    ],
+                    "content_field": "content"
+                },
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
+                        }
+                    },
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    }
+                }
+            },
+            "user_activity_distribution": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getUserActivityDistribution",
+                "measurement_args": {
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent",
+                        "WatchEvent",
+                        "ForkEvent"
+                    ]
+                },
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "r2": {
+                        "metric": "r2",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0
+                        }
+                    },
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {
+                            "discrete": false,
+                            "base": 2.0
+                        }
+                    }
+                }
+            },
+            "most_active_users": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getMostActiveUsers",
+                "measurement_args": {
+                    "k": 700,
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent",
+                        "WatchEvent",
+                        "ForkEvent"
+                    ]
+                },
+                "metrics": {
+                    "rbo": {
+                        "metric": "rbo",
+                        "metric_args": {
+                            "p": 0.95
+                        }
+                    }
+                }
+            },
+            "user_popularity": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getUserPopularity",
+                "measurement_args": {
+                    "k": 200,
+                    "eventTypes": [
+                        "WatchEvent",
+                        "ForkEvent",
+                        "CreateEvent"
+                    ],
+                    "content_field": "content"
+                },
+                "metrics": {
+                    "rbo": {
+                        "metric": "rbo",
+                        "metric_args": {
+                            "p": 0.95
+                        }
+                    }
+                }
+            },
+            "user_gini_coef": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getGiniCoef",
+                "measurement_args": {
+                    "nodeType": "user",
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent"
+                    ],
+                    "content_field": "content"
+                },
+                "metrics": {
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    },
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "user_palma_coef": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getPalmaCoef",
+                "measurement_args": {
+                    "nodeType": "user",
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent"
+                    ],
+                    "content_field": "content"
+                },
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+                    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "user_diffusion_delay": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getUserDiffusionDelay",
+                "measurement_args": {
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent"
+                    ]
+                },
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "user_trustingness": {
+                "scale": "population",
+                "node_type": "user",
+                "measurement": "getUserPullRequestAcceptance",
+                "measurement_args": {
+                    "eventTypes": [
+                        "PullRequestEvent"
+                    ]
+                },
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            }
+        },
+        "node": {
+            "user_activity_timeline": {
+                "scale": "node",
+                "node_type": "user",
+                "measurement": "getUserActivityTimeline",
+                "measurement_args": {
+                    "eventTypes": [
+                        "PullRequestEvent",
+                        "PushEvent",
+                        "IssuesEvent",
+                        "IssueCommentEvent",
+                        "PullRequestReviewCommentEvent",
+                        "CommitCommentEvent",
+                        "CreateEvent"
+                    ]
+                },
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "inner",
+                            "fill_value": 0,
+                            "relative": false
+                        }
+                    },
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    },
+                    "dtw": {
+                        "metric": "dtw",
+                        "metric_args": {}
+                    }
+                }
+            }
+        }
+    }
+}

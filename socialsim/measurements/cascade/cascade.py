@@ -11,10 +11,10 @@ from ..validators   import check_root_only
 from ..measurements import MeasurementsBaseClass
 
 class CascadeMeasurements(MeasurementsBaseClass):
-    def __init__(self, main_df, configuration, parent_node_col="parentID",
-        node_col="nodeID", root_node_col="rootID", timestamp_col="nodeTime",
-        user_col="nodeUserID", filter_on_col=None, filter_in_list=[],
-        log_file='cascade_measurements_log.txt'):
+    def __init__(self, main_df, configuration, metadata, platform, 
+        parent_node_col="parentID", node_col="nodeID", root_node_col="rootID", 
+        timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None, 
+        filter_in_list=[], log_file='cascade_measurements_log.txt'):
         """
         Description:
 
@@ -91,6 +91,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                 cascade_measurement function
         """
         result = {}
+
         for cascade_identifier, scm in self.scms.items():
             attribute   = getattr(scm, single_cascade_measurement)(**kwargs)
             update_dict = {cascade_identifier: attribute}
@@ -139,6 +140,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
         """
         if self.cascade_distribution_measurement_df is None:
             self.get_cascades_distribution_measurements()
+
         if not community_grouper:
             meas = self.cascade_distribution_measurement_df[["rootID", attribute]]
             meas.columns = ['content', 'value']
@@ -146,8 +148,9 @@ class CascadeMeasurements(MeasurementsBaseClass):
             meas = {}
             for community in self.cascade_distribution_measurement_df[community_grouper].unique():
                 if community != '':
-                    df = self.cascade_distribution_measurement_df[
-                        self.cascade_distribution_measurement_df[community_grouper] == community][["rootID", attribute]]
+                    df = self.cascade_distribution_measuremnt_df
+
+                    df = df[df[community_grouper] == community][["rootID", attribute]]
                     df.columns = ['content', 'value']
                     meas[community] = df
         return meas
@@ -457,12 +460,16 @@ class Cascade:
     The methods below this line are all measurement functions.
     """
     def get_depth_of_each_node(self):
-        if 'depth' in self.main_df.columns:
-            pass
+        #print('start'+'-'*80)
+
         self.main_df.loc[:, "depth"] = -1
+
+        #print('stop'+'-'*80)
+
         self.main_df.loc[self.main_df[self.node_col] == self.root_node, 'depth'] = 0
         seed_nodes = [self.root_node]
         depth = 1
+
         while len(seed_nodes) > 0:
             self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
                         self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
@@ -470,6 +477,8 @@ class Cascade:
                     self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
             assert len(set(seed_nodes)) == len(seed_nodes)
             depth += 1
+
+
 
 
     @check_empty(default=None)
@@ -602,28 +611,46 @@ class SingleCascadeMeasurements:
         self.reset_cascade()
         temporal_measurements = []
         old_unique_nodes_count = 1  # root node, since we start iterating from depth 1
+
+
+
         for ts, df in self.main_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=time_granularity), sort=True):
             if len(df) > 0:
+
                 self.cascade.update_cascade(df)
-                old_unique_nodes_count, temporal_measurement = self.get_incremental_cascade_measurements(ts,
-                                                                                                         old_unique_nodes_count)
+                old_unique_nodes_count, temporal_measurement = self.get_incremental_cascade_measurements(ts, old_unique_nodes_count)
                 temporal_measurements.append(temporal_measurement)
-        self.temporal_measurements[time_granularity] = pd.DataFrame(temporal_measurements,
-                                                                    columns=["timestamp", "depth", "breadth", "size",
-                                                                             "structural_virality", "unique_nodes",
-                                                                             "new_node_ratio"])
+
+
+
+        columns = ["timestamp", "depth", "breadth", "size", "structural_virality", "unique_nodes", "new_node_ratio"]
+
+
+
+        self.temporal_measurements[time_granularity] = pd.DataFrame(temporal_measurements, columns=columns)
         self.temporal_measurements[time_granularity].fillna(value=np.nan, inplace=True)
         self.set_cascade()
 
     def cascade_timeseries_of(self, attribute, time_granularity):
         """
-        :param attribute: "depth", "breadth", "size", "structural_virality", "unique_nodes", "new_node_ratio"
-        :param time_granularity: "Y", "M", "D", "H" [years/months/days/hours]
+        Description:
+
+        Input:
+            :attribute: (str) Could be any of the following: "depth",
+                "breadth", "size", "structural_virality", "unique_nodes",
+                "new_node_ratio"
+
+            :time_granularity: (str) Again, could be any of the following:
+                "Y", "M", "D", "H".
         """
+
         if time_granularity not in self.temporal_measurements:
             self.get_temporal_measurements(time_granularity)
+
+
         meas = self.temporal_measurements[time_granularity][['timestamp', attribute]]
         meas.columns = ['timestamp','value']
+
         return meas
 
     @check_empty(default=None)
@@ -682,6 +709,7 @@ class SingleCascadeMeasurements:
 
     def get_incremental_cascade_measurements(self, grouper_value, old_unique_nodes_count, by_depth=False):
         unique_nodes_count = len(self.cascade.get_cascade_nodes(unique=True))
+
         all_measurements = [grouper_value,
                             self.cascade.get_cascade_depth(),
                             self.cascade.get_cascade_breadth(),
@@ -689,8 +717,12 @@ class SingleCascadeMeasurements:
                             self.cascade.get_cascade_structural_virality(),
                             unique_nodes_count,
                             (unique_nodes_count - old_unique_nodes_count) / float(unique_nodes_count)]
+
+
+
         if by_depth:
             all_measurements = all_measurements[1:]
+
         return unique_nodes_count, all_measurements
 
     @check_empty(default=None)
@@ -734,7 +766,6 @@ def igraph_add_edges_to_existing_graph(graph, df, source, target):
         new_vertices = set(df[[source, target]].values.flatten().tolist())
         old_vertices = set(graph.vs['name'])
         graph.add_vertices(list(new_vertices - old_vertices))
-        # print("cm1", graph.vs['name'], edgelist)
         graph.add_edges(edgelist)
     return graph
 
