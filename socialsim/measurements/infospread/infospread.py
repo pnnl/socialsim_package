@@ -75,6 +75,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         else:
             self.communityDF = self.getCommmunityDF(community_col='')
 
+
     def preprocess(self, df):
         """
         Description:
@@ -116,6 +117,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         df = df.assign(time=df.time.dt.floor('h'))
         return df
 
+
     def preprocessContentMeta(self, df):
         try:
             df.columns = ['content', 'created_at', 'owner_id', 'language']
@@ -128,6 +130,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         return df
 
+
     def preprocessUserMeta(self, df):
         try:
             df.columns = ['user', 'created_at', 'location', 'company']
@@ -139,6 +142,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         df = df[df.user.isin(self.main_df.user.values)]
 
         return df
+
 
     def readPickleFile(self, ipFile):
         with open(ipFile, 'rb') as handle:
@@ -1204,7 +1208,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurements
 
 
-    def getUserPopularity(self,k=5000,use_metadata=False,eventTypes=None,content_field='root'):
+    def getUserPopularity(self, k=5000, use_metadata=False, eventTypes=None, content_field='root'):
         """
         This method returns the top k most popular users for the dataset, where popularity is measured
         as the total popularity of the repos created by the user.
@@ -1255,7 +1259,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurement
 
 
-    def getAvgTimebwEventsUsers(self,selectedUsers=True, nCPU=1):
+    def getAvgTimebwEventsUsers(self, selectedUsers=True, nCPU=1):
         """
         This method returns the average time between events for each user
 
@@ -1285,7 +1289,9 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         delta = np.mean(np.diff(d.time)) / np.timedelta64(1, 's')
         return delta
 
-    def getMeanTimeUserHelper(self,args):
+
+    def getMeanTimeUserHelper(self, args):
+
         return self.getMeanTimeUser(*args)
 
 
