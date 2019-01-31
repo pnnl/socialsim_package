@@ -61,7 +61,8 @@ class TaskRunner:
         """
         return report
 
-    def run(self, dataset):
+    def run(self, dataset, timing=False, verbose=False, save=False,
+        save_directory='./', save_format='json'):
         """
         Description: This function runs the measurements and metrics code at
             accross all measurement types. It does not deal with multiple
@@ -70,7 +71,8 @@ class TaskRunner:
         """
         configuration = self.configuration
 
-        simulation_results, simulation_logs = run_measurements(dataset, configuration)
+        simulation_results, simulation_logs = run_measurements(dataset,
+            configuration, timing, verbose, save, save_directory, save_format)
 
         # Get the ground truth measurement results
         ground_truth_results = self.ground_truth_results
@@ -85,7 +87,8 @@ class TaskRunner:
 
         return results, logs
 
-def run_measurements(dataset, configuration):
+def run_measurements(dataset, configuration, timing, verbose, save,
+    save_directory, save_format):
     """
     Description: Takes in a dataset and a configuration file and runs the
         specified measurements.
@@ -132,16 +135,27 @@ def run_measurements(dataset, configuration):
                 # Instantiate measurement object
                 measurement = Measurement(dataset_subset, configuration_subset, metadata, platform)
 
-                try: 
+                try:
+                    kwargs = {'timing':timing, 'verbose':verbose, 'save':save,
+                        'save_directory':save_directory,
+                        'save_format':save_format}
+
                     # Run the specified measurements
-                    measurement_results, measurement_logs = measurement.run()
+                    measurement_results, measurement_logs = measurement.run(**kwargs)
+
                 except Exception as error:
                     measurement_logs    = {'status': 'Measurments object failed to run.', 'error': error}
                     measurement_results = 'Object failed to run measurements.'
- 
+
+                    if verbose:
+                        print(error)
+
             except Exception as error:
                 measurement_logs    = {'status': 'Failed to instantiate measurements object', 'error': error}
-                measurement_results = measurement_type+' failed to instantiate.'            
+                measurement_results = measurement_type+' failed to instantiate.'
+
+                if verbose:
+                    print(error)
 
             # Log the results at the measurement type level
             platform_results.update({measurement_type:measurement_results})

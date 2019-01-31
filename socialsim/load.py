@@ -43,7 +43,7 @@ def _load_json(filepath, ignore_first_line, verbose, short):
 
     if verbose:
         print('Loading dataset at '+filepath)
-        
+
         if short:
             total_line_numbers = 1000
         else:
@@ -109,7 +109,7 @@ def convert_datetime(dataset, verbose):
             dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
 
     if verbose:
-        print('Done')
+        print(' Done')
 
     return dataset
 

@@ -1066,15 +1066,10 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             measurement['value'] = df['value'].cumsum()
             measurement['event'] = df['event']
 
-        if self.previous_event_counts is not None:
-            measurement = measurement.merge(self.previous_event_counts,on=['user',content_field],how='left').fillna(0)
-            measurement['value'] = measurement['value'] + measurement['count']
-
         measurement = measurement[measurement['event'].isin([event1,event2])]
 
         measurement[event1] = measurement['event'] == event1
         measurement[event2] = measurement['event'] == event2
-
 
         measurement['next_event_' + event1] = measurement[event1].shift(-1)
         measurement['next_event_' + event2 ] = measurement[event2].shift(-1)
@@ -1128,11 +1123,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
             #boolean indicator of whether a given event is the last one by the user
             measurement['last_event'] = measurement['value'] == measurement['num_events']
-
-            #add event counts from before the start of the test period
-            if self.previous_event_counts is not None:
-                measurement = measurement.merge(self.previous_event_counts,on=['user',content_field],how='left').fillna(0)
-                measurement['value'] = measurement['value'] + measurement['count']
 
             #bin by the number of previous events
             bins = np.logspace(-1,2.5,30)

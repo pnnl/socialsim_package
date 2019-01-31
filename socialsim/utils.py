@@ -1,6 +1,26 @@
 import csv
 import json
 
+def print_status(log):
+
+    return None
+
+def load_config(filepath):
+
+    with open(filepath) as f:
+
+    return config
+
+
+def config_count(filepath, level):
+
+    if level=='measurement':
+        for platform in
+
+
+    return count
+
+
 def csv_to_json(csv_location, meta_data, output_location=None):
     """
     Description: This file takes in a simulation CVS file and outputs a

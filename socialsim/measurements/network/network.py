@@ -19,11 +19,10 @@ class NetworkMeasurements(MeasurementsBaseClass):
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, dataset, configuration, test=False, log_file='network_measurements_log.txt', platform='twitter'):
+    def __init__(self, dataset, configuration, metadata, platform, test=False, log_file='network_measurements_log.txt'):
         super(NetworkMeasurements, self).__init__(dataset, configuration, log_file=log_file)
 
         self.measurement_type = 'network'
-
         self.main_df = dataset
 
         if platform=='reddit':
@@ -93,12 +92,12 @@ class NetworkMeasurements(MeasurementsBaseClass):
         #iGraph graph object construction
         B = ig.Graph.TupleList(edgelist, directed=False)
         names = np.array(B.vs["name"])
-        types = np.isin(names,right_nodes)
+        types = np.isin(names, right_nodes)
         B.vs["type"] = types
-        p1,p2 = B.bipartite_projection(multiplicity=False)
+        p1, p2 = B.bipartite_projection(multiplicity=False)
 
         self.gUNig = None
-        if (self.project_on == "user"):
+        if project_on=="user":
             self.gUNig = p1
         else:
             self.gUNig = p2
@@ -144,7 +143,8 @@ class NetworkMeasurements(MeasurementsBaseClass):
 
         """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-        edgelist = df[['nodeUserID','parentUserID']].apply(tuple,axis=1).tolist()
+        edgelist = df[['nodeUserID', 'parentUserID']].apply(tuple,axis=1)
+        edgelist = edgelist.tolist()
 
         #iGraph Graph object construction
         self.gUNig = ig.Graph.TupleList(edgelist, directed=False)

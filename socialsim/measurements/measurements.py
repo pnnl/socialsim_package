@@ -1,5 +1,7 @@
 import pickle as pkl
 
+import traceback
+
 from ..record import RecordKeeper
 
 class MeasurementsBaseClass:
@@ -41,6 +43,7 @@ class MeasurementsBaseClass:
             :log: The log indicating the status of results and timing.
 
         """
+
         results = {}
         logs    = {}
 
@@ -50,10 +53,16 @@ class MeasurementsBaseClass:
 
             for name in self.configuration[scale].keys():
                 if verbose:
-                    print('SOCIALSIM MEASUREMENTS | Running '+scale+' '+name)
+                    message = 'SOCIALSIM MEASUREMENTS | Running '
+                    message = message+self.measurement_type+' '+scale+' '+name
+                    message = message+'...'
+                    print(message, end='', flush=True)
 
                 result, log = self._evaluate_measurement(
-                    self.configuration[scale][name], timing)
+                    self.configuration[scale][name], timing, verbose)
+
+                if verbose:
+                    print(' Done.', flush=True)
 
                 if save:
                     filepath = save_directory+self.measurement_type
@@ -68,7 +77,7 @@ class MeasurementsBaseClass:
 
         return results, logs
 
-    def _evaluate_measurement(self, configuration, timing):
+    def _evaluate_measurement(self, configuration, timing, verbose):
         """
         Description: Evaluates a single measurement given the configuration
             information.
@@ -101,6 +110,9 @@ class MeasurementsBaseClass:
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
 
+            if verbose:
+                print(error)
+
             return result, log
 
         # Evaluate the function with the given arguments
@@ -117,7 +129,8 @@ class MeasurementsBaseClass:
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
 
-            self.record_keeper.update(function_name+' exited with error: '+error)
+            if verbose:
+                print(error)
 
         if timing:
             delta_time = self.record_keeper.toc(1)
