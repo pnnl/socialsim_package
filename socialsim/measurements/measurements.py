@@ -83,7 +83,7 @@ class MeasurementsBaseClass:
         if 'measurement_args' in configuration.keys():
             function_arguments = configuration['measurement_args']
         else:
-            fucntion_arguments = {}
+            function_arguments = {}
 
         # get the requested method from the instantiated measurement class
         try:

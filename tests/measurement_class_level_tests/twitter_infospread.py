@@ -9,8 +9,20 @@ with open('../configuration_files/twitter_infospread.json') as f:
 
 metadata = None
 
+print(configuration)
+
 measurements = ss.InfospreadMeasurements(dataset, configuration, metadata, 'twitter')
 
 results, logs = measurements.run(timing=True)
 
-print(logs)
+
+for scale in logs.keys():
+    print(scale)
+    for measurement in logs[scale].keys():
+        print('    '+measurement+logs[scale][measurement]['status'])
+
+
+
+print('-'*80)
+
+print(results)

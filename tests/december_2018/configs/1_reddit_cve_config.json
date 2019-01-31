@@ -362,7 +362,7 @@
             }
         }
     },
-    "baseline": {
+    "infospread": {
         "population": {
             "user_unique_content": {
                 "scale": "population",

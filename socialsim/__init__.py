@@ -7,4 +7,4 @@ from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
 
-from .visualization import generate_plot
+from .visualizations import generate_plot

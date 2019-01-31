@@ -31,7 +31,7 @@ def overview(d, n=0, max_n=5):
 
 if __name__=='__main__':
     # Define location of needed files
-    config_directory         = './configs/'
+    config_directory         = './configs/new/'
     submission_directory     = '/data/socialsim/december_2018/processed_submissions/'
     challenge_data_directory = '/data/socialsim/december_2018/'
     ground_truth_directory   = '/data/socialsim/december_2018/processed_challenge/ground_truth_data'

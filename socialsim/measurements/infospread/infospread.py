@@ -1,5 +1,6 @@
 import pandas as pd
 import pickle as pkl
+import numpy  as np
 
 from ..measurements import MeasurementsBaseClass
 from ..validators   import check_empty

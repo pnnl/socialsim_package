@@ -362,7 +362,7 @@
             }
         }
     },
-    "baseline": {
+    "infospread": {
         "population": {
             "content_liveliness_distribution": {
                 "scale": "population",

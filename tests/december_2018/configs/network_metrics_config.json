@@ -1,0 +1,165 @@
+{
+    "network":{
+		"population":{
+			"number_of_nodes": {
+				"scale": "population",
+				"measurement": "number_of_nodes",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+			"number_of_edges": {
+				"scale": "population",
+				"measurement": "number_of_edges",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"density": {
+				"scale": "population",
+				"measurement": "density",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"mean_shortest_path_length": {
+				"scale": "population",
+				"measurement": "mean_shortest_path_length",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"assortativity_coefficient": {
+				"scale": "population",
+				"measurement": "assortativity_coefficient",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"number_of_connected_components": {
+				"scale": "population",
+				"measurement": "number_of_connected_components",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"average_clustering_coefficient": {
+				"scale": "population",
+				"measurement": "average_clustering_coefficient",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"max_node_degree": {
+				"scale": "population",
+				"measurement": "max_node_degree",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+			
+			"mean_node_degree": {
+				"scale": "population",
+				"measurement": "mean_node_degree",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			},
+
+			"degree_distribution": {
+				"scale": "population",
+				"measurement": "degree_distribution",
+				"metrics": {
+					"js_divergence": {
+					"metric":"js_divergence",
+					"metric_args": {"discrete": true}
+					}
+				}
+			},
+
+			"community_modularity": {
+				"scale": "population",
+				"measurement": "community_modularity",
+				"metrics": {
+					"absolute_difference": {
+						"metric": "absolute_difference",
+						"metric_args": {}
+					},
+					"absolute_percentage_error": {
+						"metric": "absolute_percentage_error",
+						"metric_args": {}
+					}
+				}
+			}
+		}
+	}
+}

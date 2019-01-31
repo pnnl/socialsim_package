@@ -23,18 +23,22 @@ class NetworkMeasurements(MeasurementsBaseClass):
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, dataset, configuration, test=False, log_file='network_measurements_log.txt'):
+    def __init__(self, dataset, configuration, test=False, log_file='network_measurements_log.txt', platform='twitter'):
         super(NetworkMeasurements, self).__init__(dataset, configuration, log_file=log_file)
 
         self.main_df = dataset
 
-        self.build_undirected_graph(self.main_df)
+        if platform=='reddit':
+            build_undirected_graph = self.reddit_build_undirected_graph
+        elif platform=='twitter':
+            build_undirected_graph = self.twitter_build_undirected_graph
+        elif platform=='github':
+            build_undirected_graph = self.github_build_undirected_graph
 
-    def build_undirected_graph(self, df):
-        return NotImplementedError()
+        build_undirected_graph(self.main_df)
 
     def mean_shortest_path_length(self):
-        return sn.GetBfsEffDiamAll(self.gUNsn, 500, False)[3]
+        return sn.GetBfsEffDiam(self.gUNsn, 500, False)
 
     def number_of_nodes(self):
         return ig.Graph.vcount(self.gUNig)
@@ -52,8 +56,7 @@ class NetworkMeasurements(MeasurementsBaseClass):
         return len(ig.Graph.components(self.gUNig, mode="WEAK"))
 
     def average_clustering_coefficient(self):
-        return sn.GetClustCfAll(self.gUNsn, sn.TFltPrV())[0]
-        #return ig.Graph.transitivity_avglocal_undirected(self.gUNig,mode="zero")
+        return sn.GetClustCf(self.gUNsn)
 
     def max_node_degree(self):
         return max(ig.Graph.degree(self.gUNig))
@@ -80,13 +83,8 @@ class NetworkMeasurements(MeasurementsBaseClass):
             df[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull())][root_node_col].map(tweet_uids)
         return df
 
-class GithubNetworkMeasurements(NetworkMeasurements):
-    def __init__(self, project_on='nodeID', weighted=False, **kwargs):
-        self.project_on = project_on
-        self.weighted   = weighted
-        super(GithubNetworkMeasurements, self).__init__(**kwargs)
 
-    def build_undirected_graph(self, df):
+    def github_build_undirected_graph(self, df, project_on='nodeID'):
         self.main_df = self.main_df[['nodeUserID','nodeID']]
 
         left_nodes = np.array(self.main_df['nodeUserID'].unique().tolist())
@@ -114,11 +112,8 @@ class GithubNetworkMeasurements(NetworkMeasurements):
         for e in self.gUNig.es:
             self.gUNsn.AddEdge(e.source,e.target)
 
-class TwitterNetworkMeasurements(NetworkMeasurements):
-    def __init__(self, **kwargs):
-        super(TwitterNetworkMeasurements, self).__init__(**kwargs)
 
-    def build_undirected_graph(self, df):
+    def twitter_build_undirected_graph(self, df):
         """
         Description:
 
@@ -140,19 +135,8 @@ class TwitterNetworkMeasurements(NetworkMeasurements):
         for e in self.gUNig.es:
             self.gUNsn.AddEdge(e.source, e.target)
 
-class RedditNetworkMeasurements(NetworkMeasurements):
-    def __init__(self, **kwargs):
-        """
-        Description:
 
-        Input:
-
-        Output:
-
-        """
-        super(RedditNetworkMeasurements, self).__init__(**kwargs)
-
-    def build_undirected_graph(self, df):
+    def reddit_build_undirected_graph(self, df):
         """
         Description:
 

@@ -362,7 +362,7 @@
             }
         }
     },
-    "baseline": {
+    "infospread": {
         "community": {
             "community_gini": {
                 "scale": "community",
