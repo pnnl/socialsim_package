@@ -11,10 +11,6 @@ import os
 
 from ..measurements import MeasurementsBaseClass
 
-__all__ = ['GithubNetworkMeasurements',
-           'TwitterNetworkMeasurements',
-           'RedditNetworkMeasurements']
-
 class NetworkMeasurements(MeasurementsBaseClass):
     """
     This class implements Network specific   measurements. It uses iGraph and SNAP libraries with Python interfaces.
@@ -25,6 +21,8 @@ class NetworkMeasurements(MeasurementsBaseClass):
     """
     def __init__(self, dataset, configuration, test=False, log_file='network_measurements_log.txt', platform='twitter'):
         super(NetworkMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+
+        self.measurement_type = 'network'
 
         self.main_df = dataset
 

@@ -11,9 +11,9 @@ from ..validators   import check_root_only
 from ..measurements import MeasurementsBaseClass
 
 class CascadeMeasurements(MeasurementsBaseClass):
-    def __init__(self, main_df, configuration, metadata, platform, 
-        parent_node_col="parentID", node_col="nodeID", root_node_col="rootID", 
-        timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None, 
+    def __init__(self, main_df, configuration, metadata, platform,
+        parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
+        timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None,
         filter_in_list=[], log_file='cascade_measurements_log.txt'):
         """
         Description:
@@ -32,6 +32,8 @@ class CascadeMeasurements(MeasurementsBaseClass):
         """
         super(CascadeMeasurements, self).__init__(main_df, configuration,
             log_file=log_file)
+
+        self.measurement_type = 'cascade'
 
         self.main_df         = main_df
         self.root_node_col   = root_node_col

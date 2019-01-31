@@ -1,3 +1,5 @@
+import pickle as pkl
+
 from ..record import RecordKeeper
 
 class MeasurementsBaseClass:
@@ -22,7 +24,8 @@ class MeasurementsBaseClass:
             for name in configuration[scale].keys():
                 self.measurements.append(name)
 
-    def run(self, measurements_subset=None, timing=False, verbose=False):
+    def run(self, measurements_subset=None, timing=False, verbose=False,
+        save=False, save_directory='./', save_format='json'):
         """
         Description: Runs a measurement or a set of measurements on the given
             dataset.
@@ -48,9 +51,14 @@ class MeasurementsBaseClass:
             for name in self.configuration[scale].keys():
                 if verbose:
                     print('SOCIALSIM MEASUREMENTS | Running '+scale+' '+name)
-        
+
                 result, log = self._evaluate_measurement(
                     self.configuration[scale][name], timing)
+
+                if save:
+                    filepath = save_directory+self.measurement_type
+                    filepath = filepath+'_'+scale+'_'+name
+                    self.save_measurement(result, filepath, save_format)
 
                 scale_results.update({name:result})
                 scale_logs.update({name:log})
@@ -92,7 +100,7 @@ class MeasurementsBaseClass:
             result = function_name+' was not found.'
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
-            
+
             return result, log
 
         # Evaluate the function with the given arguments
@@ -116,3 +124,80 @@ class MeasurementsBaseClass:
             log.update({'run_time': delta_time})
 
         return result, log
+
+    def save_measurement(self, result, filepath, format):
+        """
+        Description:
+
+        Input:
+
+        Output:
+        """
+
+        if format=='pickle':
+            self._save_measurement_to_pickle(result, filepath)
+        elif format=='json':
+            self._save_measuremnt_to_json(result, filepath)
+
+        return None
+
+    def _save_measurement_to_pickle(self, result, filepath):
+        """
+        Description: Saves the result of a measurement to a pickle file.
+
+        Input:
+            :result: Type varies.
+            :filepath: (str)
+
+        Output:
+            None
+        """
+
+        filepath = filepath+'.pkl'
+
+        with open(filepath, 'wb') as f:
+            pkl.dump(result, f)
+
+        return None
+
+    def _save_measuremnt_to_json(self, result, filepath):
+        """
+        Description:
+
+        Input:
+            :result:
+            :filepath:
+
+        Output:
+            None
+        """
+
+        filepath = filepath+'.json'
+
+        return None
+
+    def _raw_to_json(self, result):
+        """
+        Description:
+
+        Input:
+            :result:
+
+        Output:
+            :result:
+        """
+
+        return result
+
+    def _json_to_raw(self, result):
+        """
+        Description:
+
+        Input:
+            :result:
+
+        Output:
+            :result:
+        """
+
+        return result

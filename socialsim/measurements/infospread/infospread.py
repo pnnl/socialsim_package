@@ -23,6 +23,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         """
         super().__init__(dataset, configuration)
 
+        self.measurement_type = 'infospread'
+
         self.platform = platform
 
         # What are these used for?
