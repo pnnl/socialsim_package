@@ -8,5 +8,6 @@ from .measurements import CascadeMeasurements
 from .measurements import NetworkMeasurements
 from .measurements import GroupFormationMeasurements
 from .measurements import CrossPlatformMeasurements
+from .measurements import MetaData
 
 from .visualizations import generate_plot

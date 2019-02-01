@@ -59,17 +59,13 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metaContentData!=False:
+        if metadata.use_content_data:
             self.useContentMetaData = True
-            meta_content_data = pd.read_csv(metaContentData)
-            self.contentMetaData = self.preprocessContentMeta(meta_content_data)
-        else:
-            self.useContentMetaData = False
-        if metaUserData != False:
+            self.contentMetaData = self.preprocessContentMeta(metadata.content_data)
+
+        if metadata.use_user_data:
             self.useUserMetaData = True
-            self.userMetaData = self.preprocessUserMeta(pd.read_csv(metaUserData))
-        else:
-            self.useUserMetaData = False
+            self.UserMetaData = self.preprocessUserMeta(metadata.user_data)
 
         # For community measurements
         self.community_dict_file = community_dictionary
@@ -122,12 +118,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         """
         TODO: MOVE TO LOAD METADATA
         """
-
-        try:
-            df.columns = ['content', 'created_at', 'owner_id', 'language']
-        except:
-            df.columns = ['created_at', 'owner_id', 'content']
-
+        df.columns       = ['content', 'created_at', 'owner_id', 'language']
         df['created_at'] = pd.to_datetime(df['created_at'])
 
         df = df[df.content.isin(self.main_df.content.values)]
@@ -737,7 +728,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurements
 
 
-    def getContributions(self, new_users_flag=False,cumulative=False,eventTypes=None,time_bin='H',content_field="root"):
+    def getContributions(self, new_users_flag=False, cumulative=False, eventTypes=None, time_bin='H', content_field="root"):
         """
         Calculates the total number of unique daily contributers to a repo or the unique daily contributors who are new contributors
         Question # 4
@@ -960,7 +951,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return p.head(k)
 
 
-    def getDistributionOfEventsByContent(self,content_field='root',eventTypes=['WatchEvent']):
+    def getDistributionOfEventsByContent(self, content_field='root', eventTypes=['WatchEvent']):
         """
         This method returns the distribution of event type per content e.g. x repos/posts/tweets with y number of events,
         z repos/posts/ with n amounts of events.
@@ -1043,8 +1034,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurement
 
 
-    def getEventTypeRatioTimeline(self,eventTypes=None,event1='IssuesEvent',event2='PushEvent',content_field="root"):
-        if self.platform != 'reddit':
+    def getEventTypeRatioTimeline(self, eventTypes=None, event1='IssuesEvent', event2='PushEvent', content_field="root"):
+        if self.platform!='reddit':
             df = self.selectedContent.copy()
         else:
             df = self.main_df.copy()
@@ -1057,7 +1048,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         if len(df.index) < 1:
             return {}
 
-        grouped = df.groupby([content_field,'user'])
+        grouped = df.groupby([content_field, 'user'])
+
         if len(grouped) > 1:
             measurement = grouped.apply(lambda x: x.value.cumsum()).reset_index()
             measurement['event'] = df['event'].reset_index(drop=True)
@@ -1077,7 +1069,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         bins = np.logspace(-1,3.0,16)
         measurement['num_events_binned'] = pd.cut(measurement['value'],bins).apply(lambda x: np.floor(x.right)).astype(float)
 
-
         def ratio(grp):
             if float(grp['next_event_' + event2].sum()) > 0:
                 return float(grp['next_event_' + event1].sum()) / float(grp['next_event_' + event2].sum())
@@ -1092,7 +1083,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         measurement = self.getNodeDictionary(measurement)
 
-        return(measurement)
+        return measurement
 
 
     def propUserContinue(self,eventTypes=None,content_field="root"):
@@ -1140,7 +1131,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurement
 
 
-    def determineDf(self,users,eventTypes):
+    def determineDf(self, users, eventTypes):
         """
         This function selects a subset of the full data set for a selected set of users and event types.
         Inputs: users - A boolean or a list of users.  If it is list of user ids (login_h) the data frame is subset on only this list of users.
@@ -1149,21 +1140,20 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         Output: A data frame with only the selected users and event types.
         """
-        if users == True:
-            #self.selectedUsers is a data frame containing only the users in interested_users
+        if users==True:
             df = self.selectedUsers
-        elif users != False:
+        elif type(users) is list:
             df = df[df.user.isin(users)]
         else:
             df = self.main_df
 
-        if eventTypes != None:
+        if eventTypes!=None:
             df = df[df.event.isin(eventTypes)]
 
         return df
 
 
-    def getUserUniqueContent(self,selectedUsers=False,eventTypes=None,content_field="root"):
+    def getUserUniqueContent(self, selectedUsers=False, eventTypes=None, content_field="root"):
         """
         This method returns the number of unique repos that a particular set of users contributed too
         Question #17
@@ -1172,7 +1162,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
                 content_field - CSV column which contains the content ID (e.g. nodeID, parentID, or rootID)
         Output: A dataframe with the user id and the number of repos contributed to
         """
-        df = self.determineDf(selectedUsers,eventTypes)
+        df = self.determineDf(selectedUsers, eventTypes)
         df = df.groupby('user')
         data = df[content_field].nunique().reset_index()
         data.columns = ['user','value']
