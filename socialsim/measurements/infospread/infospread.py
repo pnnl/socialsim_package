@@ -7,9 +7,8 @@ from ..validators   import check_empty
 from ..validators   import check_root_only
 
 class InfospreadMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata, platform, content_node_ids=[],
-        user_node_ids=[], metaContentData=False, metaUserData=False,
-        community_dictionary=''):
+    def __init__(self, dataset, configuration, metadata, platform,
+        content_node_ids=[], user_node_ids=[]):
         """
         Description:
 
@@ -24,17 +23,32 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         super().__init__(dataset, configuration)
 
         self.measurement_type = 'infospread'
+        self.platform         = platform
 
-        self.platform = platform
-
-        # What are these used for?
-        self.contribution_events = ['PullRequestEvent', 'PushEvent',
-            'IssuesEvent', 'IssueCommentEvent', 'PullRequestReviewCommentEvent',
-            'CommitCommentEvent', 'CreateEvent', 'post', 'tweet']
 
         # What are these used for?
-        self.popularity_events = ['WatchEvent', 'ForkEvent', 'comment', 'post',
-            'retweet', 'quote', 'reply']
+        self.contribution_events = [
+            'PullRequestEvent',
+            'PushEvent',
+            'IssuesEvent',
+            'IssueCommentEvent',
+            'PullRequestReviewCommentEvent',
+            'CommitCommentEvent',
+            'CreateEvent',
+            'post',
+            'tweet'
+            ]
+
+        # What are these used for?
+        self.popularity_events = [
+            'WatchEvent',
+            'ForkEvent',
+            'comment',
+            'post',
+            'retweet',
+            'quote',
+            'reply'
+            ]
 
         self.main_df = self.preprocess(dataset)
 
@@ -46,38 +60,39 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             self.main_df_opt = None
 
         # For content centric
-        if content_node_ids != ['all']:
-            if self.platform == 'reddit':
-                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
-            elif self.platform == 'twitter':
-                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
-            else:
-                self.selectedContent = self.main_df[self.main_df.content.isin(content_node_ids)]
-        else:
+        if content_node_ids=='all':
             self.selectedContent = self.main_df
+        else:
+            if self.platform in ['reddit', 'twitter']:
+                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
+            elif self.platform=='github':
+                self.selectedContent = self.main_df[self.main_df.content.isin(content_node_ids)]
 
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
         if metadata.use_content_data:
             self.useContentMetaData = True
-            self.contentMetaData = self.preprocessContentMeta(metadata.content_data)
+            self.contentMetaData    = self.preprocessContentMeta(metadata.content_data)
 
         if metadata.use_user_data:
             self.useUserMetaData = True
-            self.UserMetaData = self.preprocessUserMeta(metadata.user_data)
+            self.UserMetaData    = self.preprocessUserMeta(metadata.user_data)
 
         # For community measurements
-        self.community_dict_file = community_dictionary
-        if self.platform == 'github':
-            self.communityDF = self.getCommmunityDF(community_col='community')
-        elif self.platform == 'reddit':
-            self.communityDF = self.getCommmunityDF(community_col='subreddit')
-        else:
-            self.communityDF = self.getCommmunityDF(community_col='')
+        # Load and preprocess metadata
+        self.comDic = metadata.build_communities(self.contentMetaData, self.UserMetaData)
 
 
-    def preprocess(self, df):
+        if self.platform=='github':
+            self.communityDF = self.getCommmunityDF('community')
+        elif self.platform=='reddit':
+            self.communityDF = self.getCommmunityDF('subreddit')
+        elif self.platform=='twitter':
+            self.communityDF = self.getCommmunityDF('')
+
+
+    def preprocess(self, dataset):
         """
         Description:
 
@@ -86,7 +101,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         Output:
         Edit columns, convert date, sort by date
         """
-
+        events  = self.popularity_events+self.contribution_events
         mapping = {'actionType'   : 'event',
                    'nodeID'       : 'content',
                    'nodeTime'     : 'time',
@@ -104,104 +119,51 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             mapping.update({'actionSubType' : 'action',
                             'status'        : 'merged'})
 
-        df = df.rename(index=str, columns=mapping)
+        dataset = dataset.rename(index=str, columns=mapping)
+        dataset = dataset[dataset.event.isin(events)]
+        dataset = dataset.sort_values(by='time')
+        dataset = dataset.assign(time=dataset.time.dt.floor('h'))
 
-        df = df[df.event.isin(self.popularity_events + self.contribution_events)]
-
-        df = df.sort_values(by='time')              # These two steps should get moved into the data loading process.
-        df = df.assign(time=df.time.dt.floor('h'))
-
-        return df
+        return dataset
 
 
-    def preprocessContentMeta(self, df):
+    def preprocessContentMeta(self, dataset):
         """
         TODO: MOVE TO LOAD METADATA
         """
-        df.columns       = ['content', 'created_at', 'owner_id', 'language']
-        df['created_at'] = pd.to_datetime(df['created_at'])
+        dataset.columns = ['content', 'created_at', 'owner_id', 'language']
+        dataset['created_at'] = pd.to_datetime(dataset['created_at'])
+        dataset = dataset[dataset.content.isin(self.main_df.content.values)]
 
-        df = df[df.content.isin(self.main_df.content.values)]
-
-        return df
+        return dataset
 
 
-    def preprocessUserMeta(self, df):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
+    def preprocessUserMeta(self, dataset):
         try:
-            df.columns = ['user', 'created_at', 'location', 'company']
+            dataset.columns = ['user','created_at','location','company']
         except:
-            df.columns = ['user', 'created_at', 'city', 'country', 'company']
+            dataset.columns = ['user','created_at','city','country','company']
 
-        df['created_at'] = pd.to_datetime(df['created_at'])
+        dataset['created_at'] = pd.to_datetime(dataset['created_at'])
+        dataset = dataset[dataset.user.isin(self.main_df.user.values)]
 
-        df = df[df.user.isin(self.main_df.user.values)]
-
-        return df
-
-
-    def readPickleFile(self, ipFile):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        with open(ipFile, 'rb') as handle:
-            obj = pkl.load(handle)
-
-        return obj
+        return dataset
 
 
-    def loadMetaData(self):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        """
-        This method splits the user meta data into location and creation date data frames
-        """
-        if self.useUserMetaData:
-            self.created_at_df = self.userMetaData[['user','created_at']]
-            try:
-                self.locations_df = self.userMetaData[['user','city','country']]
-            except:
-                self.locations_df = self.userMetaData[['user','location']]
+    def readPickleFile(self, filepath):
+        with open(filepath, 'rb') as f:
+            pickle_object = pkl.load(f)
+        return pickle_object
 
 
-    def loadCommunities(self, path, content_field='content'):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        """
-        This method loads the community dictionary from the specified pickle file.
-        The pickle file should contain a dictionary of the format
-        {"type_of_community1":{"community1":[repo1,repo2,...], "community2":[repo3,repo4,...]},
-         "type_of_community2":...}
-         Inputs: path - file path of pickle file
-        """
-        if path != '':
-            with open(path, 'rb') as handle:
-                self.comDic = pkl.load(handle)
-                for key in self.comDic.keys():
-                    print(self.comDic[key].keys())
-        else:
-            self.comDic = {"topic":{"all":self.main_df[content_field].unique()}}
-
-
-    def getCommmunityDF(self, community_col='subreddit'):
+    def getCommmunityDF(self, community_col):
         if community_col in self.main_df.columns:
             return self.main_df.copy()
         elif community_col != '':
-            self.loadMetaData()
-            self.loadCommunities(self.community_dict_file)
-
             dfs = []
 
-            content_community_types = ['topic',"language"]
-            user_community_types    = ['city','country','company',"locations"]
+            content_community_types = ['topic','language']
+            user_community_types    = ['city','country','company','locations']
 
             #content-focused communities
             for community in content_community_types:
@@ -222,26 +184,27 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             return pd.concat(dfs)
 
 
-    def getCommunityMeasurementDict(self,df):
-        meas = {}
-        if isinstance(df,pd.DataFrame):
-            for community in df.community.unique():
-                meas[community] = df[df.community == community]
-                del meas[community]["community"]
-        elif isinstance(df,pd.Series):
+    def getCommunityMeasurementDict(self, dataset):
+        measurements = {}
+        if isinstance(dataset, pd.DataFrame):
+            for community in dataset.community.unique():
+                measurements[community]=dataset[dataset.community==community]
+                del measurements[community]["community"]
+        elif isinstance(dataset, pd.Series):
             series_output = False
-            for community in df.index:
-                meas[community] = df[community]
+            for community in dataset.index:
+                measurements[community] = dataset[community]
                 try:
-                    len(df[community])
+                    len(dataset[community])
                     series_output = True
                 except:
-                    ''
-            if series_output:
-                for community in meas:
-                    meas[community] = pd.Series(meas[community])
+                    pass
 
-        return meas
+            if series_output:
+                for community in measurements:
+                    measurements[community] = pd.Series(measurements[community])
+
+        return measurements
 
 
     def getProportion(self, eventTypes=None, community_field="subreddit"):

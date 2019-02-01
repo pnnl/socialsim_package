@@ -29,6 +29,23 @@ class MetaData:
         Input:
 
         Output:
+
         """
+        print(user_data.head())
+
+        print(content_data.head())
+
+        communities = {}
+
+        repo_communities = ['language']
+
+        user_communities = ['country', 'company']
+
+
+        for community in repo_communities:
+            data_subset = content_data.loc[:,['repo',community]]
+
+        print(data_subset.head())
+
 
         return communities
