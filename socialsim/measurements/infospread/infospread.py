@@ -73,16 +73,17 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         if metadata.use_content_data:
             self.useContentMetaData = True
-            self.contentMetaData    = self.preprocessContentMeta(metadata.content_data)
+            self.contentMetaData    = metadata.content_data
 
         if metadata.use_user_data:
             self.useUserMetaData = True
-            self.UserMetaData    = self.preprocessUserMeta(metadata.user_data)
+            self.UserMetaData    = metadata.user_data
 
         # For community measurements
         # Load and preprocess metadata
-        self.comDic = metadata.build_communities(self.contentMetaData, self.UserMetaData)
-
+        if self.useUserMetaData and self.useContentMetaData:
+            self.comDic = metadata.build_communities(self.contentMetaData,
+                self.UserMetaData)
 
         if self.platform=='github':
             self.communityDF = self.getCommmunityDF('community')
@@ -127,29 +128,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return dataset
 
 
-    def preprocessContentMeta(self, dataset):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-        dataset.columns = ['content', 'created_at', 'owner_id', 'language']
-        dataset['created_at'] = pd.to_datetime(dataset['created_at'])
-        dataset = dataset[dataset.content.isin(self.main_df.content.values)]
-
-        return dataset
-
-
-    def preprocessUserMeta(self, dataset):
-        try:
-            dataset.columns = ['user','created_at','location','company']
-        except:
-            dataset.columns = ['user','created_at','city','country','company']
-
-        dataset['created_at'] = pd.to_datetime(dataset['created_at'])
-        dataset = dataset[dataset.user.isin(self.main_df.user.values)]
-
-        return dataset
-
-
     def readPickleFile(self, filepath):
         with open(filepath, 'rb') as f:
             pickle_object = pkl.load(f)
@@ -159,7 +137,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
     def getCommmunityDF(self, community_col):
         if community_col in self.main_df.columns:
             return self.main_df.copy()
-        elif community_col != '':
+
+        elif community_col!='':
             dfs = []
 
             content_community_types = ['topic','language']
