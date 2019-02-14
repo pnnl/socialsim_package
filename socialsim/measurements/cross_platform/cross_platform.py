@@ -5,6 +5,11 @@ from scipy.stats.stats import pearsonr
 from collections import Counter, defaultdict
 from ..measurements import MeasurementsBaseClass
 
+# TODO:
+#   5. (Audience) Which platforms have the largest audience for the information?
+#   6. (Speed) On which platforms does the information spread fastest?
+#   9. (Audience) Do different platforms show similar temporal patterns of audience growth?
+
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, platform="platform", parent_node_col="parentID", node_col="nodeID",
