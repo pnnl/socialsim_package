@@ -1,274 +1,296 @@
-
 import numpy as np
 import pandas as pd
 from scipy.stats.stats import pearsonr
 from collections import Counter, defaultdict
-from ..measurements import MeasurementsBaseClass
 
+
+# from ..measurements import MeasurementsBaseClass
+# from measurements import MeasurementsBaseClass
 # TODO:
 #   5. (Audience) Which platforms have the largest audience for the information?
 #   6. (Speed) On which platforms does the information spread fastest?
 #   9. (Audience) Do different platforms show similar temporal patterns of audience growth?
 
 
-class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, platform="platform", parent_node_col="parentID", node_col="nodeID",
+# class CrossPlatformMeasurements(MeasurementsBaseClass):
+class CrossPlatformMeasurements():
+    def __init__(self, dataset, configuration=None, platform="platform", parent_node_col="parentID", node_col="nodeID",
                  root_node_col="rootID", timestamp_col="nodeTime", user_col="nodeUserID", content_col="content",
-                 log_file='cross_platform_measurements_log.txt'):
-        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
-
+                 community=None, log_file='cross_platform_measurements_log.txt'):
+        # super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+        super(CrossPlatformMeasurements, self).__init__()
         self.dataset = dataset
         self.root_node_col = root_node_col
         self.parent_node_col = parent_node_col
         self.node_col = node_col
         self.timestamp_col = timestamp_col
         self.user_col = user_col
-        self.platform = platform
-        self.content = content_col
-        self.content_df = pd.DataFrame()
+        self.platform_col = platform
+        self.content_col = content_col
+        self.community_col = community
+        # self.content_df = pd.DataFrame()
 
-    def order_of_spread_and_time_delta(self, time_granularity="S"):
-        keywords_to_order = {}
-        for index, row in self.dataset.iterrows():
-            platform = row[self.platform]
-            keywords = row[self.content]
-            for k in keywords:
-                try:
-                    if platform not in keywords_to_order[k].keys():
-                        keywords_to_order[k][platform] = index
-                except KeyError:
-                    keywords_to_order[k] = {platform: index}
-        sorted_order = {}
-        time_delta = {}
-        for k, v in keywords_to_order.items():
-            sorted_v = sorted(v.items(), key=lambda kv: kv[1])
-            sorted_keys = [item[0] for item in sorted_v]
-            sorted_order[k] = sorted_keys
-            time = [item[1] for item in sorted_v]
-            time_delta[k] = [self.dataset[self.timestamp_col].iloc[i] for i in time]
+    def select_data(self, data, nodes=[], communities=[]):
+        """
+        Subset the data based on the given communities or pieces of content
+        :param data: DataFrame of all given data
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: New DataFrame with the select communities/content only
+        """
+        if len(nodes) > 0:
+            data = data[data[self.content_col].isin(nodes)]
+        if len(communities) > 0:
+            data = data[data[self.community].isin(communities)]
+        return data
 
-        delta = {}
-        for k, v in time_delta.items():
-            delta[k] = [0]
-            if len(v) > 1:
-                deltaTime = pd.Timedelta(v[1] - v[0]).seconds
-                if time_granularity == "S":
-                    delta[k].append(deltaTime)
-                elif time_granularity == "M":
-                    delta[k].append(deltaTime / 60.0)
-                elif time_granularity == "H":
-                    delta[k].append(deltaTime / 3600.0)
-                else:
-                    delta[k].append(pd.Timedelta(v[1] - v[0]).days)
-            if len(v) > 2:
-                deltaTime = pd.Timedelta(v[2] - v[0]).seconds
-                if time_granularity == "S":
-                    delta[k].append(deltaTime)
-                elif time_granularity == "M":
-                    delta[k].append(deltaTime / 60.0)
-                elif time_granularity == "H":
-                    delta[k].append(deltaTime / 3600.0)
-                else:
-                    delta[k].append(pd.Timedelta(v[2] - v[0]).days)
+    def order_of_spread(self, nodes=[], communities=[]):
+        """
+        #TODO: How does this change for population?
+        Determine the order of spread between platforms of a community/content
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: A dictionary mapping between the community/content to the ranked list of platforms
+        """
+        data = self.select_data(self.dataset, nodes, communities)
+        keywords_to_order = defaultdict(list)
+        if len(nodes) > 0:
+            group_col = self.content_col
+        if len(communities) > 0:
+            group_col = self.community_col
+        data.drop_duplicates(subset=[group_col, self.platform_col])
+        for index, group in data.groupby(group_col):
+            keywords_to_order[group[group_col]].append(group[self.platform_col])
+        return keywords_to_order
 
-        time_df = pd.DataFrame(list(delta.items()), columns=[self.content, "time_delta"])
-        new_df = pd.DataFrame(list(sorted_order.items()), columns=[self.content, "spread_order"])
-        merged = pd.merge(new_df, time_df, on=self.content)
-        if len(self.content_df) == 0:
-            self.content_df = merged
+    def time_delta(self, time_granularity="S", nodes=[], communities=[]):
+        """
+        Determine the amount of time it takes for a community/content to appear on another platform
+        :param time_granularity: Unit of time to calculate {S=seconds, M=minutes, H=hours, D=days}
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: If population, a list of the time passed since the first obsevered time.
+                    Else, a dictionary mapping a community/content to a list of the time passed since the first time
+                    that community/content was observed
+        """
+
+        data = self.select_data(self.dataset, nodes, communities)
+        if len(nodes) > 0:
+            group_col = [self.content_col,self.platform_col]
+        elif len(communities) > 0:
+            group_col = [self.community_col,self.platform_col]
         else:
-            self.content_df = pd.merge(self.content_df, merged, on=self.content)
-
-    def filter_common_users(self):
-        all_platform_users = defaultdict(set)
-        for index, row in self.dataset.iterrows():
-            all_platform_users[row[self.user_col]].add(row[self.platform])
-        users = {}
-        for k, v in all_platform_users.items():
-            # Remove users that only appear in 1 platform
-            if len(v) > 1:
-                users[k] = v
-        return self.dataset.loc[self.dataset[self.user_col].isin(users.keys())]
-
-    def overlapping_users(self):
-        keyword_user_matrix = {}
-        tg_total = len(set(self.dataset.loc[(self.dataset[self.platform] == "twitter") |
-                                            (self.dataset[self.platform] == "github"), self.user_col].tolist()))
-        tr_total = len(set(self.dataset.loc[(self.dataset[self.platform] == "twitter") |
-                                            (self.dataset[self.platform] == "reddit"), self.user_col].tolist()))
-        rg_total = len(set(self.dataset.loc[(self.dataset[self.platform] == "reddit") |
-                                            (self.dataset[self.platform] == "github"), self.user_col].tolist()))
-        # content from all users
-        all_keywords_list = self.dataset[self.content].tolist()
-        all_keywords_set = set()
-        for key in all_keywords_list:
-            for k in key:
-                all_keywords_set.add(k)
-        common_users = self.filter_common_users()
-        common_users = common_users[[self.platform, self.user_col, self.content]]
-        common_users = common_users.loc[common_users[self.content].str.len() != 0]
-        # content from only cross-platform users
-        keyword_list = common_users[self.content].tolist()
-        common_users[self.content] = common_users[self.content].apply(lambda x: " ".join(x))
-        keyword_set = set()
-        for key in keyword_list:
-            for k in key:
-                keyword_set.add(k)
-        for k in keyword_set:
-            twitter_users = set(common_users.loc[(common_users[self.platform] == "twitter") &
-                                                 (common_users[self.content].str.contains(k)), self.user_col].tolist())
-            github_users = set(common_users.loc[(common_users[self.platform] == 'github') &
-                                                (common_users[self.content].str.contains(k)), self.user_col].tolist())
-            reddit_users = set(common_users.loc[(common_users[self.platform] == 'reddit') &
-                                                (common_users[self.content].str.contains(k)), self.user_col].tolist())
-            tr_users = len(twitter_users.intersection(reddit_users))
-            tg_users = len(twitter_users.intersection(github_users))
-            rg_users = len(reddit_users.intersection(github_users))
-            if len(twitter_users.union(github_users)) == 0:
-                tg_total_users = 0
-            else:
-                tg_total_users = tg_users / float(tg_total)
-            if len(twitter_users.union(reddit_users)) == 0:
-                tr_total_users = 0
-            else:
-                tr_total_users = tr_users / float(tr_total)
-            if len(reddit_users.union(github_users)) == 0:
-                rg_total_users = 0
-            else:
-                rg_total_users = rg_users / float(rg_total)
-
-            matrix = [[1.0, tg_total_users, tr_total_users],
-                      [tg_total_users, 1.0, rg_total_users],
-                      [tr_total_users, rg_total_users, 1.0]]
-            keyword_user_matrix[k] = np.array(matrix)
-        # content from only single platform users
-        single_platform_keywords = all_keywords_set.difference(keyword_set)
-        for k in single_platform_keywords:
-            matrix = [[1.0, 0.0, 0.0],
-                      [0.0, 1.0, 0.0],
-                      [0.0, 0.0, 1.0]]
-            keyword_user_matrix[k] = np.array(matrix)
-        if len(self.content_df) == 0:
-            self.content_df = pd.DataFrame(list(keyword_user_matrix.items()),
-                                           columns=[self.content, "overlapping_users"])
+            group_col = [self.platform_col]
+        data.drop_duplicates(subset=group_col)
+        if time_granularity == "S":
+            divide_val = 1.0
+        elif time_granularity == "M":
+            divide_val = 60.0
+        elif time_granularity == "H":
+            divide_val = 3600.0
         else:
-            self.content_df = pd.merge(self.content_df, pd.DataFrame(list(keyword_user_matrix.items()),
-                                                                     columns=[self.content, "overlapping_users"]),
-                                       on=self.content)
-
-    def size_of_shares(self):
-        content_to_size = {}
-        for index, row in self.dataset.iterrows():
-            platform = row[self.platform]
-            keywords = row[self.content]
-            for k in keywords:
-                try:
-                    content_to_size[k][platform] += 1
-                except KeyError:
-                    content_to_size[k] = Counter()
-        ranking_shares = {}
-        for k, v in content_to_size.items():
-            sorted_v = sorted(v.items(), key=lambda kv: kv[1])
-            sorted_keys = [item[0] for item in sorted_v]
-            ranking_shares[k] = sorted_keys
-        if len(self.content_df) == 0:
-            self.content_df = pd.DataFrame(list(ranking_shares.items()), columns=[self.content, "ranking_shares"])
+            divide_val = 86400.0
+        if len(nodes) == 0 and len(communities) == 0:
+            time_delta = []
+            for index, group in data.groupby(group_col[0]):
+                time_delta.append(group[self.timestamp_col])
+            delta = [0]
+            for t in time_delta[1:]:
+                delta.append(pd.Timedelta(t - time_delta[0]).seconds/divide_val)
+            return delta
         else:
-            self.content_df = pd.merge(self.content_df, pd.DataFrame(list(ranking_shares.items()),
-                                                                     columns=[self.content, "ranking_shares"]),
-                                       on=self.content)
+            time_delta = defaultdict(list)
+            for index, group in data.groupby(group_col[0]):
+                time_delta[group[group_col[0]]].append(group[self.timestamp_col])
+            delta = {}
+            for k, v in time_delta.items():
+                delta[k] = [0]
+                for i in v[1:]:
+                    delta[k].append(pd.Timedelta(i - v[0]).seconds / divide_val)
+            return delta
 
-    def temporal_share_correlation(self, time_granularity="D"):
-        content_over_time = {}
-        time_interval = set()
-        for index, row in self.dataset.iterrows():
-            time = row["nodeTime"]
-            if time_granularity == "S":
-                time = time
-            elif time_granularity == "M":
-                time = '{year}-{month:02}-{day}:{hour}:{min}'.format(year=time.year, month=time.month, day=time.day,
-                                                                     hour=time.hour, min=time.minute)
-            elif time_granularity == "H":
-                time = '{year}-{month:02}-{day}:{hour}'.format(year=time.year, month=time.month, day=time.day,
-                                                               hour=time.hour)
-            else:
-                time = '{year}-{month:02}-{day}'.format(year=time.year, month=time.month, day=time.day)
-            time_interval.add(time)
-            platform = row["platform"]
-            keywords = row["content"]
-            for k in keywords:
-                try:
-                    _ = content_over_time[k]
-                except KeyError:
-                    content_over_time[k] = {}
-                time_dict = content_over_time[k]
-                try:
-                    _ = time_dict[time]
-                except KeyError:
-                    time_dict[time] = {}
-                plat_dict = time_dict[time]
-                try:
-                    _ = plat_dict[platform]
-                except KeyError:
-                    plat_dict[platform] = 0
-                plat_dict[platform] += 1
-        content_to_correlation = {}
-        content_to_time_series = defaultdict()
-        sort_time = sorted(time_interval)
-        for k, v in content_over_time.items():
-            content_to_time_series[k] = {"twitter": [], "reddit": [], "github": []}
-            for t in sort_time:
-                try:
-                    plats = v[t]
-                    for p in ["twitter", "reddit", "github"]:
-                        try:
-                            content_to_time_series[k][p].append(plats[p])
-                        except KeyError:
-                            content_to_time_series[k][p].append(0)
-                except KeyError:
-                    content_to_time_series[k]['twitter'].append(0)
-                    content_to_time_series[k]['github'].append(0)
-                    content_to_time_series[k]['reddit'].append(0)
-        for k, v in content_to_time_series.items():
-            tg_corr = pearsonr(np.array(v["twitter"]), np.array(v["github"]))
-            tr_corr = pearsonr(np.array(v["twitter"]), np.array(v["reddit"]))
-            rg_corr = pearsonr(np.array(v["reddit"]), np.array(v["github"]))
-            content_to_correlation[k] = [[1.0, tg_corr[0], tr_corr[0]], [tg_corr[0], 1.0, rg_corr[0]],
-                                         [tr_corr[0], rg_corr[0], 1.0]]
+    def overlapping_users(self, nodes=[], communities=[]):
+        """
+        Calculate the percentage of users common to all platforms (that share in a community/content)
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: If population, a matrix of percentages of common users to any pair of platforms.
+                Else, a dictionary mapping a community/content to a matrix of the percentages of common users that
+                share in that community/content across all pairs of platforms
+        """
 
-        if len(self.content_df) == 0:
-            self.content_df = pd.DataFrame(list(content_to_correlation.items()),
-                                           columns=["content", "temporal_share_correlation"])
-        else:
-            self.content_df = pd.merge(self.content_df, pd.DataFrame(list(content_to_correlation.items()),
-                                                                     columns=["content", "temporal_share_correlation"]),
-                                       on=self.content)
+        data = self.select_data(self.dataset, nodes, communities)
+        platforms = data[self.platform_col].unique()
+        data['values'] = 1
+        data = data.drop_duplicates(subset=[self.user_col, self.platform_col])
+        cols = [self.user_col, self.platform_col, 'values']
+        index_cols = [self.user_col]
+        if len(communities) > 0:
+            cols = [self.user_col, self.platform_col, self.community, 'values']
+            index_cols = [self.user_col, self.community]
+            group_col = self.community
+        if len(nodes) > 0:
+            cols = [self.user_col, self.platform_col, self.content_col, 'values']
+            index_cols = [self.user_col, self.content_col]
+            group_col = self.content_col
 
-    def lifetime_of_spread(self):
-        keywords_to_order = {}
-        for index, row in self.dataset.iterrows():
-            platform = row["platform"]
-            keywords = row["content"]
-            time = row["nodeTime"]
-            for k in keywords:
-                try:
-                    if platform not in keywords_to_order[k].keys():
-                        keywords_to_order[k][platform] = [time]
+        user_platform = data[cols].pivot_table(index=index_cols,
+                                               columns=self.platform_col,
+                                               values='values').fillna(0)
+        user_platform = user_platform.astype(bool)
+
+        def get_meas(grp):
+            meas = np.zeros((len(platforms), len(platforms)))
+            print(grp)
+            for i, p1 in enumerate(platforms):
+                for j, p2 in enumerate(platforms):
+                    if p1 == p2:
+                        x = 1.0
                     else:
-                        keywords_to_order[k][platform].append(time)
-                except KeyError:
-                    keywords_to_order[k] = {platform: [time]}
-        content_to_lifetime = {}
-        for k, v in keywords_to_order.items():
-            lifetime_rank = {}
-            for plat, times in v.items():
-                lifetime_rank[plat] = pd.Timedelta(times[-1] - times[0])
-            sorted_v = sorted(lifetime_rank.items(), key=lambda kv: kv[1])
-            sorted_keys = [item[0] for item in sorted_v]
-            content_to_lifetime[k] = sorted_keys
-        if len(self.content_df) == 0:
-            self.content_df = pd.DataFrame(list(content_to_lifetime.items()), columns=["content", "lifetime"])
+                        x = (grp[p1] & grp[p2]).sum()
+                        total = float(grp[p1].sum())
+                        if total > 0:
+                            x = x / total
+                        else:
+                            x = 0
+                    meas[i][j] = x
+            return meas
+
+        if len(nodes) != 0 or len(communities) != 0:
+            user_platform = user_platform.groupby(group_col)
+            meas = user_platform.apply(get_meas).to_dict()
         else:
-            self.content_df = pd.merge(self.content_df, pd.DataFrame(list(content_to_lifetime.items()),
-                                                                     columns=["content", "lifetime"]),
-                                       on=self.content)
+            meas = get_meas(user_platform)
+        return meas
+
+    def size_of_shares(self, nodes=[], communities=[]):
+        """
+        Determine the number of shares per platform
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: If population, a ranked list of platforms based on total activity
+                Else, a dictionary mapping the community/content to a ranked list of platforms based on activity
+        """
+        data = self.select_data(self.dataset, nodes, communities)
+        if len(nodes) == 0 and len(communities) == 0:
+            plat_counts = data[self.platform_col].value_counts().to_dict()
+            return [item[0] for item in sorted(plat_counts.items(), key=lambda kv: kv[1])]
+        elif len(nodes) > 0:
+            group_col = self.content_col
+        elif len(communities) > 0:
+            group_col = self.community_col
+        plat_counts = {}
+        for index, group in data.groupby(group_col):
+            diction = data[self.platform_col].value_counts().to_dict()
+            plat_counts = {group[group_col]: [item[0] for item in sorted(diction.items(), key=lambda kv: kv[1])]}
+        return plat_counts
+
+    def temporal_share_correlation(self, time_granularity="D", nodes=[], communities=[]):
+        """
+        Calculates the correlation between the activity over time between all pairs of platforms
+                Twitter | Github | Reddit
+        ---------------------------------
+        Twitter | 1.0
+        ---------------------------------
+        Github  |           1.0
+        ---------------------------------
+        Reddit  |                   1.0
+        ---------------------------------
+        :param time_granularity: The scale on which to aggregate activity {S=seconds, M=minutes, H=hours, D=days}
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: If population, a matrix of pearson correlations between platforms.
+                    Else, a dictionary mapping a community/content to the matrix of correlations
+        """
+        data = self.select_data(self.dataset, nodes, communities)
+        platforms = data[self.platform_col].unique()
+        if time_granularity == "D":
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
+        elif time_granularity == "H":
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
+        elif time_granularity == "M":
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month,
+                                                                        day=x.day, hour=x.hour, min=x.minute))
+        time_interval = data[self.timestamp_col].unique()
+        if len(nodes) > 0:
+            group_col = self.content_col
+        if len(communities) > 0:
+            group_col = self.community_col
+        content_over_time = {}
+        if len(nodes) == 0 and len(communities) == 0:  # Population level
+            for index, group in data.groupby(self.timestamp_col):
+                content_over_time[group[self.timestamp_col]] = {}
+                content_over_time[group[self.timestamp_col]] = group[self.platform_col].value_counts().to_dict()
+        if len(nodes) > 0 or len(communities) > 0:
+            for idx, group in data.groupby(group_col):
+                for index, subgroup in group.groupby(self.timestamp_col):
+                    content_over_time[group[group_col]][subgroup[self.timestamp_col]] = subgroup[
+                        self.platform_col].value_counts().to_dict()
+                for t in time_interval:
+                    try:
+                        _ = content_over_time[group[group_col]][t]
+                    except KeyError:
+                        content_over_time[group[group_col]][t] = {plat: 0 for plat in platforms}
+
+        def get_array(diction):
+            arrays = {plat: np.zeros((len(diction.keys()))) for plat in platforms}
+            index = 0
+            for time, plats in diction.items():
+                for p, value in plats.items():
+                    arrays[p][index] = value
+                index += 1
+            return arrays
+
+        if len(nodes) == 0 and len(communities) == 0:
+            all_platforms = get_array(content_over_time)
+            matrix = np.zeros((len(platforms), len(platforms)))
+            for i, p1, t1 in enumerate(all_platforms.items()):
+                for j, p2, t2 in enumerate(all_platforms.items()):
+                    matrix[i][j] = pearsonr(t1,t2)
+            return matrix
+        else:
+            all_platforms = {}
+            for content, diction in content_over_time.items():
+                all_platforms[content] = get_array(diction)
+            content_to_correlation = {}
+            for c, times in all_platforms.items():
+                matrix = np.zeros((len(platforms), len(platforms)))
+                for i, p1, t1 in enumerate(times.items()):
+                    for j, p2, t2 in enumerate(times.items()):
+                        matrix[i][j] = pearsonr(t1, t2)
+                content_to_correlation[c] = matrix
+            return content_to_correlation
+
+    def lifetime_of_spread(self, nodes=[], communities=[]):
+        """
+        Ranks the different platforms based on the lifespan of content/community/population
+        :param nodes: List of specific content
+        :param communities: List of communities
+        :return: If population, returns a list of ranked platforms. Else, returns a dictionary of content/community to
+                a ranked list of platforms
+        """
+
+        data = self.select_data(self.dataset, nodes, communities)
+        platforms = data[self.platform_col].unique()
+        if len(nodes) == 0 and len(communities) == 0:
+            ranks = {plat: 0 for plat in platforms}
+            for index, group in data.sort_values([self.timestamp_col], ascending=True).groupby(self.platform_col):
+                ranks[self.platform_col] = pd.Timedelta(group[self.timestamp_col].iloc[-1] - group[self.timestamp_col].iloc[0])
+            return [item[0] for item in sorted(ranks.items(), key=lambda kv: kv[1])]
+        else:
+            if len(nodes) > 0:
+                group_col = self.content_col
+            elif len(communities) > 0:
+                group_col = self.community_col
+            content_to_rank = {}
+            for index, group in data.sort_values([self.timestamp_col], ascending=True).groupby(group_col):
+                content_to_rank[group[group_col]] = {plat: 0 for plat in platforms}
+                for index2, subgroup in group.groupby(self.platform_col):
+                    content_to_rank[group[group_col]][self.platform_col] = pd.Timedelta(
+                        subgroup[self.timestamp_col].iloc[-1] - subgroup[self.timestamp_col].iloc[0])
+                content_to_rank[group[group_col]] = [item[0] for item in sorted(content_to_rank[group[group_col]].items(),
+                                                                                key=lambda kv: kv[1])]
+            return content_to_rank
