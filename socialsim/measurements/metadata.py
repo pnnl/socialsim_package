@@ -45,19 +45,17 @@ class MetaData:
         Output:
 
         """
-        print('building communities')
-        print(datetime.datetime.now())
+
+        print('Building communities... ', end='')
 
         communities = {}
 
         repo_communities = ['language']
 
-        user_communities = ['country'] #, 'company']
+        user_communities = ['country', 'company']
 
 
         for community_type in repo_communities:
-            print(community_type)
-            print(len(content_data[community_type].unique()))
             communities.update({community_type:{}})
 
             a = content_data[community_type].unique()
@@ -69,8 +67,6 @@ class MetaData:
                 communities[community_type].update({community:community_list})
 
         for community_type in user_communities:
-            print(community_type)
-            print(len(user_data[community_type].unique()))
             communities.update({community_type:{}})
 
             a = user_data[community_type].unique()
@@ -81,15 +77,11 @@ class MetaData:
                 community_list = subset['user'].tolist()
                 communities[community_type].update({community:community_list})
 
-        print(datetime.datetime.now())
-        print('done building')
+        print('Done.')
 
         return communities
 
     def preprocessContentMeta(self, dataset):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
         dataset.columns = ['content', 'created_at', 'owner_id', 'language']
         dataset['created_at'] = pd.to_datetime(dataset['created_at'])
         return dataset
