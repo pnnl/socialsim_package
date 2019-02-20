@@ -55,14 +55,14 @@ class MeasurementsBaseClass:
                 if verbose:
                     message = 'SOCIALSIM MEASUREMENTS | Running '
                     message = message+self.measurement_type+' '+scale+' '+name
-                    message = message+'...'
+                    message = message+'... '
                     print(message, end='', flush=True)
 
                 result, log = self._evaluate_measurement(
                     self.configuration[scale][name], timing, verbose)
 
                 if verbose:
-                    print(' Done.', flush=True)
+                    print('Done.', flush=True)
 
                 if save:
                     filepath = save_directory+self.measurement_type
@@ -111,7 +111,10 @@ class MeasurementsBaseClass:
             log.update({'error'  : error})
 
             if verbose:
-                print(error)
+                print('')
+                print('-'*80)
+                trace = traceback.format_exc()
+                print(trace)
 
             return result, log
 
@@ -130,7 +133,10 @@ class MeasurementsBaseClass:
             log.update({'error'  : error})
 
             if verbose:
-                print(error)
+                print('')
+                print('-'*80)
+                trace = traceback.format_exc()
+                print(trace)
 
         if timing:
             delta_time = self.record_keeper.toc(1)
