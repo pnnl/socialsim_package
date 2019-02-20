@@ -17,7 +17,7 @@ from .load   import load_measurements
 from .record import RecordKeeper
 
 class TaskRunner:
-    def __init__(self, ground_truth, metadata, configuration, test=False):
+    def __init__(self, ground_truth, configuration, metadata=None test=False):
         """
         Description: Initializes the TaskRunner object. Stores the metadata and
             ground_truth objects and defines all measurements and metrics
@@ -121,7 +121,11 @@ def run_measurements(dataset, configuration, timing, verbose, save,
             message = message + platform+' data... '
             print(message, end='', flush=True)
 
-        dataset_subset = dataset[dataset['platform']==platform]
+
+        if platform=='cross_platform':
+            dataset_subset = dataset
+        else:
+            dataset_subset = dataset[dataset['platform']==platform]
 
         if test:
             dataset_subset = dataset_subset.head(n=1000)
@@ -146,7 +150,7 @@ def run_measurements(dataset, configuration, timing, verbose, save,
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]
 
-            metadata=None
+            metadata = self.metadata
 
             try:
                 # Instantiate measurement object
@@ -154,8 +158,13 @@ def run_measurements(dataset, configuration, timing, verbose, save,
                     message = 'SOCIALSIM TASKRUNNER   | Instantiating '
                     message = message+measurement_type+'... '
                     print(message, end='', flush=True)
-                    
-                measurement = Measurement(dataset_subset, configuration_subset, metadata, platform)
+
+                if platform=='cross_platform':
+                    measurement = Measurement(dataset_subset,
+                        configuration_subset, metadata)
+                else:
+                    measurement = Measurement(dataset_subset,
+                        configuration_subset, metadata, platform)
 
                 if verbose:
                     print('Done.')
