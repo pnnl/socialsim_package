@@ -10,6 +10,15 @@ dataset  = ss.load_data('/data/socialsim/december_2018/processed_challenge/groun
 with open('december_2018/configs/new/1_github_crypto_config.json') as f:
     configuration = json.load(f)
 
+configuration = configuration['github']['infospread']
+
 measurement = ss.InfospreadMeasurements(dataset, configuration, metadata, 'github')
+
+results, logs = measurement.run(timing=True, verbose=True, save=True, 
+    save_directory='./output/', save_format='pickle')
+
+for s in results.keys():
+    for m in results[s].keys():
+        print(type(results[s][m]))
 
 print('done.')
