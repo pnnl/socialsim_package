@@ -26,11 +26,15 @@ Questions for Emily:
             - If average, should they be normalized 
     2. Should community correlations be returning a dictionary of community to matrix of correlations? Or one matrix
         for all communities?
+        
+Changes to make:
+    1. Create community copy if given a list of communities. 
+        To be built from the metadata (a dictionary: community to a list of nodes in that community)
 """
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, communities=None, platform_col="platform", timestamp_col="nodeTime",
+    def __init__(self, dataset, configuration, meatadata=None, communities=None, platform_col="platform", timestamp_col="nodeTime",
                  user_col="nodeUserID", content_col="content", community_col="community", audience_col="audience",
                  log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
         """
@@ -305,12 +309,17 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         Determine the speed at which the information is spreading
         :param nodes: List of nodes
         :param communities: List of communities
-        :return: If population, a ranked list of the platforms that typically spread information the fastest. Ranks
+        :return: If population, a list of distributions of information speeds on each platform. Ordered alphabetically
+                    for consistency.
+                If community, a dictionary mapping each community to a list of distributions of information speeds on
+                    each platform. Ordered alphabetically for consistency.
+        a ranked list of the platforms that typically spread information the fastest. Ranks
                     are determined by the average speed of each piece of content found on that platform.
                 If community, a dictionary mapping each community to a ranked list of the platfroms that spread the
                     information found in the community the fastest.
                 Else, a dictionary mapping each content to the ranked list of platforms on which it spreads the fastest
         """
+        #print(data.groupby("community").apply(lambda x: x.groupby("platform").apply(lambda y: y.groupby("content").apply(check_zero_speed).tolist()).tolist()).to_dict())
 
         if len(nodes) == 0:
             nodes = self.node_list
@@ -329,6 +338,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         def audience_over_time(grp, indx, col):
             aud = grp.groupby(col).apply(check_zero_speed).to_dict()
             return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
+
+        def speed_distribution(grp):
+            aud = grp.groupby(self.platform_col).apply(lambda x: x.groupby(self.content_col).apply(check_zero_speed).tolist()).tolist()
+            return aud
 
         def average_audience_speed(grp):
             aud = grp.groupby(self.platform_col).apply(audience_over_time, indx=1, col=self.content_col).to_dict()
