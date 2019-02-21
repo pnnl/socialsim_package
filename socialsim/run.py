@@ -17,7 +17,7 @@ from .load   import load_measurements
 from .record import RecordKeeper
 
 class TaskRunner:
-    def __init__(self, ground_truth, configuration, metadata=None test=False):
+    def __init__(self, ground_truth, configuration, metadata=None, test=False):
         """
         Description: Initializes the TaskRunner object. Stores the metadata and
             ground_truth objects and defines all measurements and metrics
@@ -38,10 +38,14 @@ class TaskRunner:
         self.test          = test
 
         if ground_truth is str:
-            self.ground_truth_results, self.ground_truth_logs = _load_measurements(ground_truth)
+            temp = _load_measurements(ground_truth)
+            self.ground_truth_results, self.ground_truth_logs = temp
         else:
-            self.ground_truth_results, self.ground_truth_logs = run_measurements(ground_truth,
-                configuration, timing=False, verbose=True, save=False, save_directory='./', save_format='json', test=test)
+            temp = run_measurements(ground_truth, configuration, metadata, 
+                timing=False, verbose=True, save=False, save_directory='./', 
+                save_format='json', test=test)
+            
+            self.ground_truth_results, self.ground_truth_logs = temp
 
 
     def __call__(self, dataset, measurements_subset=None, run_metrics=True):
@@ -75,15 +79,16 @@ class TaskRunner:
         configuration = self.configuration
 
         simulation_results, simulation_logs = run_measurements(dataset,
-            configuration, timing, verbose, save, save_directory, save_format,
-            self.test)
+            configuration, self.metadata, timing, verbose, save, 
+            save_directory, save_format, self.test)
 
         # Get the ground truth measurement results
         ground_truth_results = self.ground_truth_results
         ground_truth_logs    = self.ground_truth_logs
 
         # Run metrics to compare simulation and ground truth results
-        metrics, metrics_logs = run_metrics(simulation_results, ground_truth_results, configuration)
+        metrics, metrics_logs = run_metrics(simulation_results, 
+            ground_truth_results, configuration, verbose)
 
         # Log results at the task level
         results = [simulation_results, ground_truth_results, metrics]
@@ -91,7 +96,7 @@ class TaskRunner:
 
         return results, logs
 
-def run_measurements(dataset, configuration, timing, verbose, save,
+def run_measurements(dataset, configuration, metadata, timing, verbose, save,
     save_directory, save_format, test):
     """
     Description: Takes in a dataset and a configuration file and runs the
@@ -150,8 +155,6 @@ def run_measurements(dataset, configuration, timing, verbose, save,
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]
 
-            metadata = self.metadata
-
             try:
                 # Instantiate measurement object
                 if verbose:
@@ -208,7 +211,7 @@ def run_measurements(dataset, configuration, timing, verbose, save,
 
     return results, logs
 
-def run_metrics(simulation, ground_truth, configuration):
+def run_metrics(simulation, ground_truth, configuration, verbose):
     """
     Description: Takes in simulation and ground truth measurement results and a
         configuration file and runs all the specified metrics on the
@@ -228,6 +231,6 @@ def run_metrics(simulation, ground_truth, configuration):
 
     metrics_object = Metrics(simulation, ground_truth, configuration)
 
-    results, logs = metrics_object.run()
+    results, logs = metrics_object.run(verbose=verbose)
 
     return results, logs

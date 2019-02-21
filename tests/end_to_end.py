@@ -10,10 +10,13 @@ simulation   = ss.load_data(dataset_directory, verbose=False)
 with open(configuration_file) as f:
     configuration = json.load(f)
 
-task_runner = ss.TaskRunner(ground_truth, None, configuration, test=True)
+task_runner = ss.TaskRunner(ground_truth, configuration, test=True)
 
 print('|'*100)
 print('|'*100)
 print('|'*100)
 
 results, logs = task_runner.run(simulation, verbose=True)
+
+
+print(results)
