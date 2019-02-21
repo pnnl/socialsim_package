@@ -5,6 +5,21 @@ import csv
 import os
 import sys
 
+def load_measurements(filepath):
+    """
+    Description:
+
+    Input:
+        :filepath:
+
+    Output:
+        :measurements:
+    """
+
+    measurements = None
+
+    return measurements
+
 def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True, short=False):
     """
     Description:
@@ -113,16 +128,9 @@ def convert_datetime(dataset, verbose):
 
     return dataset
 
-def load_measurements(directory):
-
-
-    return measurements
-
 
 def _count_number_of_lines(filepath):
     count = -1
-    for line in open(filepath):
+    for _ in open(filepath):
         count += 1
-    return count
-
     return count
