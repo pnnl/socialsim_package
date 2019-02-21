@@ -417,7 +417,7 @@ class Metrics:
         Dynamic Time Warping implemenation
         """
 
-        df = join_dfs(ground_truth,simulation,join='outer',fill_value=0.0)
+        df = self.join_dfs(ground_truth,simulation,join='outer',fill_value=0.0)
 
         try:
             ground_truth = df['value_gt'].values
@@ -511,37 +511,6 @@ class Metrics:
             return None
 
 
-    def rbo_for_te(self, ground_truth,simulation,idx,wt,ct):
-
-        ground_truth = ground_truth[idx]
-
-        if len(simulation) == 0:
-            return 0.0
-
-        simulation = simulation[idx]
-
-        metric = 0.0
-        count = 0
-
-        for grp in ground_truth.keys():
-
-
-            ent_gt = ['-'.join(list(tups[0])) if len(tups[0]) == 2 else tups[0] for tups in ground_truth[grp]]
-            if (len(ent_gt) < ct):
-                continue
-
-            ent_sm = []
-            if (grp in simulation):
-                count += 1
-                ent_sm = ['-'.join(list(tups[0])) if len(tups[0]) == 2 else tups[0] for tups in simulation[grp]]
-                metric += rbo_score(ent_gt,ent_sm,wt)
-
-        if (count > 0):
-            metric = metric/float(count)
-
-        return metric
-
-
     def rbo_score(self, ground_truth, simulation, p=0.95):
         """
         Rank biased overlap (RBO) implementation
@@ -624,7 +593,7 @@ class Metrics:
     	    simulation = np.nan_to_num(simulation)
     	    return np.sqrt(((np.asarray(ground_truth) - np.asarray(simulation)) ** 2).mean())
 
-        df = join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
+        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
 
         if len(df.index) > 0:
             if not relative:
@@ -671,7 +640,7 @@ class Metrics:
         ground_truth = ground_truth[np.isfinite(ground_truth.value)]
         simulation = simulation[np.isfinite(simulation.value)]
 
-        df = join_dfs(ground_truth,simulation,join=join,fill_value=fill_value).fillna(0)
+        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value).fillna(0)
 
         if df.empty or len(df.index) <= 1:
             return None
@@ -692,7 +661,7 @@ class Metrics:
         fill_value - fill value for non-overlapping joins
         """
 
-        df = join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
+        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
 
         if len(df.index) > 0:
             return pearsonr(df["value_gt"],df["value_sim"])
