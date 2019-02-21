@@ -26,6 +26,7 @@ data = load_data()
 
 data = data[data['content'].str.len() > 0]
 data = data.sample(frac=0.01, random_state=27)
+print(len(data))
 nodes = ['CVE-2016-2216', 'CVE-2016-7099', 'CVE-2016-2216',
          'CVE-2016-1019', 'CVE-2014-9390', 'CVE-2017-7533', 'CVE-2017-5638']
 commA = ['CVE-2016-2216', 'CVE-2016-7099', 'CVE-2016-2216']
