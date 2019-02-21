@@ -10,6 +10,8 @@ import fastdtw as fdtw
 import pandas  as pd
 import numpy   as np
 
+import traceback
+
 """
 Metrics list:
 
@@ -50,10 +52,16 @@ class Metrics:
 
         pass
 
-    def run(self, measurement_subset=None, timing=False):
+    def run(self, measurement_subset=None, timing=False, verbose=False):
         """
         Description: This runs all measurement outputs through the metrics
             specified in the configuration json.
+
+            Note to reader:
+                p for platform
+                t for measurement type
+                s for scale 
+                m for measurement
 
         Input:
             :measurement_subset: (list) The measurements to run metrics on. If
@@ -68,71 +76,73 @@ class Metrics:
         results = {}
         logs    = {}
 
-        for platform in self.configuration.keys():
-            platform_ground_truth  = self.ground_truth[platform]
-            platform_simulation    = self.simulation[platform]
-            platform_configuration = self.configuration[platform]
+        for p in self.configuration.keys():
+            p_ground_truth  = self.ground_truth[p]
+            p_simulation    = self.simulation[p]
+            p_configuration = self.configuration[p]
 
-            platform_results = {}
-            platform_logs    = {}
+            p_results = {}
+            p_logs    = {}
 
-            for measurement_type in platform_configuration:
-                measurement_type_ground_truth  = platform_ground_truth[measurement_type]
-                measurement_type_simulation    = platform_simulation[measurement_type]
-                measurement_type_configuration = platform_configuration[measurement_type]
+            for t in p_configuration:
+                t_ground_truth  = p_ground_truth[t]
+                t_simulation    = p_simulation[t]
+                t_configuration = p_configuration[t]
 
-                measurement_type_results = {}
-                measurement_type_logs    = {}
+                t_results = {}
+                t_logs    = {}
 
-                for scale in measurement_type_configuration.keys():
+                for s in t_configuration.keys():
                     
-                    if type(measurement_type_ground_truth) is str:
-                        scale_ground_truth = measurement_type_ground_truth
+                    if type(t_ground_truth) is str:
+                        s_ground_truth = t_ground_truth
                     else:
-                        scale_ground_truth = measurement_type_ground_truth[scale]
+                        s_ground_truth = t_ground_truth[s]
 
-                    if type(measurement_type_simulation) is str:
-                        scale_simulation = measurement_type_simulation
+                    if type(t_simulation) is str:
+                        s_simulation = t_simulation
                     else:
-                        scale_simulation = measurement_type_simulation[scale]
+                        s_simulation = t_simulation[s]
 
-                    scale_configuration = measurement_type_configuration[scale]
+                    s_configuration = t_configuration[s]
 
-                    scale_results = {}
-                    scale_logs    = {}
+                    s_results = {}
+                    s_logs    = {}
 
-                    for measurement in scale_configuration.keys():
+                    for m in s_configuration.keys():
 
-                        if type(scale_ground_truth) is str:
-                            ground_truth = scale_ground_truth
+                        if type(s_ground_truth) is str:
+                            ground_truth = s_ground_truth
                         else:
-                            ground_truth = scale_ground_truth[measurement]
+                            ground_truth = s_ground_truth[m]
 
-                        if type(scale_simulation) is str:
-                            simulation = scale_simulation
+                        if type(s_simulation) is str:
+                            simulation = s_simulation
                         else:
-                            simulation = scale_simulation[measurement]
+                            simulation = s_simulation[m]
 
-                        configuration = scale_configuration[measurement]
+                        configuration = s_configuration[m]
 
-                        result, log = self._evaluate_metrics(ground_truth, simulation, configuration, timing)
+                        result, log = self._evaluate_metrics(ground_truth, 
+                                simulation, configuration, timing, verbose)
 
-                        scale_results.update({measurement:result})
-                        scale_logs.update({measurement:log})
+                        s_results.update({m:result})
+                        s_logs.update({m:log})
 
-                    measurement_type_results.update({scale:scale_results})
-                    measurement_type_logs.update({scale:scale_logs})
+                    t_results.update({s:s_results})
+                    t_logs.update({s:s_logs})
 
-                platform_results.update({measurement_type:measurement_type_results})
-                platform_logs.update({measurement_type:measurement_type_logs})
+                p_results.update({t:t_results})
+                p_logs.update({t:t_logs})
 
-            results.update({platform:platform_results})
-            logs.update({platform:platform_logs})
+            results.update({p:p_results})
+            logs.update({p:p_logs})
 
         return results, logs
 
 
-    def _evaluate_metrics(self, ground_truth, simulation, configuration, timing):
+    def _evaluate_metrics(self, ground_truth, simulation, configuration, 
+        timing, verbose):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -160,9 +170,14 @@ class Metrics:
 
         # Loop over metrics
         for metric in configuration['metrics'].keys():
-
             # Get metric name and arguments
             metric_name = configuration['metrics'][metric]['metric']
+
+            if verbose:
+                message = 'SOCIALSIM METRICS   | Running '
+                message = message + metric_name
+                message = message + '... '
+                print(message, end='', flush=True)
 
             if 'metric_args' in configuration.keys():
                 metric_args = configuration['metrics'][metric]['metric_args']
@@ -176,15 +191,30 @@ class Metrics:
                 log.update({'status' : 'failure'})
                 log.update({'error'  : error})
 
+                if verbose:
+                    print('')
+                    print('-'*80)
+                    trace = traceback.format_exc()
+                    print(trace)
+
                 return result, log
 
             try:
-                result = metric_function(**metric_args)
+                result = metric_function(ground_truth, simulation, **metric_args)
             except Exception as error:
                 result = metric_name+' failed to run.'
 
+                if verbose:
+                    print('')
+                    print('-'*80)
+                    trace = traceback.format_exc()
+                    print(trace)
+
             if timing:
                 pass
+
+            if verbose:
+                print('Done.', flush=True)
 
         return result, log
 
@@ -198,7 +228,8 @@ class Metrics:
             :ground_truth: (unknown) Output of measurements code.
             :simulation: (unknown) Output of measurements code.
         Outputs:
-            :ground_truth: (np.array) Standardized ground truth measurements data.
+            :ground_truth: (np.array) Standardized ground truth measurements 
+                data.
             :simulation: (np.array) Standardized simulation measurements data.
         """
 
@@ -219,9 +250,10 @@ class Metrics:
         use consistent bins for distributional comparisons
 
         Inputs:
-        ground_truth: Ground truth measurement
-        simulation: Simulation measurement
-        method: Method of bin calculation corresponding the np.histogram bin argument
+            ground_truth: Ground truth measurement
+            simulation: Simulation measurement
+            method: Method of bin calculation corresponding the np.histogram bin 
+                argument
 
         Outputs:
             :bins: ()

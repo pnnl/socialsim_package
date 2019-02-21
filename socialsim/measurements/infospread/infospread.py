@@ -1,14 +1,14 @@
 import pandas as pd
 import pickle as pkl
+import numpy  as np
 
 from ..measurements import MeasurementsBaseClass
 from ..validators   import check_empty
 from ..validators   import check_root_only
 
 class InfospreadMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata, platform, content_node_ids=[],
-        user_node_ids=[], metaContentData=False, metaUserData=False,
-        community_dictionary=''):
+    def __init__(self, dataset, configuration, metadata, platform,
+        content_node_ids=[], user_node_ids=[]):
         """
         Description:
 
@@ -22,16 +22,33 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         """
         super().__init__(dataset, configuration)
 
-        self.platform = platform
+        self.measurement_type = 'infospread'
+        self.platform         = platform
+
 
         # What are these used for?
-        self.contribution_events = ['PullRequestEvent', 'PushEvent',
-            'IssuesEvent', 'IssueCommentEvent', 'PullRequestReviewCommentEvent',
-            'CommitCommentEvent', 'CreateEvent', 'post', 'tweet']
+        self.contribution_events = [
+            'PullRequestEvent',
+            'PushEvent',
+            'IssuesEvent',
+            'IssueCommentEvent',
+            'PullRequestReviewCommentEvent',
+            'CommitCommentEvent',
+            'CreateEvent',
+            'post',
+            'tweet'
+            ]
 
         # What are these used for?
-        self.popularity_events = ['WatchEvent', 'ForkEvent', 'comment', 'post',
-            'retweet', 'quote', 'reply']
+        self.popularity_events = [
+            'WatchEvent',
+            'ForkEvent',
+            'comment',
+            'post',
+            'retweet',
+            'quote',
+            'reply'
+            ]
 
         self.main_df = self.preprocess(dataset)
 
@@ -43,42 +60,40 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             self.main_df_opt = None
 
         # For content centric
-        if content_node_ids != ['all']:
-            if self.platform == 'reddit':
-                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
-            elif self.platform == 'twitter':
-                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
-            else:
-                self.selectedContent = self.main_df[self.main_df.content.isin(content_node_ids)]
-        else:
+        if content_node_ids=='all':
             self.selectedContent = self.main_df
+        else:
+            if self.platform in ['reddit', 'twitter']:
+                self.selectedContent = self.main_df[self.main_df.root.isin(content_node_ids)]
+            elif self.platform=='github':
+                self.selectedContent = self.main_df[self.main_df.content.isin(content_node_ids)]
 
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metaContentData!=False:
+        if metadata.use_content_data:
             self.useContentMetaData = True
-            meta_content_data = pd.read_csv(metaContentData)
-            self.contentMetaData = self.preprocessContentMeta(meta_content_data)
-        else:
-            self.useContentMetaData = False
-        if metaUserData != False:
+            self.contentMetaData    = metadata.content_data
+
+        if metadata.use_user_data:
             self.useUserMetaData = True
-            self.userMetaData = self.preprocessUserMeta(pd.read_csv(metaUserData))
-        else:
-            self.useUserMetaData = False
+            self.UserMetaData    = metadata.user_data
 
         # For community measurements
-        self.community_dict_file = community_dictionary
-        if self.platform == 'github':
-            self.communityDF = self.getCommmunityDF(community_col='community')
-        elif self.platform == 'reddit':
-            self.communityDF = self.getCommmunityDF(community_col='subreddit')
-        else:
-            self.communityDF = self.getCommmunityDF(community_col='')
+        # Load and preprocess metadata
+        if self.useUserMetaData and self.useContentMetaData:
+            self.comDic = metadata.build_communities(self.contentMetaData,
+                self.UserMetaData)
+
+        if self.platform=='github':
+            self.communityDF = self.getCommmunityDF('community')
+        elif self.platform=='reddit':
+            self.communityDF = self.getCommmunityDF('subreddit')
+        elif self.platform=='twitter':
+            self.communityDF = self.getCommmunityDF('')
 
 
-    def preprocess(self, df):
+    def preprocess(self, dataset):
         """
         Description:
 
@@ -87,7 +102,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         Output:
         Edit columns, convert date, sort by date
         """
-
+        events  = self.popularity_events+self.contribution_events
         mapping = {'actionType'   : 'event',
                    'nodeID'       : 'content',
                    'nodeTime'     : 'time',
@@ -105,109 +120,29 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             mapping.update({'actionSubType' : 'action',
                             'status'        : 'merged'})
 
-        df = df.rename(index=str, columns=mapping)
+        dataset = dataset.rename(index=str, columns=mapping)
+        dataset = dataset[dataset.event.isin(events)]
+        dataset = dataset.sort_values(by='time')
+        dataset = dataset.assign(time=dataset.time.dt.floor('h'))
 
-        df = df[df.event.isin(self.popularity_events + self.contribution_events)]
-
-        df = df.sort_values(by='time')              # These two steps should get moved into the data loading process.
-        df = df.assign(time=df.time.dt.floor('h'))
-
-        return df
+        return dataset
 
 
-    def preprocessContentMeta(self, df):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        try:
-            df.columns = ['content', 'created_at', 'owner_id', 'language']
-        except:
-            df.columns = ['created_at', 'owner_id', 'content']
-
-        df['created_at'] = pd.to_datetime(df['created_at'])
-
-        df = df[df.content.isin(self.main_df.content.values)]
-
-        return df
+    def readPickleFile(self, filepath):
+        with open(filepath, 'rb') as f:
+            pickle_object = pkl.load(f)
+        return pickle_object
 
 
-    def preprocessUserMeta(self, df):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        try:
-            df.columns = ['user', 'created_at', 'location', 'company']
-        except:
-            df.columns = ['user', 'created_at', 'city', 'country', 'company']
-
-        df['created_at'] = pd.to_datetime(df['created_at'])
-
-        df = df[df.user.isin(self.main_df.user.values)]
-
-        return df
-
-
-    def readPickleFile(self, ipFile):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        with open(ipFile, 'rb') as handle:
-            obj = pkl.load(handle)
-
-        return obj
-
-
-    def loadMetaData(self):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        """
-        This method splits the user meta data into location and creation date data frames
-        """
-        if self.useUserMetaData:
-            self.created_at_df = self.userMetaData[['user','created_at']]
-            try:
-                self.locations_df = self.userMetaData[['user','city','country']]
-            except:
-                self.locations_df = self.userMetaData[['user','location']]
-
-
-    def loadCommunities(self, path, content_field='content'):
-        """
-        TODO: MOVE TO LOAD METADATA
-        """
-
-        """
-        This method loads the community dictionary from the specified pickle file.
-        The pickle file should contain a dictionary of the format
-        {"type_of_community1":{"community1":[repo1,repo2,...], "community2":[repo3,repo4,...]},
-         "type_of_community2":...}
-         Inputs: path - file path of pickle file
-        """
-        if path != '':
-            with open(path, 'rb') as handle:
-                self.comDic = pkl.load(handle)
-                for key in self.comDic.keys():
-                    print(self.comDic[key].keys())
-        else:
-            self.comDic = {"topic":{"all":self.main_df[content_field].unique()}}
-
-
-    def getCommmunityDF(self, community_col='subreddit'):
+    def getCommmunityDF(self, community_col):
         if community_col in self.main_df.columns:
             return self.main_df.copy()
-        elif community_col != '':
-            self.loadMetaData()
-            self.loadCommunities(self.community_dict_file)
 
+        elif community_col!='':
             dfs = []
 
-            content_community_types = ['topic',"language"]
-            user_community_types    = ['city','country','company',"locations"]
+            content_community_types = ['topic','language']
+            user_community_types    = ['city','country','company','locations']
 
             #content-focused communities
             for community in content_community_types:
@@ -228,26 +163,27 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             return pd.concat(dfs)
 
 
-    def getCommunityMeasurementDict(self,df):
-        meas = {}
-        if isinstance(df,pd.DataFrame):
-            for community in df.community.unique():
-                meas[community] = df[df.community == community]
-                del meas[community]["community"]
-        elif isinstance(df,pd.Series):
+    def getCommunityMeasurementDict(self, dataset):
+        measurements = {}
+        if isinstance(dataset, pd.DataFrame):
+            for community in dataset.community.unique():
+                measurements[community]=dataset[dataset.community==community]
+                del measurements[community]["community"]
+        elif isinstance(dataset, pd.Series):
             series_output = False
-            for community in df.index:
-                meas[community] = df[community]
+            for community in dataset.index:
+                measurements[community] = dataset[community]
                 try:
-                    len(df[community])
+                    len(dataset[community])
                     series_output = True
                 except:
-                    ''
-            if series_output:
-                for community in meas:
-                    meas[community] = pd.Series(meas[community])
+                    pass
 
-        return meas
+            if series_output:
+                for community in measurements:
+                    measurements[community] = pd.Series(measurements[community])
+
+        return measurements
 
 
     def getProportion(self, eventTypes=None, community_field="subreddit"):
@@ -734,7 +670,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurements
 
 
-    def getContributions(self, new_users_flag=False,cumulative=False,eventTypes=None,time_bin='H',content_field="root"):
+    def getContributions(self, new_users_flag=False, cumulative=False, eventTypes=None, time_bin='H', content_field="root"):
         """
         Calculates the total number of unique daily contributers to a repo or the unique daily contributors who are new contributors
         Question # 4
@@ -957,7 +893,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return p.head(k)
 
 
-    def getDistributionOfEventsByContent(self,content_field='root',eventTypes=['WatchEvent']):
+    def getDistributionOfEventsByContent(self, content_field='root', eventTypes=['WatchEvent']):
         """
         This method returns the distribution of event type per content e.g. x repos/posts/tweets with y number of events,
         z repos/posts/ with n amounts of events.
@@ -1040,8 +976,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurement
 
 
-    def getEventTypeRatioTimeline(self,eventTypes=None,event1='IssuesEvent',event2='PushEvent',content_field="root"):
-        if self.platform != 'reddit':
+    def getEventTypeRatioTimeline(self, eventTypes=None, event1='IssuesEvent', event2='PushEvent', content_field="root"):
+        if self.platform!='reddit':
             df = self.selectedContent.copy()
         else:
             df = self.main_df.copy()
@@ -1054,7 +990,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         if len(df.index) < 1:
             return {}
 
-        grouped = df.groupby([content_field,'user'])
+        grouped = df.groupby([content_field, 'user'])
+
         if len(grouped) > 1:
             measurement = grouped.apply(lambda x: x.value.cumsum()).reset_index()
             measurement['event'] = df['event'].reset_index(drop=True)
@@ -1063,22 +1000,16 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             measurement['value'] = df['value'].cumsum()
             measurement['event'] = df['event']
 
-        if self.previous_event_counts is not None:
-            measurement = measurement.merge(self.previous_event_counts,on=['user',content_field],how='left').fillna(0)
-            measurement['value'] = measurement['value'] + measurement['count']
-
         measurement = measurement[measurement['event'].isin([event1,event2])]
 
         measurement[event1] = measurement['event'] == event1
         measurement[event2] = measurement['event'] == event2
-
 
         measurement['next_event_' + event1] = measurement[event1].shift(-1)
         measurement['next_event_' + event2 ] = measurement[event2].shift(-1)
 
         bins = np.logspace(-1,3.0,16)
         measurement['num_events_binned'] = pd.cut(measurement['value'],bins).apply(lambda x: np.floor(x.right)).astype(float)
-
 
         def ratio(grp):
             if float(grp['next_event_' + event2].sum()) > 0:
@@ -1094,7 +1025,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         measurement = self.getNodeDictionary(measurement)
 
-        return(measurement)
+        return measurement
 
 
     def propUserContinue(self,eventTypes=None,content_field="root"):
@@ -1126,11 +1057,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             #boolean indicator of whether a given event is the last one by the user
             measurement['last_event'] = measurement['value'] == measurement['num_events']
 
-            #add event counts from before the start of the test period
-            if self.previous_event_counts is not None:
-                measurement = measurement.merge(self.previous_event_counts,on=['user',content_field],how='left').fillna(0)
-                measurement['value'] = measurement['value'] + measurement['count']
-
             #bin by the number of previous events
             bins = np.logspace(-1,2.5,30)
             measurement['num_actions'] = pd.cut(measurement['value'],bins).apply(lambda x: np.floor(x.right)).astype(float)
@@ -1147,7 +1073,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return measurement
 
 
-    def determineDf(self,users,eventTypes):
+    def determineDf(self, users, eventTypes):
         """
         This function selects a subset of the full data set for a selected set of users and event types.
         Inputs: users - A boolean or a list of users.  If it is list of user ids (login_h) the data frame is subset on only this list of users.
@@ -1156,21 +1082,20 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         Output: A data frame with only the selected users and event types.
         """
-        if users == True:
-            #self.selectedUsers is a data frame containing only the users in interested_users
+        if users==True:
             df = self.selectedUsers
-        elif users != False:
+        elif type(users) is list:
             df = df[df.user.isin(users)]
         else:
             df = self.main_df
 
-        if eventTypes != None:
+        if eventTypes!=None:
             df = df[df.event.isin(eventTypes)]
 
         return df
 
 
-    def getUserUniqueContent(self,selectedUsers=False,eventTypes=None,content_field="root"):
+    def getUserUniqueContent(self, selectedUsers=False, eventTypes=None, content_field="root"):
         """
         This method returns the number of unique repos that a particular set of users contributed too
         Question #17
@@ -1179,7 +1104,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
                 content_field - CSV column which contains the content ID (e.g. nodeID, parentID, or rootID)
         Output: A dataframe with the user id and the number of repos contributed to
         """
-        df = self.determineDf(selectedUsers,eventTypes)
+        df = self.determineDf(selectedUsers, eventTypes)
         df = df.groupby('user')
         data = df[content_field].nunique().reset_index()
         data.columns = ['user','value']
