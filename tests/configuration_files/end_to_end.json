@@ -465,7 +465,7 @@
           },
           "metrics": {
             "rbo": {
-              "metric": "rbo",
+              "metric": "rbo_score",
               "metric_args": {
                 "p": 0.95
               }
@@ -486,7 +486,7 @@
           },
           "metrics": {
             "rbo": {
-              "metric": "rbo",
+              "metric": "rbo_score",
               "metric_args": {
                 "p": 0.95
               }
@@ -755,7 +755,7 @@
           },
           "metrics": {
             "rbo": {
-              "metric": "rbo",
+              "metric": "rbo_score",
               "metric_args": {
                 "p": 0.95
               }
@@ -818,7 +818,7 @@
           },
           "metrics": {
             "rbo": {
-              "metric": "rbo",
+              "metric": "rbo_score",
               "metric_args": {
                 "p": 0.95
               }
@@ -1917,7 +1917,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -1955,7 +1955,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -1967,7 +1967,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -1979,7 +1979,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2021,7 +2021,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2091,7 +2091,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2105,7 +2105,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2141,7 +2141,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2153,7 +2153,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2195,7 +2195,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2265,7 +2265,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2303,7 +2303,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2315,7 +2315,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2327,7 +2327,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }
@@ -2369,7 +2369,7 @@
                   "temporal_vs_batch": "Batch",
                   "metrics": {
                       "rbo": {
-                          "metric": "rbo",
+                          "metric": "rbo_score",
                           "metric_args": {}
                       }
                   }

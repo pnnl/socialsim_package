@@ -16,7 +16,7 @@ print('|'*100)
 print('|'*100)
 print('|'*100)
 
-results, logs = task_runner.run(simulation, verbose=True)
+results, logs = task_runner(simulation, verbose=True)
 
 
-print(results)
+#print(results[0])
