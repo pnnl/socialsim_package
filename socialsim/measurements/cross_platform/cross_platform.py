@@ -34,9 +34,12 @@ Changes to make:
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, meatadata=None, communities=None, platform_col="platform", timestamp_col="nodeTime",
-                 user_col="nodeUserID", content_col="content", community_col="community", audience_col="audience",
-                 log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset, configuration, meatadata=None, communities=None, 
+        platform_col="platform", timestamp_col="nodeTime", 
+        user_col="nodeUserID", content_col="informationID", 
+        community_col="community", audience_col="audience",
+        log_file='cross_platform_measurements_log.txt', node_list=None, 
+        community_list=None):
         """
 
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
@@ -49,7 +52,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param audience_col: name of the column containing the audience amount each content piece has reached
         :param log_file:
         """
-        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
+            log_file=log_file)
+
         self.dataset            = dataset
         self.community_set      = communities
         self.timestamp_col      = timestamp_col
@@ -58,6 +63,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.content_col        = content_col
         self.community_col      = community_col
         self.audience_col       = audience_col
+
+        self.measurement_type = 'cross_platform'
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
@@ -68,7 +75,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         if communities is not None:
             if community_list == "all":
-                self.community_list = self.community_set[self.community_col].unique()
+                self.community_list = self.community_set[self.community_col]
+                self.community_list = self.community_list.unique()
                 print(self.community_list)
             elif community_list is not None:
                 self.community_list = community_list
