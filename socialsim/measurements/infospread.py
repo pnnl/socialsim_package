@@ -2,9 +2,9 @@ import pandas as pd
 import pickle as pkl
 import numpy  as np
 
-from ..measurements import MeasurementsBaseClass
-from ..validators   import check_empty
-from ..validators   import check_root_only
+from .measurements import MeasurementsBaseClass
+from .validators   import check_empty
+from .validators   import check_root_only
 
 class InfospreadMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, metadata, platform,

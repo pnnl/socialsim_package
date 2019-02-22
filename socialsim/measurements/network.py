@@ -9,7 +9,7 @@ import community
 import tqdm
 import os
 
-from ..measurements import MeasurementsBaseClass
+from .measurements import MeasurementsBaseClass
 
 class NetworkMeasurements(MeasurementsBaseClass):
     """

@@ -4,10 +4,6 @@ from scipy.stats.stats import pearsonr
 
 from .measurements import MeasurementsBaseClass
 
-# TODO:
-#   Run measurements with config
-
-
 """
 Checklist: 
 - order_of_spread: (1,10) 
@@ -126,7 +122,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         def platform_order(diction):
             plat_diction = {p: np.zeros((len(platforms))) for p in platforms}
-            for content, plat in diction.items():
+            for _, plat in diction.items():
                 for p in platforms:
                     pos, = np.where(plat == p)
                     plat_diction[p][pos] += 1
@@ -432,7 +428,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         def get_array(content_diction):
             arrays = {plat: np.zeros((len(content_diction.keys()))) for plat in platforms}
             index = 0
-            for time, plats in content_diction.items():
+            for _, plats in content_diction.items():
                 for p, value in plats.items():
                     arrays[p][index] = value
                 index += 1
@@ -465,8 +461,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
             all_platforms = get_array(content_over_time)
             matrix = np.zeros((len(platforms), len(platforms)))
-            for i, (p1, t1) in enumerate(all_platforms.items()):
-                for j, (p2, t2) in enumerate(all_platforms.items()):
+            for i, (_, t1) in enumerate(all_platforms.items()):
+                for j, (_, t2) in enumerate(all_platforms.items()):
                     pearson_corr = pearsonr(t1, t2)
                     matrix[i][j] = pearson_corr[0]
             return matrix
@@ -492,8 +488,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             content_to_correlation = {}
             for c, times in all_platforms.items():
                 matrix = np.zeros((len(platforms), len(platforms)))
-                for i, (p1, t1) in enumerate(times.items()):
-                    for j, (p2, t2) in enumerate(times.items()):
+                for i, (_, t1) in enumerate(times.items()):
+                    for j, (_, t2) in enumerate(times.items()):
                         pearson_corr = pearsonr(t1, t2)
                         matrix[i][j] = pearson_corr[0]
                 content_to_correlation[c] = matrix
@@ -517,6 +513,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_list
         data = self.select_data(nodes, communities)
 
+        # Looks like platforms is never used. Should it be? Can we remove this line?
         platforms = sorted(data[self.platform_col].unique())
 
         def lifetime(grp, indx, col):
@@ -569,7 +566,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             group_col = [self.content_col, self.platform_col]
 
         plat_counts = {plat: np.zeros((len(data))) for plat in platforms}
-        for i, (index, group) in enumerate(data.groupby(group_col)):
+        for i, (_, group) in enumerate(data.groupby(group_col)):
             count = 0
             if measure == "share":
                 count = len(group)
@@ -587,8 +584,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             plat = group[self.platform_col].values[0]
             plat_counts[plat][i] = count
         matrix = np.zeros((len(platforms), len(platforms)))
-        for i, (p1, t1) in enumerate(plat_counts.items()):
-            for j, (p2, t2) in enumerate(plat_counts.items()):
+        for i, (_, t1) in enumerate(plat_counts.items()):
+            for j, (_, t2) in enumerate(plat_counts.items()):
                 pearson_corr = pearsonr(t1, t2)
                 matrix[i][j] = pearson_corr[0]
         return matrix
