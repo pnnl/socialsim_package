@@ -63,8 +63,8 @@ def get_github_activity(df):
 
 data = load_data()
 
-data = data[data['content'].str.len() > 0]
-# data = data.sample(frac=0.01, random_state=27)
+data = data[data['informationID'].str.len() > 0]
+data = data.sample(frac=0.01, random_state=27)
 # Define communities and node list subsets
 nodes = ['CVE-2016-2216', 'CVE-2016-7099', 'CVE-2016-2216',
          'CVE-2016-1019', 'CVE-2014-9390', 'CVE-2017-7533', 'CVE-2017-5638']
@@ -72,25 +72,25 @@ commA = ['CVE-2016-2216', 'CVE-2016-7099', 'CVE-2016-2216']
 commB = ['CVE-2016-1019', 'CVE-2014-9390', 'CVE-2017-7533', 'CVE-2016-2216']
 
 # Format content df
-s = data.apply(lambda x: pd.Series(x['content']), axis=1).stack().reset_index(level=1, drop=True)
-s.name = 'content'
+s = data.apply(lambda x: pd.Series(x['informationID']), axis=1).stack().reset_index(level=1, drop=True)
+s.name = 'informationID'
 
-data = data.drop('content', axis=1).join(s).reset_index(drop=True)
+data = data.drop('informationID', axis=1).join(s).reset_index(drop=True)
 data = data.dropna(subset=['nodeUserID'])
 
 # Compute audience per content
-start = time.time()
-new_data = get_reddit_activity(data)
-end = time.time()
-print(end-start)
-print(list(new_data))
-data = get_github_activity(new_data)
-print(new_data["audience"].value_counts())
+# start = time.time()
+# new_data = get_reddit_activity(data)
+# end = time.time()
+# print(end-start)
+# print(list(new_data))
+# data = get_github_activity(new_data)
+# print(new_data["audience"].value_counts())
 
 # Format community df
 comm_df = []
 for name, comm in zip(["A", "B"],[commA, commB]):
-    temp = data.loc[data["content"].isin(comm)]
+    temp = data.loc[data["informationID"].isin(comm)]
     temp["community"] = name
     comm_df.append(temp)
 
@@ -138,9 +138,9 @@ community_df = pd.concat(comm_df)
 # meas = cpm.temporal_correlation(measure="audience", nodes=nodes)
 # for k, v in meas.items():
 #     print(k, v)
-#
-#
-# cpm = ss.CrossPlatformMeasurements(data, configuration={})
+
+
+cpm = ss.CrossPlatformMeasurements(data, configuration={})
 # print("----------------------------------------")
 # print("POPULATION LEVEL")
 # print("----------------------------------------")
@@ -186,47 +186,43 @@ community_df = pd.concat(comm_df)
 #     print(k)
 
 # print(list(community_df))
-# cpm = ss.CrossPlatformMeasurements(data, configuration={}, communities=community_df, community_list="all")
-# print("----------------------------------------")
-# print("COMMUNITY LEVEL")
-# print("----------------------------------------")
-# print("***** 10 ORDER OF SPREAD")
-# meas = cpm.order_of_spread()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 11 TIME DELTA")
-# meas = cpm.time_delta()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 12 OVERLAPPING USERS")
-# meas = cpm.overlapping_users()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 13 SIZE OF SHARES")
-# meas = cpm.size_of_shares()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 14 SPEED OF SPREAD")
-# meas = cpm.speed_of_spread()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 15 LIFETIME")
-# meas = cpm.lifetime_of_spread()
-# for k, v in meas.items():
-#     print(k, v)
-# print("***** 16 SHARE CORRELATION")
-# meas = cpm.correlation_of_information(measure="share")
-# for k in meas:
-#     print(k)
-# print("***** 17 AUDIENCE CORRELATION")
-# meas = cpm.correlation_of_information(measure="audience")
-# for k in meas:
-#     print(k)
-# print("***** 18 LIFETIME CORRELATION")
-# meas = cpm.correlation_of_information(measure="lifetime")
-# for k in meas:
-#     print(k)
-# print("***** 19 SPEED CORRELATION")
-# meas = cpm.correlation_of_information(measure="speed")
-# for k in meas:
-#     print(k)
+cpm = ss.CrossPlatformMeasurements(data, configuration={}, communities=community_df, community_list="all")
+print("----------------------------------------")
+print("COMMUNITY LEVEL")
+print("----------------------------------------")
+print("***** 10 ORDER OF SPREAD")
+meas = cpm.order_of_spread()
+for k, v in meas.items():
+    print(k, v)
+print("***** 11 TIME DELTA")
+meas = cpm.time_delta()
+for k, v in meas.items():
+    print(k, v)
+print("***** 12 OVERLAPPING USERS")
+meas = cpm.overlapping_users()
+for k, v in meas.items():
+    print(k, v)
+print("***** 13 SIZE OF SHARES")
+meas = cpm.size_of_shares()
+for k, v in meas.items():
+    print(k, v)
+print("***** 14 SPEED OF SPREAD")
+meas = cpm.speed_of_spread()
+for k, v in meas.items():
+    print(k, v)
+print("***** 15 LIFETIME")
+meas = cpm.lifetime_of_spread()
+for k, v in meas.items():
+    print(k, v)
+print("***** 16 SHARE CORRELATION")
+meas = cpm.correlation_of_information(measure="share")
+print(meas)
+print("***** 17 AUDIENCE CORRELATION")
+meas = cpm.correlation_of_information(measure="audience")
+print(meas)
+print("***** 18 LIFETIME CORRELATION")
+meas = cpm.correlation_of_information(measure="lifetime")
+print(meas)
+print("***** 19 SPEED CORRELATION")
+meas = cpm.correlation_of_information(measure="speed")
+print(meas)
