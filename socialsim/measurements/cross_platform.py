@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats.stats import pearsonr
 
-from ..measurements import MeasurementsBaseClass
+from .measurements import MeasurementsBaseClass
 
 # TODO:
 #   Run measurements with config
