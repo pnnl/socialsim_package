@@ -46,11 +46,11 @@ def extract_github_data_from_mongo(collection, database="Jun19-train", extras=No
         events = coll.find({}, select)
         events = json_normalize(list(events))
         events.rename(columns={'id_h': "nodeID", 'actor.id_h': "nodeUserID",
-                               'created_at': "nodeTime", 'socialsim_details': 'content',
+                               'created_at': "nodeTime", 'socialsim_details': 'informationID',
                                "repo.id_h": "rootID"}, inplace=True)
         events = convert_datetime(events)
         # events['nodeTime'] = pd.to_datetime(events['nodeTime'], infer_datetime_format=True)
-        events["content"] = events["content"].apply(lambda x: x[0]['extension']['socialsim_keywords'])
+        events["informationID"] = events["informationID"].apply(lambda x: x[0]['extension']['socialsim_keywords'])
 
         events.drop_duplicates(subset='nodeID', inplace=True)
 
@@ -58,11 +58,11 @@ def extract_github_data_from_mongo(collection, database="Jun19-train", extras=No
         repos = coll.find({}, select)
         repos = json_normalize(list(repos))
         repos.rename(columns={'id_h': "nodeID", 'actor.id_h': "nodeUserID",
-                              'created_at': "nodeTime", 'socialsim_details': 'content',
+                              'created_at': "nodeTime", 'socialsim_details': 'informationID',
                               "repo.id_h": "rootID"}, inplace=True)
         # repos['nodeTime'] = pd.to_datetime(repos['nodeTime'], infer_datetime_format=True)
         repos = convert_datetime(repos)
-        repos["content"] = repos["content"].apply(lambda x: x[0]['extension']['socialsim_keywords'])
+        repos["informationID"] = repos["informationID"].apply(lambda x: x[0]['extension']['socialsim_keywords'])
         repos.drop_duplicates(subset='nodeID', inplace=True)
         return events.append(repos).reset_index(drop=True)
 
@@ -72,10 +72,10 @@ def extract_twitter_data_from_mongo(collection, database="Jun19-train", extras=N
     coll = mongo_client[database][collection]
     if "URL" in collection:
         exploit = 'extension.socialsim_urls_m'
-        renamed = "content"
+        renamed = "informationID"
     else:
         exploit = 'extension.socialsim_keywords'
-        renamed = "content"
+        renamed = "informationID"
     select = {'id_h': 1,
               'created_at': 1,
               'username_h': 1,
@@ -110,7 +110,7 @@ def extract_reddit_data_from_mongo(collection, database="Jun19-train", extras=No
         data = coll.find({}, select)
         data = json_normalize(list(data))
         data.rename(columns={'id_h': "nodeID", 'author_h': "nodeUserID",
-                             'created_date': "nodeTime", 'extension.socialsim_keywords': 'content'}, inplace=True)
+                             'created_date': "nodeTime", 'extension.socialsim_keywords': 'informationID'}, inplace=True)
 
         data['nodeID'] = data['nodeID'].apply(lambda x: 't3_{}'.format(x))
         data["rootID"] = data["nodeID"]
@@ -134,7 +134,7 @@ def extract_reddit_data_from_mongo(collection, database="Jun19-train", extras=No
         comments = json_normalize(list(comments))
         comments.rename(
             columns={'id_h': "nodeID", 'author_h': "nodeUserID", "parent_id_h": "parentID", "link_id_h": "rootID",
-                     'created_date': "nodeTime", 'extension.socialsim_keywords': 'content'}, inplace=True)
+                     'created_date': "nodeTime", 'extension.socialsim_keywords': 'informationID'}, inplace=True)
 
         comments['nodeID'] = comments['nodeID'].apply(lambda x: 't1_{}'.format(x))
         # comments['nodeTime'] = pd.to_datetime(comments['nodeTime'], infer_datetime_format=True)
@@ -156,7 +156,7 @@ def extract_reddit_data_from_mongo(collection, database="Jun19-train", extras=No
         data = json_normalize(list(data))
         data.rename(
             columns={'id_h': 'nodeID', 'author_h': 'nodeUserID', 'parent_id_h': 'parentID', 'link_id_h': 'rootID',
-                     'created_date': "nodeTime", 'extension.socialsim_urls_m': 'content'}, inplace=True)
+                     'created_date': "nodeTime", 'extension.socialsim_urls_m': 'informationID'}, inplace=True)
         # data['nodeTime'] = pd.to_datetime(data['nodeTime'], infer_datetime_format=True)
         data = convert_datetime(data)
         data.drop_duplicates(subset='nodeID', inplace=True)
