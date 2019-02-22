@@ -12,25 +12,6 @@ import numpy   as np
 
 import traceback
 
-"""
-Metrics list:
-
-absolute_difference
-absolute_percentage_error
-kl_divergence
-kl_divergence_smoothed
-dtw
-fast_dtw
-js_divergence
-rbo_for_te
-rbo_score
-rbo_weight
-rmse
-r2
-pearson
-ks_test
-"""
-
 class Metrics:
     def __init__(self, ground_truth, simulation, configuration):
         """
@@ -45,7 +26,6 @@ class Metrics:
             None
 
         """
-
         self.ground_truth  = ground_truth
         self.simulation    = simulation
         self.configuration = configuration
@@ -72,7 +52,6 @@ class Metrics:
             :logs: (dict)
 
         """
-
         results = {}
         logs    = {}
 
@@ -152,7 +131,6 @@ class Metrics:
             :configuration:
 
         Output:
-
         """
         log = {}
 
@@ -259,7 +237,6 @@ class Metrics:
             :bins: ()
 
         """
-
         all_data = np.concatenate([ground_truth, simulation])
 
         _, bins = np.histogram(all_data, bins=method)
@@ -281,7 +258,6 @@ class Metrics:
         fill_value - Value for filling NAs or method for filling in NAs
             (e.g. "ffill" for forward fill)
         """
-
         df = ground_truth.merge(simulation,
                                 on = [c for c in ground_truth.columns if c != 'value'],
                                 suffixes = ('_gt','_sim'),
@@ -306,12 +282,9 @@ class Metrics:
         Absolute difference between ground truth simulation measurement
         Meant for scalar valued measurements
         """
-
-        try:
-            return np.abs(float(simulation) - float(ground_truth))
-        except TypeError:
-            print('Input should be two scalar, numerics')
-            return None
+        result = np.abs(float(simulation) - float(ground_truth))
+        
+        return result
 
 
     def absolute_percentage_error(self, ground_truth, simulation):
@@ -320,14 +293,13 @@ class Metrics:
         Meant for scalar valued measurements
         """
 
-        try:
-            if ground_truth==0:
-                return None
-            return 100.*(np.abs(float(simulation) - float(ground_truth)))/float(ground_truth)
-        except TypeError:
-            print('Input should be two scalar, numerics')
-            return None
+        if ground_truth==0:
+            result =  None
+        else:
+            result = self.absolute_difference(ground_truth, simulation)
+            result = 100.0 * result / float(ground_truth)
 
+        return result
 
     def kl_divergence(self, ground_truth, simulation, discrete=False):
         """
@@ -340,22 +312,19 @@ class Metrics:
         discrete: Whether the distribution is over discrete values (e.g. days of the week) (True) or numeric values (False)
 
         """
-
         if simulation is None:
             return None
 
         # if data is numeric, compute histogram
         if not discrete:
 
-            ground_truth, simulation = check_data_types(ground_truth, simulation)
+            ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
-            bins = get_hist_bins(ground_truth, simulation,method='doane')
+            bins = self.get_hist_bins(ground_truth, simulation,method='doane')
 
             ground_truth = np.histogram(ground_truth, bins=bins)[0]
             simulation = np.histogram(simulation, bins=bins)[0]
-
         else:
-
             df = ground_truth.merge(simulation,
                                     on=[c for c in ground_truth.columns if c != 'value'],
                                     suffixes=('_gt', '_sim'),
@@ -381,20 +350,16 @@ class Metrics:
         Additional input:
         alpha - smoothing parameter
         """
-
         # if data is numeric, compute histogram
         if not discrete:
+            ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
-            ground_truth, simulation = check_data_types(ground_truth, simulation)
-
-            bins = get_hist_bins(ground_truth, simulation)
+            bins = self.get_hist_bins(ground_truth, simulation)
 
             ground_truth = np.histogram(ground_truth, bins=bins)[0]
             simulation = np.histogram(simulation, bins=bins)[0]
             smoothed_simulation = (1 - alpha) * simulation + alpha * (np.ones(simulation.shape))
-
         else:
-
             df = ground_truth.merge(simulation,
                                     on=[c for c in ground_truth.columns if c != 'value'],
                                     suffixes=('_gt', '_sim'),
@@ -416,7 +381,6 @@ class Metrics:
         """
         Dynamic Time Warping implemenation
         """
-
         df = self.join_dfs(ground_truth,simulation,join='outer',fill_value=0.0)
 
         try:
@@ -425,7 +389,6 @@ class Metrics:
         except:
             ground_truth = np.array(ground_truth)
             simulation = np.array(simulation)
-
 
         if len(simulation) > 0:
             dist = fdtw.dtw(ground_truth.tolist(), simulation, dist=euclidean)[0]
@@ -439,14 +402,13 @@ class Metrics:
         """
         Fast Dynamic Time Warping implemenation
         """
-
+        # Can we change this try except to a if statement?
         try:
             ground_truth = ground_truth['value'].values
             simulation = simulation['value'].values
         except:
             ground_truth = np.array(ground_truth)
             simulation = np.array(simulation)
-
 
         dist = fdtw.fastdtw(ground_truth, simulation, dist=euclidean)[0]
         return dist
@@ -462,14 +424,13 @@ class Metrics:
         simulation - simulation measurement
         base - the logarithmic base to use
         """
-
-        if simulation is None or len(simulation) == 0 or ground_truth is None or len(ground_truth) == 0:
+        if simulation is None or len(simulation) == 0 or ground_truth is None or len(ground_truth)==0:
             return None
 
         if not discrete:
 
 
-            ground_truth, simulation = check_data_types(ground_truth, simulation)
+            ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
             try:
                 ground_truth = ground_truth[np.isfinite(ground_truth)]
@@ -477,7 +438,7 @@ class Metrics:
             except TypeError:
                 return None
 
-            bins = get_hist_bins(ground_truth, simulation,method='doane')
+            bins = self.get_hist_bins(ground_truth, simulation,method='doane')
 
             ground_truth = np.histogram(ground_truth, bins=bins)[0].astype(float)
             simulation = np.histogram(simulation, bins=bins)[0].astype(float)
@@ -498,10 +459,8 @@ class Metrics:
             ground_truth = df['value_gt'].values.astype(float)
             simulation = df['value_sim'].values.astype(float)
 
-
         ground_truth = ground_truth / ground_truth.sum()
         simulation = simulation / simulation.sum()
-
 
         if len(ground_truth) == len(simulation):
             m = 1. / 2 * (ground_truth + simulation)
@@ -538,7 +497,7 @@ class Metrics:
 
         sl, ll = sorted([(len(ground_truth), ground_truth), (len(simulation), simulation)])
         s, S = sl
-        l, L = ll
+        _, L = ll
         if s == 0: return 0
 
         # Calculate the overlaps at ranks 1 through s
@@ -567,7 +526,7 @@ class Metrics:
         for i in range(1, d):
             sum1 += np.power(p, i) / float(i)
 
-        wt = 1.0 - np.power(p, (d - 1)) + (((1 - p) / p) * d) * (np.log(1 / (1 - p)) - sum1)
+        wt = 1.0-np.power(p,(d-1))+(((1-p)/p)*d)*(np.log(1/(1-p))-sum1)
 
         return wt
 
@@ -678,9 +637,6 @@ class Metrics:
         if simulation is None or len(simulation) == 0:
             return None
 
-        ground_truth, simulation = check_data_types(ground_truth,simulation)
+        ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
-        try:
-            return ks_2samp(ground_truth,simulation).statistic
-        except:
-            return None
+        return ks_2samp(ground_truth,simulation).statistic

@@ -6,9 +6,9 @@ import pandas as pd
 
 import pysal
 
-from ..validators   import check_empty
-from ..validators   import check_root_only
-from ..measurements import MeasurementsBaseClass
+from .validators   import check_empty
+from .validators   import check_root_only
+from .measurements import MeasurementsBaseClass
 
 class CascadeMeasurements(MeasurementsBaseClass):
     def __init__(self, main_df, configuration, metadata, platform,
@@ -103,31 +103,65 @@ class CascadeMeasurements(MeasurementsBaseClass):
 
 
     def split_communities(self, data, community_grouper):
+        """
+        Description:
 
-        return {
-        community: data[data[community_grouper] == community][[c for c in data.columns if c != community_grouper]] for
-        community in data[community_grouper].unique()}
+        Input:
+
+        Output:
+        """
+        communities = {}
+        
+        for community in data[community_grouper].unique():
+            columns = [c for c in data.columns if c!=community_grouper]
+
+            community_data = data[data[community_grouper]==community][columns]
+
+            communities.update({community:community_data})
+
+        return communities
 
 
     @check_empty(default=None)
     def get_cascades_distribution_measurements(self):
         """
-        :return: pandas dataframe with cascade identiifer and "depth", "breadth", "size", "structural_virality" and lifetime for each cascade in the population
+        Description:
+
+        Inputs:
+            None
+        
+        Output:
+            :return: pandas dataframe with cascade identiifer and "depth", 
+            "breadth", "size", "structural_virality" and lifetime for each 
+            cascade in the population
         """
         cascades_distribution_measurements = []
         for cascade_identifier, scm in self.scms.items():
-            cascades_distribution_measurements.append([cascade_identifier,
-                                                       scm.community,
-                                                       scm.cascade.get_cascade_depth(),
-                                                       scm.cascade.get_cascade_size(),
-                                                       scm.cascade.get_cascade_breadth(),
-                                                       scm.cascade.get_cascade_structural_virality(),
-                                                       scm.cascade.get_cascade_lifetime()
-                                                       ])
+            cascade_information = [
+                cascade_identifier,
+                scm.community,
+                scm.cascade.get_cascade_depth(),
+                scm.cascade.get_cascade_size(),
+                scm.cascade.get_cascade_breadth(),
+                scm.cascade.get_cascade_structural_virality(),
+                scm.cascade.get_cascade_lifetime()
+                ]
 
-        cols = ["rootID", "communityID", "depth", "size", "breadth", "structural_virality", "lifetime"]
+            cascades_distribution_measurements.append(cascade_information)
 
-        self.cascade_distribution_measurement_df = pd.DataFrame(cascades_distribution_measurements, columns=cols)
+        cols = [
+            "rootID", 
+            "communityID", 
+            "depth", 
+            "size", 
+            "breadth", 
+            "structural_virality", 
+            "lifetime"
+            ]
+
+        data = pd.DataFrame(cascades_distribution_measurements, columns=cols)
+
+        self.cascade_distribution_measurement_df = data
 
     """
     ----------------------------------------------------------------------------
@@ -136,9 +170,11 @@ class CascadeMeasurements(MeasurementsBaseClass):
     ----------------------------------------------------------------------------
     The methods below this line are all measurement functions.
     """
-    def cascade_collection_distribution_of(self, attribute, community_grouper=None):
+    def cascade_collection_distribution_of(self, attribute, 
+        community_grouper=None):
         """
-        :param attribute: "depth", "size", "breadth", "structural_virality", "lifetime"
+        :param attribute: "depth", "size", "breadth", "structural_virality", 
+            "lifetime"
         """
         if self.cascade_distribution_measurement_df is None:
             self.get_cascades_distribution_measurements()
@@ -176,10 +212,7 @@ class CascadeMeasurements(MeasurementsBaseClass):
                 set_index(self.timestamp_col).groupby(grouper, sort=True):
             mean_lifetime = df.groupby(self.root_node_col).size().mean()
 
-            temporal_measurements.append(
-                list(ts) + [mean_lifetime] if community_grouper and community_grouper in self.main_df.columns else [ts,
-                                                                                                                    mean_lifetime])
-            # temporal_measurements.append([*ts, mean_lifetime] if community_grouper else [ts, mean_lifetime])
+            temporal_measurements.append(list(ts) + [mean_lifetime] if community_grouper and community_grouper in self.main_df.columns else [ts, mean_lifetime])
 
         temporal_measurements = pd.DataFrame(temporal_measurements, columns=result_df_columns).fillna(0)
 
