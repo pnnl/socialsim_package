@@ -30,12 +30,15 @@ Questions for Emily:
 Changes to make:
     1. Create community copy if given a list of communities. 
         To be built from the metadata (a dictionary: community to a list of nodes in that community)
+    2. Change Audience functions. No audience column, only counting users that contain that informationID
+    3. Matrix of distributions: dataframe, columns: plt_1, plt_2, measure (call value) (each point in dist. is a row) 
+            (all dist.s in one dataframe)
 """
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, meatadata=None, communities=None, platform_col="platform", timestamp_col="nodeTime",
-                 user_col="nodeUserID", content_col="content", community_col="community", audience_col="audience",
+                 user_col="nodeUserID", content_col="informationID", community_col="community", audience_col="audience",
                  log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
         """
 
@@ -319,7 +322,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     information found in the community the fastest.
                 Else, a dictionary mapping each content to the ranked list of platforms on which it spreads the fastest
         """
-        #print(data.groupby("community").apply(lambda x: x.groupby("platform").apply(lambda y: y.groupby("content").apply(check_zero_speed).tolist()).tolist()).to_dict())
 
         if len(nodes) == 0:
             nodes = self.node_list
@@ -343,17 +345,18 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             aud = grp.groupby(self.platform_col).apply(lambda x: x.groupby(self.content_col).apply(check_zero_speed).tolist()).tolist()
             return aud
 
-        def average_audience_speed(grp):
-            aud = grp.groupby(self.platform_col).apply(audience_over_time, indx=1, col=self.content_col).to_dict()
-            return [item[0] for item in sorted(aud.items(), reverse=True, key=lambda kv: np.mean(kv[1]))]
+        # def average_audience_speed(grp):
+        #     aud = grp.groupby(self.platform_col).apply(audience_over_time, indx=1, col=self.content_col).to_dict()
+        #     return [item[0] for item in sorted(aud.items(), reverse=True, key=lambda kv: np.mean(kv[1]))]
 
         if len(communities) > 0:
-            return data.groupby(self.community_col).apply(average_audience_speed).to_dict()
+            return data.groupby(self.community_col).apply(speed_distribution).to_dict()
         elif len(nodes) > 0:
             return data.groupby(self.content_col).apply(audience_over_time, indx=0, col=self.platform_col).to_dict()
         else:
-            data = data.groupby(self.platform_col).apply(audience_over_time, indx=1, col=self.content_col).to_dict()
-            return [item[0] for item in sorted(data.items(), reverse=True, key=lambda kv: np.mean(kv[1]))]
+            return speed_distribution(data)
+            # data = data.groupby(self.platform_col).apply(audience_over_time, indx=1, col=self.content_col).to_dict()
+            # return [item[0] for item in sorted(data.items(), reverse=True, key=lambda kv: np.mean(kv[1]))]
 
     def size_of_shares(self, nodes=[], communities=[]):
         """
