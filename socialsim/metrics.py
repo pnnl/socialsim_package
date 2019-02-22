@@ -12,25 +12,6 @@ import numpy   as np
 
 import traceback
 
-"""
-Metrics list:
-
-absolute_difference
-absolute_percentage_error
-kl_divergence
-kl_divergence_smoothed
-dtw
-fast_dtw
-js_divergence
-rbo_for_te
-rbo_score
-rbo_weight
-rmse
-r2
-pearson
-ks_test
-"""
-
 class Metrics:
     def __init__(self, ground_truth, simulation, configuration):
         """
@@ -150,7 +131,6 @@ class Metrics:
             :configuration:
 
         Output:
-
         """
         log = {}
 

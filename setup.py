@@ -20,3 +20,19 @@ setup(name='socialsim',
       maintainer='Zachary New',
       maintainer_email='zachary.new@pnnl.gov',
       )
+
+
+
+"""
+
+pandas
+scipy
+scikit-learn
+fastdtw
+python-igraph
+pysal
+<snap>
+
+
+
+"""
