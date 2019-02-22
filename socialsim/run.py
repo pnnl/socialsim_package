@@ -1,4 +1,6 @@
 # External imports
+import traceback 
+
 import pandas as pd
 import numpy  as np
 
@@ -38,7 +40,7 @@ class TaskRunner:
         self.test          = test
 
         if ground_truth is str:
-            temp = _load_measurements(ground_truth)
+            temp = load_measurements(ground_truth)
             self.ground_truth_results, self.ground_truth_logs = temp
         else:
             temp = run_measurements(ground_truth, configuration, metadata, 
@@ -48,27 +50,7 @@ class TaskRunner:
             self.ground_truth_results, self.ground_truth_logs = temp
 
 
-    def __call__(self, dataset, measurements_subset=None, run_metrics=True):
-        """
-        Description: Allows the class to be called as a function. Takes in a
-            dataset runs the specified measurements and metrics on the dataset
-            given the ground truth and metadata that initialized the
-            TaskRunner.
-
-        Inputs:
-            :dataset: (pd.DataFrame) The dataset to run the given measurements
-                and metrics on.
-            :configuration: (dict) The configuration information in the form of
-                a nested dictionary.
-
-        Outputs:
-            :report: (dict) A summary of the run including all results and
-                status on the success or failure of individual function calls.
-        """
-
-        return report
-
-    def run(self, dataset, timing=False, verbose=False, save=False,
+    def __call__(self, dataset, timing=False, verbose=False, save=False,
         save_directory='./', save_format='json'):
         """
         Description: This function runs the measurements and metrics code at
@@ -96,6 +78,7 @@ class TaskRunner:
 
         return results, logs
 
+
 def run_measurements(dataset, configuration, metadata, timing, verbose, save,
     save_directory, save_format, test):
     """
@@ -106,12 +89,6 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
     Output:
     """
-    measurements = {
-        'infospread'      : InfospreadMeasurements,
-        'cascade'         : CascadeMeasurements,
-        'network'         : NetworkMeasurements,
-        'group_formation' : GroupFormationMeasurements
-    }
 
     results = {}
     logs    = {}
@@ -125,7 +102,6 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
             message = 'SOCIALSIM TASKRUNNER   | Subsetting '
             message = message + platform+' data... '
             print(message, end='', flush=True)
-
 
         if platform=='cross_platform':
             dataset_subset = dataset
@@ -148,9 +124,6 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = NetworkMeasurements
             elif measurement_type=='cross_platform':
                 Measurement = CrossPlatformMeasurements
-            else:
-                print('No measurements found for '+measurement_type)
-                continue
 
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]
@@ -198,7 +171,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 if verbose:
                     print('')
                     print('-'*80)
-                    print(error)
+                    trace = traceback.format_exc()
+                    print(trace)
                     print('-'*80)
 
             # Log the results at the measurement type level
@@ -211,13 +185,12 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
     return results, logs
 
+
 def run_metrics(simulation, ground_truth, configuration, verbose):
     """
     Description: Takes in simulation and ground truth measurement results and a
         configuration file and runs all the specified metrics on the
         measurements.
-
-        TODO: Add error handling at each level of loop
 
     Input:
         :simulation_results:
