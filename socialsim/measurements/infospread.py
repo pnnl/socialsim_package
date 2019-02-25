@@ -71,13 +71,17 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metadata.use_content_data:
-            self.useContentMetaData = True
-            self.contentMetaData    = metadata.content_data
+        if metadata:
+            if metadata.use_content_data:
+                self.useContentMetaData = True
+                self.contentMetaData    = metadata.content_data
 
-        if metadata.use_user_data:
-            self.useUserMetaData = True
-            self.UserMetaData    = metadata.user_data
+            if metadata.use_user_data:
+                self.useUserMetaData = True
+                self.UserMetaData    = metadata.user_data
+        else:
+            self.useContentMetaData = False
+            self.useUserMetaData    = False
 
         # For community measurements
         # Load and preprocess metadata

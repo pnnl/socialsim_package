@@ -158,7 +158,7 @@ class Metrics:
             metric_name = configuration['metrics'][metric]['metric']
 
             if verbose:
-                message = 'SOCIALSIM METRICS   | Running '
+                message = 'SOCIALSIM METRICS      | Running '
                 message = message + p+' '+t+' '+s+' '+m+' '
                 message = message + metric_name
                 message = message + '... '
