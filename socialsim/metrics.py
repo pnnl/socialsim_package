@@ -12,8 +12,11 @@ import numpy   as np
 
 import traceback
 
+from .record import RecordKeeper
+
 class Metrics:
-    def __init__(self, ground_truth, simulation, configuration):
+    def __init__(self, ground_truth, simulation, configuration, 
+        log_file='metrics_log.txt'):
         """
         Description:
 
@@ -30,9 +33,11 @@ class Metrics:
         self.simulation    = simulation
         self.configuration = configuration
 
+        self.record_keeper = RecordKeeper('metrics_log.txt')
+
         pass
 
-    def run(self, measurement_subset=None, timing=False, verbose=False):
+    def run(self, measurement_subset=None, verbose=False):
         """
         Description: This runs all measurement outputs through the metrics
             specified in the configuration json.
@@ -73,12 +78,12 @@ class Metrics:
 
                 for s in t_configuration.keys():
                     
-                    if type(t_ground_truth) is str:
+                    if t_ground_truth is None:
                         s_ground_truth = t_ground_truth
                     else:
                         s_ground_truth = t_ground_truth[s]
 
-                    if type(t_simulation) is str:
+                    if t_simulation is None:
                         s_simulation = t_simulation
                     else:
                         s_simulation = t_simulation[s]
@@ -90,12 +95,12 @@ class Metrics:
 
                     for m in s_configuration.keys():
 
-                        if type(s_ground_truth) is str:
+                        if s_ground_truth is None:
                             ground_truth = s_ground_truth
                         else:
                             ground_truth = s_ground_truth[m]
 
-                        if type(s_simulation) is str:
+                        if s_simulation is None:
                             simulation = s_simulation
                         else:
                             simulation = s_simulation[m]
@@ -103,7 +108,7 @@ class Metrics:
                         configuration = s_configuration[m]
 
                         result, log = self._evaluate_metrics(ground_truth, 
-                                simulation, configuration, timing, verbose, p, 
+                                simulation, configuration, verbose, p, 
                                 t, s, m)
 
                         s_results.update({m:result})
@@ -122,7 +127,7 @@ class Metrics:
 
 
     def _evaluate_metrics(self, ground_truth, simulation, configuration, 
-        timing, verbose, p, t, s, m):
+        verbose, p, t, s, m):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -135,13 +140,13 @@ class Metrics:
         """
         log = {}
 
-        if type(ground_truth) is str:
+        if ground_truth is None:
             log.update({'status' : 'failure'})
             result = ground_truth
 
             return result, log
 
-        if type(simulation) is str:
+        if simulation is None:
             log.update({'status' : 'failure'})
             result = simulation
     
@@ -179,8 +184,11 @@ class Metrics:
 
                 return result, log
 
+            self.record_keeper.tic(1)
+
             try:
-                result = metric_function(ground_truth, simulation, **metric_args)
+                result = metric_function(ground_truth, simulation, 
+                    **metric_args)
             except Exception as error:
                 result = metric_name+' failed to run.'
 
@@ -190,11 +198,12 @@ class Metrics:
                     trace = traceback.format_exc()
                     print(trace)
 
-            if timing:
-                pass
+            delta_time = self.record_keeper.toc(1)
+            log.update({'run_time': delta_time})
 
             if verbose:
-                print('Done.', flush=True)
+                message = 'Done. ({0} seconds.)'.format(delta_time)
+                print(message, flush=True)
 
         return result, log
 
@@ -260,10 +269,11 @@ class Metrics:
         fill_value - Value for filling NAs or method for filling in NAs
             (e.g. "ffill" for forward fill)
         """
-        df = ground_truth.merge(simulation,
-                                on = [c for c in ground_truth.columns if c != 'value'],
-                                suffixes = ('_gt','_sim'),
-                                how=join)
+
+        on = [c for c in ground_truth.columns if c!='value']
+        suffixes = ('_gt', '_sim')
+
+        df = ground_truth.merge(simulation, on=on, suffixes=suffixes, how=join)
         df = df.sort_values([c for c in ground_truth.columns if c != 'value'])
 
         try:

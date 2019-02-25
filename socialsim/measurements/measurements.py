@@ -21,6 +21,8 @@ class MeasurementsBaseClass:
         self.configuration = configuration
         self.record_keeper = RecordKeeper('measurements_log.txt')
 
+        self.measurement_type = 'baseclass'
+
         self.measurements  = []
         for scale in configuration.keys():
             for name in configuration[scale].keys():
@@ -59,10 +61,12 @@ class MeasurementsBaseClass:
                     print(message, end='', flush=True)
 
                 result, log = self._evaluate_measurement(
-                    self.configuration[scale][name], timing, verbose)
+                    self.configuration[scale][name], verbose)
 
                 if verbose:
-                    print('Done.', flush=True)
+                    delta_time = log['run_time']
+                    message = 'Done. ({0} seconds.)'.format(delta_time)
+                    print(message, flush=True)
 
                 if save:
                     filepath = save_directory+self.measurement_type
@@ -77,7 +81,7 @@ class MeasurementsBaseClass:
 
         return results, logs
 
-    def _evaluate_measurement(self, configuration, timing, verbose):
+    def _evaluate_measurement(self, configuration, verbose):
         """
         Description: Evaluates a single measurement given the configuration
             information.
@@ -106,7 +110,7 @@ class MeasurementsBaseClass:
         try:
             function = getattr(self, function_name)
         except Exception as error:
-            result = function_name+' was not found.'
+            result = None
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
 
@@ -119,8 +123,7 @@ class MeasurementsBaseClass:
             return result, log
 
         # Evaluate the function with the given arguments
-        if timing:
-            self.record_keeper.tic(1)
+        self.record_keeper.tic(1)
 
         try:
             result = function(**function_arguments)
@@ -128,7 +131,7 @@ class MeasurementsBaseClass:
 
             self.record_keeper.update(function_name+' complete.')
         except Exception as error:
-            result = function_name+' failed to run.'
+            result = None
             log.update({'status' : 'failure'})
             log.update({'error'  : error})
 
@@ -138,13 +141,12 @@ class MeasurementsBaseClass:
                 trace = traceback.format_exc()
                 print(trace)
 
-        if timing:
-            delta_time = self.record_keeper.toc(1)
-            log.update({'run_time': delta_time})
+        delta_time = self.record_keeper.toc(1)
+        log.update({'run_time': delta_time})
 
         return result, log
 
-    def save_measurement(self, result, filepath, format):
+    def save_measurement(self, result, filepath, format='json'):
         """
         Description:
 
