@@ -26,8 +26,8 @@ class MeasurementsBaseClass:
             for name in configuration[scale].keys():
                 self.measurements.append(name)
 
-    def run(self, measurements_subset=None, timing=False, verbose=False,
-        save=False, save_directory='./', save_format='json'):
+    def run(self, measurements_subset=None, verbose=False, save=False, 
+        save_directory='./', save_format='json'):
         """
         Description: Runs a measurement or a set of measurements on the given
             dataset.

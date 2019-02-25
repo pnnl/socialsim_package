@@ -103,7 +103,8 @@ class Metrics:
                         configuration = s_configuration[m]
 
                         result, log = self._evaluate_metrics(ground_truth, 
-                                simulation, configuration, timing, verbose)
+                                simulation, configuration, timing, verbose, p, 
+                                t, s, m)
 
                         s_results.update({m:result})
                         s_logs.update({m:log})
@@ -121,7 +122,7 @@ class Metrics:
 
 
     def _evaluate_metrics(self, ground_truth, simulation, configuration, 
-        timing, verbose):
+        timing, verbose, p, t, s, m):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -153,6 +154,7 @@ class Metrics:
 
             if verbose:
                 message = 'SOCIALSIM METRICS   | Running '
+                message = message + p+' '+t+' '+s+' '+m+' '
                 message = message + metric_name
                 message = message + '... '
                 print(message, end='', flush=True)
