@@ -382,6 +382,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
             return measurement
         else:
+            # Need to find out what warnings does
             warnings.warn('Skipping optional propIssueEventHelper')
             return None
 
