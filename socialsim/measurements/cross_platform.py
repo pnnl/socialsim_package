@@ -6,33 +6,6 @@ from scipy.stats.stats import pearsonr
 
 from .measurements import MeasurementsBaseClass
 
-<<<<<<< HEAD
-"""
-Checklist: 
-- order_of_spread: (1,10) 
-- time_delta: (2, 11)
-- overlapping_users: (3, 12)
-- size_of_audience: (5)
-- speed_of_spread: (6, 14)
-- temporal_correlation: (8, 9)
-- size_of_shares: (4, 13)
-- lifetime_of_spread: (7, 15)
-- correlation_of_information: (16,17,18,19)
-
-Questions for Emily:
-    1. Lifetime/speed of the community = first appearance of any content in community to last or average 
-        lifetime of each content
-            - If average, should they be normalized 
-    2. Should community correlations be returning a dictionary of community to matrix of correlations? Or one matrix
-        for all communities?
-        
-Changes to make:
-    1. Create community copy if given a list of communities. 
-        To be built from the metadata (a dictionary: community to a list of nodes in that community)
-"""
-
-=======
->>>>>>> c2a840a4c5ce30eb211e56c06001d155be229cba
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, meatadata=None, communities=None, platform_col="platform",
@@ -57,6 +30,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.platform_col       = platform_col
         self.content_col        = content_col
         self.community_col      = community_col
+
+        self.measurement_type = 'cross_platform'
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
@@ -491,12 +466,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_list
         data = self.select_data(nodes, communities)
 
-<<<<<<< HEAD
-        # Looks like platforms is never used. Should it be? Can we remove this line?
-        platforms = sorted(data[self.platform_col].unique())
-
-=======
->>>>>>> c2a840a4c5ce30eb211e56c06001d155be229cba
         def lifetime(grp, indx, col):
             aud = grp.groupby(col).apply(lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).to_dict()
             return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
@@ -573,31 +542,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             return plats
 
         plat_counts = {plat: np.zeros((len(data))) for plat in platforms}
-<<<<<<< HEAD
-        for i, (_, group) in enumerate(data.groupby(group_col)):
-            count = 0
-            if measure == "share":
-                count = len(group)
-            elif measure == "audience":
-                count = group[self.audience_col].sum()
-            elif measure == "lifetime":
-                count = pd.Timedelta(group[self.timestamp_col].iloc[-1] - group[self.timestamp_col].iloc[0]).seconds
-            elif measure == "speed":
-                count = group[self.audience_col].sum() / (pd.Timedelta(
-                    group[self.timestamp_col].max() - group[self.timestamp_col].min()).seconds)
-                if count == float("inf"):  # Happens when a piece of content only appears once on a platform
-                    count = 0
-            else:
-                print("ERROR: Not a valid correlation option. Choices are: share, audience, lifetime, speed.")
-            plat = group[self.platform_col].values[0]
-            plat_counts[plat][i] = count
-        matrix = np.zeros((len(platforms), len(platforms)))
-        for i, (_, t1) in enumerate(plat_counts.items()):
-            for j, (_, t2) in enumerate(plat_counts.items()):
-                pearson_corr = pearsonr(t1, t2)
-                matrix[i][j] = pearson_corr[0]
-        return matrix
-=======
         community_to_plat = {}
         for index, group in data.groupby(group_col):
             if len(communities) > 0:
@@ -606,7 +550,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     community_to_plat[index] = get_measurement(plat_group, plat_index, community_to_plat[index])
             else:
                 plat_counts = get_measurement(group, index, plat_counts)
->>>>>>> c2a840a4c5ce30eb211e56c06001d155be229cba
 
         if len(communities) > 0:
             community_correlations = {}

@@ -18,7 +18,7 @@ def load_measurements(filepath):
 
     measurements = None
 
-    return measurements
+    return results, logs
 
 def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True, short=False):
     """
