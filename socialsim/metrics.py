@@ -37,6 +37,7 @@ class Metrics:
 
         pass
 
+
     def run(self, measurement_subset=None, verbose=False):
         """
         Description: This runs all measurement outputs through the metrics
@@ -284,6 +285,18 @@ class Metrics:
 
         return(df)
 
+
+    def rbo_weight(self, d, p):
+        # Weight given to the top d ranks for a given p
+        sum1 = 0.0
+        for i in range(1, d):
+            sum1 += np.power(p, i) / float(i)
+
+        wt = 1.0-np.power(p,(d-1))+(((1-p)/p)*d)*(np.log(1/(1-p))-sum1)
+
+        return wt
+
+
     """
     The remaining functions are metrics used in comparing the output of the
     measurements code.
@@ -312,6 +325,7 @@ class Metrics:
             result = 100.0 * result / float(ground_truth)
 
         return result
+
 
     def kl_divergence(self, ground_truth, simulation, discrete=False):
         """
@@ -354,7 +368,8 @@ class Metrics:
             return None
 
 
-    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, discrete=False):
+    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, 
+        discrete=False):
         """
         Smoothed version of the KL divergence which smooths the simulation output
         to prevent infinities in the KL divergence output
@@ -532,18 +547,8 @@ class Metrics:
         return rbo_score
 
 
-    def rbo_weight(self, d, p):
-        # Weight given to the top d ranks for a given p
-        sum1 = 0.0
-        for i in range(1, d):
-            sum1 += np.power(p, i) / float(i)
-
-        wt = 1.0-np.power(p,(d-1))+(((1-p)/p)*d)*(np.log(1/(1-p))-sum1)
-
-        return wt
-
-
-    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, relative=False):
+    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, 
+        relative=False):
         """
         Root mean squared error
 
@@ -556,26 +561,37 @@ class Metrics:
         fill_value - fill value for non-overlapping joins
         """
 
-        if simulation is None or ground_truth is None:
-            return None
+        if type(ground_truth) is np.ndarray: 
+            result = ground_truth - simulation 
+            result = (result ** 2).mean()
+            result = np.sqrt(result)
+            return result
 
         if type(ground_truth) is list:
-    	    ground_truth = np.nan_to_num(ground_truth)
-    	    simulation = np.nan_to_num(simulation)
-    	    return np.sqrt(((np.asarray(ground_truth) - np.asarray(simulation)) ** 2).mean())
+            
+            ground_truth = np.nan_to_num(ground_truth)
+            simulation   = np.nan_to_num(simulation)
+            
+            result = np.asarray(ground_truth) - np.asarray(simulation)
+            result = (result ** 2).mean()
+            result = np.sqrt(result) 
+            
+            return result
 
-        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
+        df = self.join_dfs(ground_truth, simulation, join=join, 
+            fill_value=fill_value)
 
         if len(df.index) > 0:
             if not relative:
-                return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean())
+                return np.sqrt(((df["value_sim"]-df["value_gt"])**2).mean())
             else:
                 iq_range = float(iqr(df['value_gt'].values))
 
                 if iq_range > 0:
-                    return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean()) / iq_range
-                else:
-                    return None
+                    result = df["value_sim"]-df["value_gt"]
+                    result = (result ** 2).mean()
+                    result = np.sqrt(result) / iq_range
+                    return result 
         else:
             return None
 
