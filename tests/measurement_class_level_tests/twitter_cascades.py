@@ -8,7 +8,8 @@ with open('../configuration_files/twitter_cascade.json') as f:
 
 metadata = None
 
-measurements = ss.CascadeMeasurements(dataset, configuration, metadata, 'twitter')
+measurements = ss.CascadeMeasurements(dataset, configuration, metadata, 
+    'twitter')
 
-results, logs = measurements.run(timing=True, verbose=True, save=True,
+results, logs = measurements.run(verbose=True, save=True,
     save_directory='./output/', save_format='pickle')
