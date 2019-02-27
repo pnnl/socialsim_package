@@ -6,6 +6,12 @@ from .measurements import MeasurementsBaseClass
 from .validators   import check_empty
 from .validators   import check_root_only
 
+"""
+Notes:
+    - If no metadata then run community measurements as if there is a single 
+    community containing every node.
+"""
+
 class InfospreadMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, metadata, platform,
         content_node_ids=[], user_node_ids=[]):
