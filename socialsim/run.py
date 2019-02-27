@@ -146,8 +146,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                     print('Done.')
 
                 try:
-                    kwargs = {'timing':timing, 'verbose':verbose, 'save':save,
-                        'save_directory':save_directory,
+                    kwargs = {'verbose':verbose, 'save':save,
+                        'save_directory':save_directory, 
                         'save_format':save_format}
 
                     # Run the specified measurements
@@ -155,7 +155,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
                 except Exception as error:
                     measurement_logs    = {'status': 'Measurments object failed to run.', 'error': error}
-                    measurement_results = 'Object failed to run measurements.'
+                    measurement_results = None
 
                     if verbose:
                         print('')
@@ -166,8 +166,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
             except Exception as error:
                 measurement_logs    = {'status': 'Failed to instantiate measurements object', 'error': error}
-                measurement_results = measurement_type+' failed to instantiate.'
-
+                measurement_results = None
+                
                 if verbose:
                     print('')
                     print('-'*80)

@@ -12,8 +12,11 @@ import numpy   as np
 
 import traceback
 
+from .record import RecordKeeper
+
 class Metrics:
-    def __init__(self, ground_truth, simulation, configuration):
+    def __init__(self, ground_truth, simulation, configuration, 
+        log_file='metrics_log.txt'):
         """
         Description:
 
@@ -30,9 +33,12 @@ class Metrics:
         self.simulation    = simulation
         self.configuration = configuration
 
+        self.record_keeper = RecordKeeper('metrics_log.txt')
+
         pass
 
-    def run(self, measurement_subset=None, timing=False, verbose=False):
+
+    def run(self, measurement_subset=None, verbose=False):
         """
         Description: This runs all measurement outputs through the metrics
             specified in the configuration json.
@@ -73,12 +79,12 @@ class Metrics:
 
                 for s in t_configuration.keys():
                     
-                    if type(t_ground_truth) is str:
+                    if t_ground_truth is None:
                         s_ground_truth = t_ground_truth
                     else:
                         s_ground_truth = t_ground_truth[s]
 
-                    if type(t_simulation) is str:
+                    if t_simulation is None:
                         s_simulation = t_simulation
                     else:
                         s_simulation = t_simulation[s]
@@ -90,12 +96,12 @@ class Metrics:
 
                     for m in s_configuration.keys():
 
-                        if type(s_ground_truth) is str:
+                        if s_ground_truth is None:
                             ground_truth = s_ground_truth
                         else:
                             ground_truth = s_ground_truth[m]
 
-                        if type(s_simulation) is str:
+                        if s_simulation is None:
                             simulation = s_simulation
                         else:
                             simulation = s_simulation[m]
@@ -103,7 +109,8 @@ class Metrics:
                         configuration = s_configuration[m]
 
                         result, log = self._evaluate_metrics(ground_truth, 
-                                simulation, configuration, timing, verbose)
+                                simulation, configuration, verbose, p, 
+                                t, s, m)
 
                         s_results.update({m:result})
                         s_logs.update({m:log})
@@ -121,7 +128,7 @@ class Metrics:
 
 
     def _evaluate_metrics(self, ground_truth, simulation, configuration, 
-        timing, verbose):
+        verbose, p, t, s, m):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -134,13 +141,13 @@ class Metrics:
         """
         log = {}
 
-        if type(ground_truth) is str:
+        if ground_truth is None:
             log.update({'status' : 'failure'})
             result = ground_truth
 
             return result, log
 
-        if type(simulation) is str:
+        if simulation is None:
             log.update({'status' : 'failure'})
             result = simulation
     
@@ -152,7 +159,8 @@ class Metrics:
             metric_name = configuration['metrics'][metric]['metric']
 
             if verbose:
-                message = 'SOCIALSIM METRICS   | Running '
+                message = 'SOCIALSIM METRICS      | Running '
+                message = message + p+' '+t+' '+s+' '+m+' '
                 message = message + metric_name
                 message = message + '... '
                 print(message, end='', flush=True)
@@ -177,8 +185,11 @@ class Metrics:
 
                 return result, log
 
+            self.record_keeper.tic(1)
+
             try:
-                result = metric_function(ground_truth, simulation, **metric_args)
+                result = metric_function(ground_truth, simulation, 
+                    **metric_args)
             except Exception as error:
                 result = metric_name+' failed to run.'
 
@@ -188,11 +199,12 @@ class Metrics:
                     trace = traceback.format_exc()
                     print(trace)
 
-            if timing:
-                pass
+            delta_time = self.record_keeper.toc(1)
+            log.update({'run_time': delta_time})
 
             if verbose:
-                print('Done.', flush=True)
+                message = 'Done. ({0} seconds.)'.format(delta_time)
+                print(message, flush=True)
 
         return result, log
 
@@ -258,10 +270,11 @@ class Metrics:
         fill_value - Value for filling NAs or method for filling in NAs
             (e.g. "ffill" for forward fill)
         """
-        df = ground_truth.merge(simulation,
-                                on = [c for c in ground_truth.columns if c != 'value'],
-                                suffixes = ('_gt','_sim'),
-                                how=join)
+
+        on = [c for c in ground_truth.columns if c!='value']
+        suffixes = ('_gt', '_sim')
+
+        df = ground_truth.merge(simulation, on=on, suffixes=suffixes, how=join)
         df = df.sort_values([c for c in ground_truth.columns if c != 'value'])
 
         try:
@@ -271,6 +284,18 @@ class Metrics:
             df = df.fillna(method=fill_value)
 
         return(df)
+
+
+    def rbo_weight(self, d, p):
+        # Weight given to the top d ranks for a given p
+        sum1 = 0.0
+        for i in range(1, d):
+            sum1 += np.power(p, i) / float(i)
+
+        wt = 1.0-np.power(p,(d-1))+(((1-p)/p)*d)*(np.log(1/(1-p))-sum1)
+
+        return wt
+
 
     """
     The remaining functions are metrics used in comparing the output of the
@@ -300,6 +325,7 @@ class Metrics:
             result = 100.0 * result / float(ground_truth)
 
         return result
+
 
     def kl_divergence(self, ground_truth, simulation, discrete=False):
         """
@@ -342,7 +368,8 @@ class Metrics:
             return None
 
 
-    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, discrete=False):
+    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, 
+        discrete=False):
         """
         Smoothed version of the KL divergence which smooths the simulation output
         to prevent infinities in the KL divergence output
@@ -520,18 +547,8 @@ class Metrics:
         return rbo_score
 
 
-    def rbo_weight(self, d, p):
-        # Weight given to the top d ranks for a given p
-        sum1 = 0.0
-        for i in range(1, d):
-            sum1 += np.power(p, i) / float(i)
-
-        wt = 1.0-np.power(p,(d-1))+(((1-p)/p)*d)*(np.log(1/(1-p))-sum1)
-
-        return wt
-
-
-    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, relative=False):
+    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, 
+        relative=False):
         """
         Root mean squared error
 
@@ -544,26 +561,37 @@ class Metrics:
         fill_value - fill value for non-overlapping joins
         """
 
-        if simulation is None or ground_truth is None:
-            return None
+        if type(ground_truth) is np.ndarray: 
+            result = ground_truth - simulation 
+            result = (result ** 2).mean()
+            result = np.sqrt(result)
+            return result
 
         if type(ground_truth) is list:
-    	    ground_truth = np.nan_to_num(ground_truth)
-    	    simulation = np.nan_to_num(simulation)
-    	    return np.sqrt(((np.asarray(ground_truth) - np.asarray(simulation)) ** 2).mean())
+            
+            ground_truth = np.nan_to_num(ground_truth)
+            simulation   = np.nan_to_num(simulation)
+            
+            result = np.asarray(ground_truth) - np.asarray(simulation)
+            result = (result ** 2).mean()
+            result = np.sqrt(result) 
+            
+            return result
 
-        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
+        df = self.join_dfs(ground_truth, simulation, join=join, 
+            fill_value=fill_value)
 
         if len(df.index) > 0:
             if not relative:
-                return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean())
+                return np.sqrt(((df["value_sim"]-df["value_gt"])**2).mean())
             else:
                 iq_range = float(iqr(df['value_gt'].values))
 
                 if iq_range > 0:
-                    return np.sqrt(((df["value_sim"] - df["value_gt"]) ** 2).mean()) / iq_range
-                else:
-                    return None
+                    result = df["value_sim"]-df["value_gt"]
+                    result = (result ** 2).mean()
+                    result = np.sqrt(result) / iq_range
+                    return result 
         else:
             return None
 

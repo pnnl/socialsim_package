@@ -2,12 +2,6 @@ from distutils.core import setup
 
 package_structure = ['socialsim',
                      'socialsim.measurements',
-                     'socialsim.measurements.cascade',
-                     'socialsim.measurements.cross_platform',
-                     'socialsim.measurements.group_formation',
-                     'socialsim.measurements.infospread',
-                     'socialsim.measurements.network',
-                     'socialsim.metrics',
                      'socialsim.visualizations',
 ]
 
@@ -22,17 +16,3 @@ setup(name='socialsim',
       )
 
 
-
-"""
-
-pandas
-scipy
-scikit-learn
-fastdtw
-python-igraph
-pysal
-<snap>
-
-
-
-"""

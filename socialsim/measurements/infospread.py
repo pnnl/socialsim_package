@@ -2,9 +2,15 @@ import pandas as pd
 import pickle as pkl
 import numpy  as np
 
-from ..measurements import MeasurementsBaseClass
-from ..validators   import check_empty
-from ..validators   import check_root_only
+from .measurements import MeasurementsBaseClass
+from .validators   import check_empty
+from .validators   import check_root_only
+
+"""
+Notes:
+    - If no metadata then run community measurements as if there is a single 
+    community containing every node.
+"""
 
 class InfospreadMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, metadata, platform,
@@ -71,13 +77,17 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metadata.use_content_data:
-            self.useContentMetaData = True
-            self.contentMetaData    = metadata.content_data
+        if metadata:
+            if metadata.use_content_data:
+                self.useContentMetaData = True
+                self.contentMetaData    = metadata.content_data
 
-        if metadata.use_user_data:
-            self.useUserMetaData = True
-            self.UserMetaData    = metadata.user_data
+            if metadata.use_user_data:
+                self.useUserMetaData = True
+                self.UserMetaData    = metadata.user_data
+        else:
+            self.useContentMetaData = False
+            self.useUserMetaData    = False
 
         # For community measurements
         # Load and preprocess metadata
@@ -378,6 +388,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
             return measurement
         else:
+            # Need to find out what warnings does
             warnings.warn('Skipping optional propIssueEventHelper')
             return None
 

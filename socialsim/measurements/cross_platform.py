@@ -31,6 +31,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.content_col        = content_col
         self.community_col      = community_col
 
+        self.measurement_type = 'cross_platform'
+
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
         elif node_list is not None:
@@ -89,7 +91,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         def platform_order(diction):
             plat_diction = {p: np.zeros((len(platforms))) for p in platforms}
-            for content, plat in diction.items():
+            for _, plat in diction.items():
                 for p in platforms:
                     pos, = np.where(plat == p)
                     plat_diction[p][pos] += 1
@@ -378,7 +380,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         def get_array(content_diction):
             arrays = {plat: np.zeros((len(content_diction.keys()))) for plat in platforms}
             index = 0
-            for time, plats in content_diction.items():
+            for _, plats in content_diction.items():
                 for p, value in plats.items():
                     arrays[p][index] = value
                 index += 1
@@ -411,8 +413,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
             all_platforms = get_array(content_over_time)
             matrix = np.zeros((len(platforms), len(platforms)))
-            for i, (p1, t1) in enumerate(all_platforms.items()):
-                for j, (p2, t2) in enumerate(all_platforms.items()):
+            for i, (_, t1) in enumerate(all_platforms.items()):
+                for j, (_, t2) in enumerate(all_platforms.items()):
                     pearson_corr = pearsonr(t1, t2)
                     matrix[i][j] = pearson_corr[0]
             return matrix
@@ -438,8 +440,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             content_to_correlation = {}
             for c, times in all_platforms.items():
                 matrix = np.zeros((len(platforms), len(platforms)))
-                for i, (p1, t1) in enumerate(times.items()):
-                    for j, (p2, t2) in enumerate(times.items()):
+                for i, (_, t1) in enumerate(times.items()):
+                    for j, (_, t2) in enumerate(times.items()):
                         pearson_corr = pearsonr(t1, t2)
                         matrix[i][j] = pearson_corr[0]
                 content_to_correlation[c] = matrix

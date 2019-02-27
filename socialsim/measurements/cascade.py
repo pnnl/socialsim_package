@@ -697,7 +697,6 @@ class SingleCascadeMeasurements:
 
         Output:
 
-
         :return: pandas dataframe with "breadth", "size", "structural_virality", "unique_nodes", "new_node_ratio" at each depth
         """
         self.main_df["depth"] = -1
@@ -708,11 +707,13 @@ class SingleCascadeMeasurements:
 
         seed_nodes = [self.cascade.root_node]
         depth = 1
+
         while len(seed_nodes) > 0:
             self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
                         self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
             seed_nodes = self.main_df[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
                         self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
+
             assert len(set(seed_nodes)) == len(seed_nodes)
             depth += 1
         depth_based_measurements = [[0,0,0,0,0,0]]
