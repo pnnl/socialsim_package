@@ -668,3 +668,25 @@ class Metrics:
         ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
         return ks_2samp(ground_truth,simulation).statistic
+
+
+    def distribution_metric(self, ground_truth, simulation, metric, **kwargs):
+        if "platform_2" in list(ground_truth):
+            group_cols = ["platform_1", "platform_2"]
+        else:
+            group_cols = ["platform"]
+        plt_1, plt_2, m = [], [], []
+        for (pls_1, gt), (pls_2, sim) in zip(ground_truth.groupby(group_cols), simulation.groupby(group_cols)):
+            plt_1.append(pls_1[0])
+            if len(group_cols) == 2:
+                plt_2.append(pls_1[1])
+            if metric == "kl":
+                m.append(self.kl_divergence(gt, sim, **kwargs))
+            elif metric == "kl_smoothed":
+                m.append(self.kl_divergence_smoothed(gt, sim, **kwargs))
+            elif metric == "js":
+                m.append(self.js_divergence(gt, sim, **kwargs))
+        if len(group_cols) == 2:
+            return pd.DataFrame({"platform_1":plt_1, "platform_2": plt_2, "metric": m})
+        else:
+            return pd.DataFrame({"platform": plt_1, "metric": m})

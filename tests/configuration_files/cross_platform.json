@@ -23,8 +23,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rmse": {
-                        "metric": "rmse",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -36,7 +38,9 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {
+                            "join": "outer"
+                        }
                     }
                 }
             },
@@ -59,8 +63,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -87,7 +93,9 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {
+                            "join": "outer"
+                        }
                     }
                 }
             },
@@ -102,7 +110,9 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {
+                            "join": "outer"
+                        }
                     }
                 }
             },
@@ -113,8 +123,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -128,7 +140,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -142,7 +154,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -156,7 +168,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -170,7 +182,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             }
@@ -197,8 +209,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -210,7 +224,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -233,8 +247,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -261,7 +277,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -276,7 +292,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -287,8 +303,10 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                        "metric": "distribution_metric",
+                        "metric_args": {
+                            "metric": "kl"
+                        }
                     }
                 }
             },
@@ -302,7 +320,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -316,7 +334,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -330,7 +348,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -344,7 +362,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             }
@@ -384,7 +402,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -435,7 +453,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
@@ -450,7 +468,7 @@
                 "metrics": {
                     "rmse": {
                         "metric": "rmse",
-                        "metric_args": {}
+                        "metric_args": {"join": "outer"}
                     }
                 }
             },
