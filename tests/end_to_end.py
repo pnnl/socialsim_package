@@ -19,7 +19,7 @@ def subset_for_test(dataset, n=1000):
 dataset_directory  = '/data/socialsim/dataset.txt'
 configuration_file = '/home/newz863/pic_drive/socialsim/repositories/stash/'
 configuration_file = configuration_file + 'socialsim_package/tests/'
-configuration_file = configuration_file + 'configuration_files/infospread.json'
+configuration_file = configuration_file + 'configuration_files/end_to_end.json'
 
 ground_truth = ss.load_data(dataset_directory, verbose=True)
 ground_truth = subset_for_test(ground_truth)

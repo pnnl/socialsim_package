@@ -475,8 +475,8 @@ class Cascade:
             if self.community_col in df.columns:
                 self.community = self.main_df[self.community_col].values[0]
 
-#            root_df = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]
-#            self.root_node = root_df[self.node_col].values[0]
+            #root_df = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]
+            #self.root_node = root_df[self.node_col].values[0]
             self.root_node = self.main_df[self.root_node_col].values[0]
             self.cascade_nx = igraph_from_pandas_edgelist(
                 self.main_df[self.main_df[self.node_col] != self.main_df[self.root_node_col]],
@@ -495,25 +495,23 @@ class Cascade:
     The methods below this line are all measurement functions.
     """
     def get_depth_of_each_node(self):
-        #print('start'+'-'*80)
-
         self.main_df.loc[:, "depth"] = -1
-
-        #print('stop'+'-'*80)
 
         self.main_df.loc[self.main_df[self.node_col] == self.root_node, 'depth'] = 0
         seed_nodes = [self.root_node]
         depth = 1
 
         while len(seed_nodes) > 0:
-            self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
-                        self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
-            seed_nodes = self.main_df[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
-                    self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
+            self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
+            seed_nodes = self.main_df[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
+
+            if not len(set(seed_nodes))==len(seed_nodes):
+                print(seed_nodes)
+                print(len(set(seed_nodes)))
+                print(len(seed_nodes))
+
             assert len(set(seed_nodes)) == len(seed_nodes)
             depth += 1
-
-
 
 
     @check_empty(default=None)
