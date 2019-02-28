@@ -32,7 +32,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         self.platform         = platform
 
 
-        # What are these used for?
         self.contribution_events = [
             'PullRequestEvent',
             'PushEvent',
@@ -45,7 +44,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
             'tweet'
             ]
 
-        # What are these used for?
         self.popularity_events = [
             'WatchEvent',
             'ForkEvent',
@@ -58,8 +56,9 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
         self.main_df = self.preprocess(dataset)
 
-        # store action and merged columns in a seperate data frame that is not used for most measurements
-        if platform == 'github' and len(self.main_df.columns) == 6 and 'action' in self.main_df.columns:
+        # store action and merged columns in a seperate data frame that is not 
+        # used for most measurements
+        if platform=='github' and len(self.main_df.columns)==6 and 'action' in self.main_df.columns:
             self.main_df_opt = self.main_df.copy()[['action', 'merged']]
             self.main_df = self.main_df.drop(['action', 'merged'], axis=1)
         else:
@@ -94,6 +93,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         if self.useUserMetaData and self.useContentMetaData:
             self.comDic = metadata.build_communities(self.contentMetaData,
                 self.UserMetaData)
+        else:
+            self.comDic = {}
 
         if self.platform=='github':
             self.communityDF = self.getCommmunityDF('community')
@@ -170,15 +171,21 @@ class InfospreadMeasurements(MeasurementsBaseClass):
                         d[community_col] = key
                         dfs.append(d)
 
-            return pd.concat(dfs)
+            if len(dfs)==0:
+                result = self.main_df.copy()
+                result['community'] = 'all'
+            else:
+                result = pd.concat(dfs)
+
+            return result
 
 
     def getCommunityMeasurementDict(self, dataset):
         measurements = {}
         if isinstance(dataset, pd.DataFrame):
-            for community in dataset.community.unique():
+            for community in dataset['community'].unique():
                 measurements[community]=dataset[dataset.community==community]
-                del measurements[community]["community"]
+                del measurements[community]['community']
         elif isinstance(dataset, pd.Series):
             series_output = False
             for community in dataset.index:
@@ -388,8 +395,6 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
             return measurement
         else:
-            # Need to find out what warnings does
-            warnings.warn('Skipping optional propIssueEventHelper')
             return None
 
 
@@ -778,7 +783,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
 
 
     @check_empty(default=None)
-    def getGiniCoef(self,nodeType='root', eventTypes=None, content_field="root"):
+    def getGiniCoef(self,nodeType='root', eventTypes=None, 
+        content_field="root"):
         """
         Wrapper function calculate the gini coefficient for the data frame.
         Question #6,14,26
@@ -792,7 +798,8 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         return result
 
 
-    def getGiniCoefHelper(self, df,nodeType,eventTypes=None,content_field="root"):
+    def getGiniCoefHelper(self, df, nodeType, eventTypes=None, 
+        content_field="root"):
         """
         This method returns the gini coefficient for the data frame.
         Question #6,14,26
@@ -1265,7 +1272,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         df['value'] = df['value'].dt.round('1H')
 
         if self.useUserMetaData:
-            df = df.merge(self.userMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
+            df = df.merge(self.UserMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
             df = df[['user','created_at','value']].dropna()
             measurement = df['value'].sub(df['created_at']).apply(lambda x: int(x / np.timedelta64(1, unit)))
         else:

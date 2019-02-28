@@ -125,7 +125,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param nodes: List of specific content
         :param communities: List of communities
         :return: If population, a DataFrame with columns platform_1, platform_2, and value
-                If community, a dictionary mapping a community to a a DataFrame with columns
+                If community, a dictionary mapping a community to a DataFrame with columns
                     platform_1, platform_2, and value
                 Else, a dictionary mapping a content to a list (equal in length to the number of platforms)
                 of the time passed since the first time that content was observed. This list is sorted alphabetically
@@ -221,19 +221,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         user_platform = user_platform.astype(bool)
 
         def get_meas(grp):
-            meas = np.zeros((len(platforms), len(platforms)))
+            pl_1, pl_2, val = [], [], []
             for i, p1 in enumerate(platforms):
                 for j, p2 in enumerate(platforms):
-                    if p1 == p2:
-                        x = 1.0
-                    else:
+                    if p1 != p2:
                         x = (grp[p1] & grp[p2]).sum()
                         total = float(grp[p1].sum())
                         if total > 0:
                             x = x / total
                         else:
                             x = 0
-                    meas[i][j] = x
+                        pl_1.append(p1)
+                        pl_2.append(p2)
+                        val.append(x)
+            meas = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+            meas = meas.drop_duplicates(subset=["platform_1", "platform_2"])
             return meas
 
         if len(nodes) != 0 or len(communities) != 0:
@@ -412,11 +414,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
 
             all_platforms = get_array(content_over_time)
-            matrix = np.zeros((len(platforms), len(platforms)))
-            for i, (_, t1) in enumerate(all_platforms.items()):
-                for j, (_, t2) in enumerate(all_platforms.items()):
+            pl_1, pl_2, val = [], [], []
+            for i, (p1, t1) in enumerate(all_platforms.items()):
+                for j, (p2, t2) in enumerate(all_platforms.items()):
                     pearson_corr = pearsonr(t1, t2)
-                    matrix[i][j] = pearson_corr[0]
+                    pl_1.append(p1)
+                    pl_2.append(p2)
+                    val.append(pearson_corr[0])
+            matrix = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return matrix
 
         else:
@@ -439,12 +444,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 all_platforms[content] = get_array(diction)
             content_to_correlation = {}
             for c, times in all_platforms.items():
-                matrix = np.zeros((len(platforms), len(platforms)))
-                for i, (_, t1) in enumerate(times.items()):
-                    for j, (_, t2) in enumerate(times.items()):
+                pl_1, pl_2, val = [], [], []
+                for i, (p1, t1) in enumerate(times.items()):
+                    for j, (p2, t2) in enumerate(times.items()):
                         pearson_corr = pearsonr(t1, t2)
-                        matrix[i][j] = pearson_corr[0]
-                content_to_correlation[c] = matrix
+                        pl_1.append(p1)
+                        pl_2.append(p2)
+                        val.append(pearson_corr[0])
+                content_to_correlation[c] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return content_to_correlation
 
     def lifetime_of_spread(self, nodes=[], communities=[]):
@@ -527,7 +534,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     count = len(sub_group[self.user_col].unique())
                 elif measure == "lifetime":
                     count = pd.Timedelta(
-                        sub_group[self.timestamp_col].iloc[-1] - sub_group[self.timestamp_col].iloc[0]).seconds
+                        sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds
                 elif measure == "speed":
                     denominator = pd.Timedelta(
                         sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds
@@ -537,7 +544,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         count = len(sub_group) / (pd.Timedelta(
                             sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds)
                 else:
-                    sys.exit("ERROR: Not a valid correlation option. Choices are: share, audience, lifetime, speed.")
+                    print("ERROR: Not a valid correlation option. Choices are: share, audience, lifetime, speed.")
+                    count = 0
                 plats[ix][j] = count
             return plats
 
@@ -554,17 +562,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if len(communities) > 0:
             community_correlations = {}
             for comm, plat_diction in community_to_plat.items():
-                matrix = np.zeros((len(platforms), len(platforms)))
+                pl_1, pl_2, val = [], [], []
                 for i, (p1, t1) in enumerate(plat_diction.items()):
                     for j, (p2, t2) in enumerate(plat_diction.items()):
                         pearson_corr = pearsonr(t1, t2)
-                        matrix[i][j] = pearson_corr[0]
-                community_correlations[comm] = matrix
+                        pl_1.append(p1)
+                        pl_2.append(p2)
+                        val.append(pearson_corr[0])
+                community_correlations[comm] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return community_correlations
         else:
-            matrix = np.zeros((len(platforms), len(platforms)))
+            pl_1, pl_2, val = [], [], []
             for i, (p1, t1) in enumerate(plat_counts.items()):
                 for j, (p2, t2) in enumerate(plat_counts.items()):
                     pearson_corr = pearsonr(t1, t2)
-                    matrix[i][j] = pearson_corr[0]
-            return matrix
+                    pl_1.append(p1)
+                    pl_2.append(p2)
+                    val.append(pearson_corr[0])
+            return pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
