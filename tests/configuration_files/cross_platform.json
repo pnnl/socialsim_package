@@ -23,7 +23,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rmse": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
@@ -63,7 +63,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
@@ -123,7 +123,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
@@ -209,7 +209,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
@@ -247,7 +247,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
@@ -303,7 +303,7 @@
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
-                        "metric": "distribution_metric",
+                        "metric": "platform_metrics",
                         "metric_args": {
                             "metric": "kl"
                         }
