@@ -188,7 +188,7 @@ class Metrics:
             self.record_keeper.tic(1)
 
             try:
-                if s in ['community']: #['node', 'community']:
+                if s in ['node', 'community']:
                     result = {}
                     for a in ground_truth.keys():
                         sub_result = metric_function(ground_truth[a], 

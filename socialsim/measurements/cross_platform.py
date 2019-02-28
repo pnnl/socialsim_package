@@ -34,7 +34,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'cross_platform'
 
-        if type(metadata) is None:
+        print(metadata)
+
+        if metadata is None:
             self.community_set = None
         else:
             self.community_set = metadata.communities
