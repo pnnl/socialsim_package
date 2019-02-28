@@ -171,15 +171,21 @@ class InfospreadMeasurements(MeasurementsBaseClass):
                         d[community_col] = key
                         dfs.append(d)
 
-            return pd.concat(dfs)
+            if len(dfs)==0:
+                result = self.main_df.copy()
+                result['community'] = 'all'
+            else:
+                result = pd.concat(dfs)
+
+            return result
 
 
     def getCommunityMeasurementDict(self, dataset):
         measurements = {}
         if isinstance(dataset, pd.DataFrame):
-            for community in dataset.community.unique():
+            for community in dataset['community'].unique():
                 measurements[community]=dataset[dataset.community==community]
-                del measurements[community]["community"]
+                del measurements[community]['community']
         elif isinstance(dataset, pd.Series):
             series_output = False
             for community in dataset.index:
@@ -1266,7 +1272,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         df['value'] = df['value'].dt.round('1H')
 
         if self.useUserMetaData:
-            df = df.merge(self.userMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
+            df = df.merge(self.UserMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
             df = df[['user','created_at','value']].dropna()
             measurement = df['value'].sub(df['created_at']).apply(lambda x: int(x / np.timedelta64(1, unit)))
         else:
