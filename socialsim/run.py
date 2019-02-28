@@ -9,10 +9,10 @@ from ast import literal_eval
 # Internal imports
 from .metrics import Metrics
 
-from .measurements import InfospreadMeasurements
-from .measurements import CascadeMeasurements
-from .measurements import NetworkMeasurements
-from .measurements import GroupFormationMeasurements
+from .measurements import SocialActivityMeasurements
+from .measurements import InformationCascadeMeasurements
+from .measurements import SocialStructureMeasurements
+from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
 
 from .load   import load_measurements
@@ -116,12 +116,12 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
         # Loop over measurement types
         for measurement_type in configuration[platform].keys():
-            if measurement_type=='infospread' or measurement_type=='baseline':
-                Measurement = InfospreadMeasurements
-            elif measurement_type=='cascade':
-                Measurement = CascadeMeasurements
-            elif measurement_type=='network':
-                Measurement = NetworkMeasurements
+            if measurement_type=='social_activity':
+                Measurement = SocialActivityMeasurements
+            elif measurement_type=='information_cascades':
+                Measurement = InformationCascadeMeasurements
+            elif measurement_type=='social_structure':
+                Measurement = SocialStructureMeasurements
             elif measurement_type=='cross_platform':
                 Measurement = CrossPlatformMeasurements
 
@@ -154,7 +154,10 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                     measurement_results, measurement_logs = measurement.run(**kwargs)
 
                 except Exception as error:
-                    measurement_logs    = {'status': 'Measurments object failed to run.', 'error': error}
+                    measurement_logs    = {
+                        'status': 'Measurments object failed to run.', 
+                        'error': error
+                        }
                     measurement_results = None
 
                     if verbose:
@@ -165,7 +168,10 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                         print('-'*80)
 
             except Exception as error:
-                measurement_logs    = {'status': 'Failed to instantiate measurements object', 'error': error}
+                measurement_logs    = {
+                    'status': 'Failed to instantiate measurements object', 
+                    'error': error
+                    }
                 measurement_results = None
                 
                 if verbose:

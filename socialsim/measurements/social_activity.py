@@ -12,7 +12,7 @@ Notes:
     community containing every node.
 """
 
-class InfospreadMeasurements(MeasurementsBaseClass):
+class SocialActivityMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, configuration, metadata, platform,
         content_node_ids=[], user_node_ids=[]):
         """
@@ -28,7 +28,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         """
         super().__init__(dataset, configuration)
 
-        self.measurement_type = 'infospread'
+        self.measurement_type = 'social_activity'
         self.platform         = platform
 
 
