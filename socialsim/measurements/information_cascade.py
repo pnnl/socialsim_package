@@ -10,7 +10,7 @@ from .validators   import check_empty
 from .validators   import check_root_only
 from .measurements import MeasurementsBaseClass
 
-class CascadeMeasurements(MeasurementsBaseClass):
+class InformationCascadeMeasurements(MeasurementsBaseClass):
     def __init__(self, main_df, configuration, metadata, platform,
         parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
         timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None,
@@ -30,8 +30,8 @@ class CascadeMeasurements(MeasurementsBaseClass):
         Outputs:
             None
         """
-        super(CascadeMeasurements, self).__init__(main_df, configuration,
-            log_file=log_file)
+        super(InformationCascadeMeasurements, self).__init__(main_df, 
+            configuration, log_file=log_file)
 
         self.measurement_type = 'cascade'
 

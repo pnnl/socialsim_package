@@ -11,18 +11,21 @@ import os
 
 from .measurements import MeasurementsBaseClass
 
-class NetworkMeasurements(MeasurementsBaseClass):
+class SocialStructureMeasurements(MeasurementsBaseClass):
     """
-    This class implements Network specific   measurements. It uses iGraph and SNAP libraries with Python interfaces.
-    For installation information please visit the websites for the two packages.
+    This class implements Network specific measurements. It uses iGraph and 
+    SNAP libraries with Python interfaces. For installation information please 
+    visit the websites for the two packages.
 
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, dataset, configuration, metadata, platform, test=False, log_file='network_measurements_log.txt'):
-        super(NetworkMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+    def __init__(self, dataset, configuration, metadata, platform, test=False, 
+        log_file='network_measurements_log.txt'):
+        super(SocialStructureMeasurements, self).__init__(dataset, 
+            configuration, log_file=log_file)
 
-        self.measurement_type = 'network'
+        self.measurement_type = 'social_structure'
         self.main_df = dataset
 
         if platform=='reddit':
@@ -84,7 +87,8 @@ class NetworkMeasurements(MeasurementsBaseClass):
     def github_build_undirected_graph(self, df, project_on='nodeID'):
         self.main_df = self.main_df[['nodeUserID','nodeID']]
 
-        left_nodes = np.array(self.main_df['nodeUserID'].unique().tolist())
+        # below line will be deleted if commenting it out produces no errors
+        # left_nodes = np.array(self.main_df['nodeUserID'].unique().tolist())
         right_nodes = np.array(self.main_df['nodeID'].unique().tolist())
         el = self.main_df.apply(tuple, axis=1).tolist()
         edgelist = list(set(el))
