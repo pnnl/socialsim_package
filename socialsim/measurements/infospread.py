@@ -1272,7 +1272,7 @@ class InfospreadMeasurements(MeasurementsBaseClass):
         df['value'] = df['value'].dt.round('1H')
 
         if self.useUserMetaData:
-            df = df.merge(self.userMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
+            df = df.merge(self.UserMetaData[['user','created_at']],left_on='user',right_on='user',how='left')
             df = df[['user','created_at','value']].dropna()
             measurement = df['value'].sub(df['created_at']).apply(lambda x: int(x / np.timedelta64(1, unit)))
         else:
