@@ -76,7 +76,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             data = self.dataset.copy()
         return data
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def order_of_spread(self, nodes=None, communities=None):
         """
         Determine the order of spread between platforms of a community/content
@@ -133,8 +136,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     val.extend(v)
                 return pd.DataFrame({"platform": plt_1, "value": val})
             return keywords_to_order
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def time_delta(self, time_granularity="s", nodes=None, communities=None):
         """
         Determine the amount of time it takes for a community/content to appear on another platform
@@ -205,7 +213,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 delta = pd.DataFrame({"platform_1": plt_1, "platform_2": plt_2, "value": deltas})
             return delta
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def overlapping_users(self, nodes=None, communities=None):
         """
         Calculate the percentage of users common to all platforms (that share in a community/content)
@@ -270,7 +281,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             meas = get_meas(user_platform)
         return meas
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def size_of_audience(self, nodes=None, communities=None):
         """
         Determine the ranking of audience sizes on each platform
@@ -305,7 +319,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             return data.groupby(group_col).apply(audience).to_dict()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def speed_of_spread(self, nodes=None, communities=None):
         """
         Determine the speed at which the information is spreading
@@ -356,7 +373,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             m = sum(speeds.values(), [])
             return pd.DataFrame({"platform": l, "value": m})
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def size_of_shares(self, nodes=None, communities=None):
         """
         Determine the number of shares per platform
@@ -388,9 +408,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                                   sorted(diction.items(), reverse=True, key=lambda kv: kv[1])]
         return plat_counts
 
+<<<<<<< HEAD
 
     def temporal_correlation(self, measure="share", time_granularity="D", 
         nodes=None, communities=None):
+=======
+    def temporal_correlation(self, measure="share", time_granularity="D", nodes=None, communities=None):
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
         """
         Calculates the correlation between the activity over time between all pairs of platforms
                 Github | Reddit | Twitter
@@ -501,8 +525,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 content_to_correlation[c] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return content_to_correlation
 
+<<<<<<< HEAD
 
     def lifetime_of_spread(self, nodes=None, communities=None):
+=======
+    def lifetime_of_spread(self, nodes=[], communities=None):
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
         """
         Ranks the different platforms based on the lifespan of content/community/population
         :param nodes: List of specific content
@@ -552,7 +580,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 community_diction[com_idx] = pd.DataFrame({"platform": plats, "value": lifetimes})
             return community_diction
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def correlation_of_information(self, measure="share", communities=None):
         """
         Compute Pearson correlation
