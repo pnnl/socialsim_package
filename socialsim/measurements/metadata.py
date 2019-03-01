@@ -5,7 +5,7 @@ import sys
 import datetime
 
 class MetaData:
-    def __init__(self, content_data=False, user_data=False, verbose=True):
+    def __init__(self, content_data=False, user_data=False, verbose=True, ):
         """
         Description:
 
@@ -17,9 +17,13 @@ class MetaData:
         if content_data!=False:
             self.use_content_data = True
 
-            if verbose: print('Loading content metadata... ', end='', flush=True)
+            if verbose: 
+                print('Loading content metadata... ', end='', flush=True)
+
             self.content_data = pd.read_csv(content_data)
-            if verbose: print('Done.', flush=True)
+
+            if verbose: 
+                print('Done.', flush=True)
 
             self.content_data = self.preprocessContentMeta(self.content_data)
         else:
@@ -80,6 +84,7 @@ class MetaData:
         print('Done.')
 
         return communities
+
 
     def preprocessContentMeta(self, dataset):
         dataset.columns = ['content', 'created_at', 'owner_id', 'language']

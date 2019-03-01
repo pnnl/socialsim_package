@@ -188,12 +188,12 @@ class Metrics:
             self.record_keeper.tic(1)
 
             try:
-                if s=='community':
+                if s in ['node', 'community']:
                     result = {}
-                    for community in ground_truth.keys():
-                        sub_result = metric_function(ground_truth[community], 
-                            simulation[community], **metric_args)
-                        result.update({community:sub_result})
+                    for a in ground_truth.keys():
+                        sub_result = metric_function(ground_truth[a], 
+                            simulation[a], **metric_args)
+                        result.update({a:sub_result})
                 else:
                     result = metric_function(ground_truth, simulation, 
                         **metric_args)

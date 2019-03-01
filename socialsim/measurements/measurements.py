@@ -5,7 +5,8 @@ import traceback
 from ..record import RecordKeeper
 
 class MeasurementsBaseClass:
-    def __init__(self, dataset, configuration, log_file='measurements_log.txt'):
+    def __init__(self, dataset, configuration, log=False, 
+        log_file='measurements_log.txt'):
         """
         Description: Base class for all measurements classes. Contains methods
             necessary for running all measurements.
@@ -129,7 +130,8 @@ class MeasurementsBaseClass:
             result = function(**function_arguments)
             log.update({'status' : 'success'})
 
-            self.record_keeper.update(function_name+' complete.')
+            if log:
+                self.record_keeper.update(function_name+' complete.')
         except Exception as error:
             result = None
             log.update({'status' : 'failure'})

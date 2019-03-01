@@ -10,7 +10,7 @@ from .validators   import check_empty
 from .validators   import check_root_only
 from .measurements import MeasurementsBaseClass
 
-class CascadeMeasurements(MeasurementsBaseClass):
+class InformationCascadeMeasurements(MeasurementsBaseClass):
     def __init__(self, main_df, configuration, metadata, platform,
         parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
         timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None,
@@ -30,12 +30,12 @@ class CascadeMeasurements(MeasurementsBaseClass):
         Outputs:
             None
         """
-        super(CascadeMeasurements, self).__init__(main_df, configuration,
-            log_file=log_file)
+        super(InformationCascadeMeasurements, self).__init__(main_df, 
+            configuration, log_file=log_file)
 
         self.measurement_type = 'cascade'
 
-        self.main_df         = main_df
+        self.main_df         = main_df.copy()
         self.root_node_col   = root_node_col
         self.parent_node_col = parent_node_col
         self.node_col        = node_col
@@ -43,6 +43,13 @@ class CascadeMeasurements(MeasurementsBaseClass):
         self.user_col        = user_col
         self.filter_on_col   = filter_on_col
         self.filter_in_list  = filter_in_list
+
+        columns = ['informationID', 'urlDomains', 'partialParentID']
+
+        self.main_df = self.main_df.drop(columns=columns)
+        self.main_df = self.main_df.drop_duplicates()
+
+        self.main_df.drop
 
         if len(self.main_df) > 0:
             # for reddit community measurements
@@ -69,11 +76,8 @@ class CascadeMeasurements(MeasurementsBaseClass):
         for cascade_identifier, cascade_df in self.main_df.groupby(self.root_node_col):
             if len(cascade_df[cascade_df[self.node_col] == cascade_df[self.root_node_col]].index) > 0:
                 self.scms[cascade_identifier] = SingleCascadeMeasurements(main_df=cascade_df,
-                                                                          parent_node_col=self.parent_node_col,
-                                                                          root_node_col=self.root_node_col,
-                                                                          node_col=self.node_col,
-                                                                          timestamp_col=self.timestamp_col,
-                                                                          user_col=self.user_col)
+                    parent_node_col=self.parent_node_col, root_node_col=self.root_node_col,
+                    node_col=self.node_col, timestamp_col=self.timestamp_col, user_col=self.user_col)
 
 
     @check_empty(default=None)
@@ -475,8 +479,8 @@ class Cascade:
             if self.community_col in df.columns:
                 self.community = self.main_df[self.community_col].values[0]
 
-#            root_df = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]
-#            self.root_node = root_df[self.node_col].values[0]
+            #root_df = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]
+            #self.root_node = root_df[self.node_col].values[0]
             self.root_node = self.main_df[self.root_node_col].values[0]
             self.cascade_nx = igraph_from_pandas_edgelist(
                 self.main_df[self.main_df[self.node_col] != self.main_df[self.root_node_col]],
@@ -495,25 +499,23 @@ class Cascade:
     The methods below this line are all measurement functions.
     """
     def get_depth_of_each_node(self):
-        #print('start'+'-'*80)
-
         self.main_df.loc[:, "depth"] = -1
-
-        #print('stop'+'-'*80)
 
         self.main_df.loc[self.main_df[self.node_col] == self.root_node, 'depth'] = 0
         seed_nodes = [self.root_node]
         depth = 1
 
         while len(seed_nodes) > 0:
-            self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
-                        self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
-            seed_nodes = self.main_df[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (
-                    self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
+            self.main_df.loc[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (self.main_df[self.node_col] != self.main_df[self.parent_node_col]), 'depth'] = depth
+            seed_nodes = self.main_df[(self.main_df[self.parent_node_col].isin(seed_nodes)) & (self.main_df[self.node_col] != self.main_df[self.parent_node_col])][self.node_col].values
+
+            if not len(set(seed_nodes))==len(seed_nodes):
+                print(seed_nodes)
+                print(len(set(seed_nodes)))
+                print(len(seed_nodes))
+
             assert len(set(seed_nodes)) == len(seed_nodes)
             depth += 1
-
-
 
 
     @check_empty(default=None)

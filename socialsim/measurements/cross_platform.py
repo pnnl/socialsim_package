@@ -8,11 +8,13 @@ from .measurements import MeasurementsBaseClass
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, meatadata=None, communities=None, platform_col="platform",
-                 timestamp_col="nodeTime", user_col="nodeUserID", content_col="informationID", community_col="community",
-                 log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
-        """
+    def __init__(self, dataset, configuration, metadata=None, 
+        platform_col="platform", timestamp_col="nodeTime", 
+        user_col="nodeUserID", content_col="informationID", 
+        community_col="community", node_list=None, community_list=None,
+        log_file='cross_platform_measurements_log.txt'):
 
+        """
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
         :param configuration:
         :param platform_col: name of the column containing the platforms
@@ -24,7 +26,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
         super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
         self.dataset            = dataset
-        self.community_set      = communities
         self.timestamp_col      = timestamp_col
         self.user_col           = user_col
         self.platform_col       = platform_col
@@ -33,6 +34,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'cross_platform'
 
+        if metadata is None:
+            self.community_set = None
+        else:
+            self.community_set = metadata.communities
+
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
         elif node_list is not None:
@@ -40,7 +46,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.node_list = []
 
-        if communities is not None:
+        if self.community_set is not None:
             if community_list == "all":
                 self.community_list = self.community_set[self.community_col].unique()
             elif community_list is not None:
@@ -579,4 +585,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     pl_1.append(p1)
                     pl_2.append(p2)
                     val.append(pearson_corr[0])
-            return pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+
+            result = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+
+            return result
