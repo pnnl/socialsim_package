@@ -519,8 +519,7 @@ class Metrics:
             p = 0 means only the first element is considered
             p = 1 means all ranks are weighted equally
         """
-
-        if type(ground_truth) is list:
+        if type(ground_truth) is list or type(ground_truth) is np.ndarray:
             pass
         else:
             if len(ground_truth.columns) == 2:
