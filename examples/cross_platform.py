@@ -1,7 +1,7 @@
 import socialsim as ss
 
 # Load the example dataset
-dataset = 'data/example_dataset.txt'
+dataset = 'data/debug_dataset.txt'
 dataset = ss.load_data(dataset)
 
 # Load the configuration file

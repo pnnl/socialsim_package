@@ -76,10 +76,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             data = self.dataset.copy()
         return data
 
-<<<<<<< HEAD
 
-=======
->>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def order_of_spread(self, nodes=None, communities=None):
         """
         Determine the order of spread between platforms of a community/content
@@ -208,10 +205,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 delta = pd.DataFrame({"platform_1": plt_1, "platform_2": plt_2, "value": deltas})
             return delta
 
-<<<<<<< HEAD
-
-=======
->>>>>>> fbd59e049ec0bac378c975cd8cc5f76c0c3827a4
     def overlapping_users(self, nodes=None, communities=None):
         """
         Calculate the percentage of users common to all platforms (that share in a community/content)
