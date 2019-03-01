@@ -1,26 +1,6 @@
 import csv
 import json
 
-def print_status(log):
-
-    return None
-
-def load_config(filepath):
-
-    with open(filepath) as f:
-
-    return config
-
-
-def config_count(filepath, level):
-
-    if level=='measurement':
-        for platform in
-
-
-    return count
-
-
 def csv_to_json(csv_location, meta_data, output_location=None):
     """
     Description: This file takes in a simulation CVS file and outputs a
@@ -82,3 +62,16 @@ def csv_to_json(csv_location, meta_data, output_location=None):
 
     with open(output_location,'w') as f:
         json.dump(submission, f)
+
+def subset_for_test(dataset, n=1000):
+    platforms = dataset['platform'].unique()
+
+    subsets = []
+    for platform in platforms:
+        subset = dataset[dataset['platform']==platform]
+        subset = subset.head(n=n)
+        subsets.append(subset)
+
+    subset = pd.concat(subsets, axis=0)
+
+    return subset

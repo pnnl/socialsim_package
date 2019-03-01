@@ -143,14 +143,14 @@ class Metrics:
 
         if ground_truth is None:
             log.update({'status' : 'failure'})
-            result = ground_truth
+            result = None
 
             return result, log
 
         if simulation is None:
             log.update({'status' : 'failure'})
-            result = simulation
-    
+            result = None
+
             return result, log
 
         # Loop over metrics
@@ -165,7 +165,7 @@ class Metrics:
                 message = message + '... '
                 print(message, end='', flush=True)
 
-            if 'metric_args' in configuration.keys():
+            if 'metric_args' in configuration['metrics'][metric].keys():
                 metric_args = configuration['metrics'][metric]['metric_args']
             else:
                 metric_args = {}
@@ -188,8 +188,15 @@ class Metrics:
             self.record_keeper.tic(1)
 
             try:
-                result = metric_function(ground_truth, simulation, 
-                    **metric_args)
+                if s in ['node', 'community']:
+                    result = {}
+                    for a in ground_truth.keys():
+                        sub_result = metric_function(ground_truth[a], 
+                            simulation[a], **metric_args)
+                        result.update({a:sub_result})
+                else:
+                    result = metric_function(ground_truth, simulation, 
+                        **metric_args)
             except Exception as error:
                 result = metric_name+' failed to run.'
 
@@ -301,6 +308,7 @@ class Metrics:
     The remaining functions are metrics used in comparing the output of the
     measurements code.
     """
+
 
     def absolute_difference(self, ground_truth, simulation):
         """
@@ -512,15 +520,18 @@ class Metrics:
             p = 1 means all ranks are weighted equally
         """
 
-        if len(ground_truth.columns) == 2:
-
-            entity = [c for c in ground_truth.columns if c != 'value'][0]
-
-            ground_truth = ground_truth[entity].tolist()
-            simulation = simulation[entity].tolist()
+        if type(ground_truth) is list:
+            pass
         else:
-            ground_truth = ground_truth.index.tolist()
-            simulation = simulation.index.tolist()
+            if len(ground_truth.columns) == 2:
+
+                entity = [c for c in ground_truth.columns if c != 'value'][0]
+
+                ground_truth = ground_truth[entity].tolist()
+                simulation = simulation[entity].tolist()
+            else:
+                ground_truth = ground_truth.index.tolist()
+                simulation = simulation.index.tolist()
 
         sl, ll = sorted([(len(ground_truth), ground_truth), (len(simulation), simulation)])
         s, S = sl
@@ -668,3 +679,42 @@ class Metrics:
         ground_truth, simulation = self.check_data_types(ground_truth, simulation)
 
         return ks_2samp(ground_truth,simulation).statistic
+
+
+    def platform_metrics(self, ground_truth, simulation, **kwargs):
+        """
+        Description:
+
+        Input:
+            :ground_truth:
+            :simulation:
+            :metric:
+
+        Output:
+        """
+        metric = kwargs.pop('metric')
+
+        if "platform_2" in list(ground_truth):
+            group_cols = ["platform_1", "platform_2"]
+        else:
+            group_cols = ["platform"]
+        
+        plt_1, plt_2, m = [], [], []
+
+        groups = zip(ground_truth.groupby(group_cols), 
+            simulation.groupby(group_cols))
+
+        for (pls_1, gt), (_, sim) in groups:
+            plt_1.append(pls_1[0])
+            if len(group_cols) == 2:
+                plt_2.append(pls_1[1])
+            if metric == "kl":
+                m.append(self.kl_divergence(gt, sim, **kwargs))
+            elif metric == "kl_smoothed":
+                m.append(self.kl_divergence_smoothed(gt, sim, **kwargs))
+            elif metric == "js":
+                m.append(self.js_divergence(gt, sim, **kwargs))
+        if len(group_cols) == 2:
+            return pd.DataFrame({"platform_1":plt_1, "platform_2": plt_2, "metric": m})
+        else:
+            return pd.DataFrame({"platform": plt_1, "metric": m})

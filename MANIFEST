@@ -7,12 +7,12 @@ socialsim/record.py
 socialsim/run.py
 socialsim/utils.py
 socialsim/measurements/__init__.py
-socialsim/measurements/cascade.py
 socialsim/measurements/cross_platform.py
-socialsim/measurements/group_formation.py
-socialsim/measurements/infospread.py
+socialsim/measurements/information_cascade.py
 socialsim/measurements/measurements.py
 socialsim/measurements/metadata.py
-socialsim/measurements/network.py
+socialsim/measurements/persistent_groups.py
+socialsim/measurements/social_activity.py
+socialsim/measurements/social_structure.py
 socialsim/measurements/validators.py
 socialsim/visualizations/__init__.py
