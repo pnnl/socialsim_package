@@ -62,3 +62,16 @@ def csv_to_json(csv_location, meta_data, output_location=None):
 
     with open(output_location,'w') as f:
         json.dump(submission, f)
+
+def subset_for_test(dataset, n=1000):
+    platforms = dataset['platform'].unique()
+
+    subsets = []
+    for platform in platforms:
+        subset = dataset[dataset['platform']==platform]
+        subset = subset.head(n=n)
+        subsets.append(subset)
+
+    subset = pd.concat(subsets, axis=0)
+
+    return subset

@@ -34,8 +34,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'cross_platform'
 
-        print(metadata)
-
         if metadata is None:
             self.community_set = None
         else:
@@ -587,4 +585,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     pl_1.append(p1)
                     pl_2.append(p2)
                     val.append(pearson_corr[0])
-            return pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+
+            result = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+
+            return result

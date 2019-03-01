@@ -1,4 +1,5 @@
 from .load import load_data
+from .load import load_config
 
 from .run  import TaskRunner
 from .run  import run_measurements
@@ -12,4 +13,4 @@ from .measurements import MetaData
 
 from .visualizations import generate_plot
 
-from .load import load_config
+from .utils import subset_for_test

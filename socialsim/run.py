@@ -17,6 +17,7 @@ from .measurements import CrossPlatformMeasurements
 
 from .load   import load_measurements
 from .record import RecordKeeper
+from .utils  import subset_for_test
 
 class TaskRunner:
     def __init__(self, ground_truth, configuration, metadata=None, test=False):
@@ -105,11 +106,12 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
         if platform=='cross_platform':
             dataset_subset = dataset
+
         else:
             dataset_subset = dataset[dataset['platform']==platform]
 
         if test:
-            dataset_subset = dataset_subset.head(n=1000)
+            dataset_subset = subset_for_test(dataset_subset)
 
         if verbose:
             print('Done.', flush=True)
