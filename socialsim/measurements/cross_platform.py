@@ -8,13 +8,11 @@ from .measurements import MeasurementsBaseClass
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, 
-        platform_col="platform", timestamp_col="nodeTime", 
-        user_col="nodeUserID", content_col="informationID", 
-        community_col="community", node_list=None, community_list=None,
-        log_file='cross_platform_measurements_log.txt'):
-
+    def __init__(self, dataset, configuration, metadata=None, platform_col="platform",
+                 timestamp_col="nodeTime", user_col="nodeUserID", content_col="informationID", community_col="community",
+                 log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
         """
+
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
         :param configuration:
         :param platform_col: name of the column containing the platforms
@@ -57,6 +55,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
+
     def select_data(self, nodes=None, communities=None):
         """
         Subset the data based on the given communities or pieces of content
@@ -77,6 +76,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             data = self.dataset.copy()
         return data
+
 
     def order_of_spread(self, nodes=None, communities=None):
         """
@@ -396,7 +396,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                                   sorted(diction.items(), reverse=True, key=lambda kv: kv[1])]
         return plat_counts
 
-    def temporal_correlation(self, measure="share", time_granularity="D", nodes=None, communities=None):
+
+    def temporal_correlation(self, measure="share", time_granularity="D", 
+        nodes=None, communities=None):
         """
         Calculates the correlation between the activity over time between all pairs of platforms
                 Github | Reddit | Twitter
@@ -425,32 +427,37 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
+        # Can we extract this function?
         def get_array(content_diction):
             arrays = {plat: np.zeros((len(content_diction.keys()))) for plat in platforms}
             index = 0
+
             for _, plats in content_diction.items():
                 for p, value in plats.items():
                     arrays[p][index] = value
                 index += 1
+
             return arrays
 
         platforms = sorted(data[self.platform_col].unique())
+
+        # I think this step needs to change. We cannot modify the dataframe within a measurement class
         if time_granularity == "D":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
         elif time_granularity == "H":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
         elif time_granularity == "M":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month,
-                                                                        day=x.day, hour=x.hour, min=x.minute))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour, min=x.minute))
+
         time_interval = data[self.timestamp_col].unique()
+
         if len(nodes) > 0:
             group_col = self.content_col
         if len(communities) > 0:
             group_col = self.community_col
+
         content_over_time = {}
+
         if len(nodes) == 0 and len(communities) == 0:  # Population level
             if measure == "share":
                 content_over_time = data.groupby(self.timestamp_col).apply(
@@ -460,14 +467,18 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
 
             all_platforms = get_array(content_over_time)
+
             pl_1, pl_2, val = [], [], []
+
             for i, (p1, t1) in enumerate(all_platforms.items()):
                 for j, (p2, t2) in enumerate(all_platforms.items()):
                     pearson_corr = pearsonr(t1, t2)
                     pl_1.append(p1)
                     pl_2.append(p2)
                     val.append(pearson_corr[0])
+
             matrix = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
+
             return matrix
 
         else:
@@ -500,7 +511,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 content_to_correlation[c] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return content_to_correlation
 
-    def lifetime_of_spread(self, nodes=[], communities=None):
+
+    def lifetime_of_spread(self, nodes=None, communities=None):
         """
         Ranks the different platforms based on the lifespan of content/community/population
         :param nodes: List of specific content
@@ -631,7 +643,4 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     pl_1.append(p1)
                     pl_2.append(p2)
                     val.append(pearson_corr[0])
-
-            result = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
-
-            return result
+            return pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
