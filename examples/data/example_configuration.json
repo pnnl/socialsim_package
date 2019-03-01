@@ -2129,8 +2129,8 @@
           },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
+            "rmse": {
+              "metric": "rmse",
               "metric_args": {}
             }
           }
@@ -2160,8 +2160,8 @@
           },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "rmse": {
-              "metric": "rmse",
+            "rbo": {
+              "metric": "rbo_score",
               "metric_args": {}
             }
           }

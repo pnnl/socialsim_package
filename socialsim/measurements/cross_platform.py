@@ -8,9 +8,11 @@ from .measurements import MeasurementsBaseClass
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, platform_col="platform",
-                 timestamp_col="nodeTime", user_col="nodeUserID", content_col="informationID", community_col="community",
-                 log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset, configuration, metadata=None, 
+        platform_col="platform", timestamp_col="nodeTime", 
+        user_col="nodeUserID", content_col="informationID", 
+        community_col="community", log_file='cross_platform_measurements_log.txt', 
+        node_list=None, community_list=None):
         """
 
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time

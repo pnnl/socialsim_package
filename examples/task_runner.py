@@ -9,7 +9,7 @@ ground_truth = 'data/debug_dataset.txt'
 ground_truth = ss.load_data(ground_truth)
 
 # Load the configuration file 
-config = 'example_configuration.json'
+config = 'data/example_configuration.json'
 config = ss.load_config(config)
 
 # Instantiate the task runner 
