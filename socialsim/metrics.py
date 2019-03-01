@@ -188,12 +188,12 @@ class Metrics:
             self.record_keeper.tic(1)
 
             try:
-                if s=='community':
+                if s in ['node','community']:
                     result = {}
-                    for community in ground_truth.keys():
-                        sub_result = metric_function(ground_truth[community], 
-                            simulation[community], **metric_args)
-                        result.update({community:sub_result})
+                    for a in ground_truth.keys():
+                        sub_result = metric_function(ground_truth[a],
+                            simulation[a], **metric_args)
+                        result.update({a:sub_result})
                 else:
                     result = metric_function(ground_truth, simulation, 
                         **metric_args)
@@ -519,8 +519,7 @@ class Metrics:
             p = 0 means only the first element is considered
             p = 1 means all ranks are weighted equally
         """
-
-        if type(ground_truth) is list:
+        if type(ground_truth) is list or type(ground_truth) is np.ndarray:
             pass
         else:
             if len(ground_truth.columns) == 2:
