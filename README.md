@@ -25,9 +25,11 @@ _______________________________________________________________________________
 
 ## Social Network Representation Files
 
-Submission files are made of individual json dictionaries on each line with a
-header json as the first entry. The minimal format is as shown below. Some 
-measurements may require additional fields.
+Dataset files are made of individual json dictionaries on each line with a
+header json as the first entry. 
+
+The minimal format is shown below. Some measurements may require additional 
+fields.
 
 ```python
 {'identifier': identifier, 'team': team, 'scenario': scenario}
