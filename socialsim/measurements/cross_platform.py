@@ -112,8 +112,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     plat_diction[k] = [0]*len(platforms)
                 else:
                     plat_diction[k] = v / v.sum(axis=0)
-            # for k, v in plat_diction.items():
-            #     plat_diction[k] = v.tolist()
             return plat_diction
 
         if len(communities) > 0:
@@ -124,18 +122,24 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             keywords_to_order = {}
             for comm, content_diction in community_platform_order.items():
                 keywords_to_order[comm] = platform_order(content_diction)
-            return keywords_to_order
+            plt_1, position, val = [], [], []
+            for k, v in keywords_to_order.items():
+                plt_1.extend([k] * len(v))
+                position.extend([1,2,3])
+                val.extend(v)
+            return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
         else:
             data.drop_duplicates(subset=[self.content_col, self.platform_col], inplace=True)
             data = data.groupby(self.content_col).apply(lambda x: x[self.platform_col].tolist())
             keywords_to_order = data.to_dict()
             if len(nodes) == 0 and len(communities) == 0:
-                plt_1, val = [], []
+                plt_1, position, val = [], [], []
                 keywords_to_order = platform_order(keywords_to_order)
                 for k, v in keywords_to_order.items():
                     plt_1.extend([k]*len(v))
+                    position.extend([1, 2, 3])
                     val.extend(v)
-                return pd.DataFrame({"platform": plt_1, "value": val})
+                return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
             return keywords_to_order
 
     def time_delta(self, time_granularity="s", nodes=None, communities=None):
@@ -304,12 +308,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         def audience(grp):
             aud = grp.groupby(self.platform_col).apply(lambda x: len(x[self.user_col].unique())).to_dict()
-            return [item[0] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
+            return [[item[0], item[1]] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
 
         if len(nodes) == 0 and len(communities) == 0:
             return audience(data)
         else:
-            return data.groupby(group_col).apply(audience).to_dict()
+            audience_diction = data.groupby(group_col).apply(audience).to_dict()
+            final_diction = {}
+            for name, sorted_list in audience_diction.items():
+                platform_list, value = [], []
+                for i in sorted_list:
+                    platform_list.append(i[0])
+                    value.append(i[1])
+                final_diction[name] = pd.DataFrame({"platform": platform_list, "value": value})
+            return final_diction
 
     def speed_of_spread(self, nodes=None, communities=None):
         """
