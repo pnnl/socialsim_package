@@ -1,4 +1,3 @@
-
 import sys
 import numpy as np
 import pandas as pd
@@ -8,11 +7,11 @@ from .measurements import MeasurementsBaseClass
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, 
-        platform_col="platform", timestamp_col="nodeTime", 
-        user_col="nodeUserID", content_col="informationID", 
-        community_col="community", log_file='cross_platform_measurements_log.txt', 
-        node_list=None, community_list=None):
+    def __init__(self, dataset, configuration, metadata=None,
+                 platform_col="platform", timestamp_col="nodeTime",
+                 user_col="nodeUserID", content_col="informationID",
+                 community_col="community", log_file='cross_platform_measurements_log.txt',
+                 node_list=None, community_list=None):
         """
 
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
@@ -25,12 +24,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param log_file:
         """
         super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
-        self.dataset            = dataset
-        self.timestamp_col      = timestamp_col
-        self.user_col           = user_col
-        self.platform_col       = platform_col
-        self.content_col        = content_col
-        self.community_col      = community_col
+        self.dataset = dataset
+        self.timestamp_col = timestamp_col
+        self.user_col = user_col
+        self.platform_col = platform_col
+        self.content_col = content_col
+        self.community_col = community_col
 
         self.measurement_type = 'cross_platform'
 
@@ -57,7 +56,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
-
     def select_data(self, nodes=None, communities=None):
         """
         Subset the data based on the given communities or pieces of content
@@ -78,7 +76,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             data = self.dataset.copy()
         return data
-
 
     def order_of_spread(self, nodes=None, communities=None):
         """
@@ -111,7 +108,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     plat_diction[p][pos] += 1
             for k, v in plat_diction.items():
                 if v.sum(axis=0) == 0:
-                    plat_diction[k] = [0]*len(platforms)
+                    plat_diction[k] = [0] * len(platforms)
                 else:
                     plat_diction[k] = v / v.sum(axis=0)
             return plat_diction
@@ -127,7 +124,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             plt_1, position, val = [], [], []
             for k, v in keywords_to_order.items():
                 plt_1.extend([k] * len(v))
-                position.extend([1,2,3])
+                position.extend([1, 2, 3])
                 val.extend(v)
             return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
         else:
@@ -138,7 +135,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 plt_1, position, val = [], [], []
                 keywords_to_order = platform_order(keywords_to_order)
                 for k, v in keywords_to_order.items():
-                    plt_1.extend([k]*len(v))
+                    plt_1.extend([k] * len(v))
                     position.extend([1, 2, 3])
                     val.extend(v)
                 return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
@@ -174,7 +171,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             group_col = [self.community_col, self.content_col, self.platform_col]
             data.drop_duplicates(subset=group_col, inplace=True)
             data = data.groupby(self.community_col).apply(
-                lambda x: x.groupby(self.content_col).apply(lambda y: y[[self.timestamp_col, self.platform_col]].values).to_dict())
+                lambda x: x.groupby(self.content_col).apply(
+                    lambda y: y[[self.timestamp_col, self.platform_col]].values).to_dict())
             time_delta = data.to_dict()
             delta = {}
             for comm, content_diction in time_delta.items():
@@ -186,7 +184,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         for i in range(1, len(v)):
                             plt_1.append(v[0][1])
                             plt_2.append(v[i][1])
-                            deltas.append((np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
+                            deltas.append(
+                                (np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
                 delta[comm] = pd.DataFrame({"platform_1": plt_1, "platform_2": plt_2, "value": deltas})
             return delta
         else:
@@ -200,7 +199,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 delta[k] = [0]
                 if len(v) > 1:
                     for i in range(1, len(v)):
-                        delta[k].append((np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
+                        delta[k].append(
+                            (np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
             if len(nodes) == 0 and len(communities) == 0:
                 plt_1 = []
                 plt_2 = []
@@ -358,7 +358,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
 
         def speed_distribution(grp):
-            aud = grp.groupby(self.platform_col).apply(lambda x: x.groupby(self.content_col).apply(check_zero_speed).tolist()).to_dict()
+            aud = grp.groupby(self.platform_col).apply(
+                lambda x: x.groupby(self.content_col).apply(check_zero_speed).tolist()).to_dict()
             return aud
 
         if len(communities) > 0:
@@ -410,9 +411,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                                   sorted(diction.items(), reverse=True, key=lambda kv: kv[1])]
         return plat_counts
 
-
-    def temporal_correlation(self, measure="share", time_granularity="D", 
-        nodes=None, communities=None):
+    def temporal_correlation(self, measure="share", time_granularity="D",
+                             nodes=None, communities=None):
         """
         Calculates the correlation between the activity over time between all pairs of platforms
                 Github | Reddit | Twitter
@@ -457,11 +457,15 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         # I think this step needs to change. We cannot modify the dataframe within a measurement class
         if time_granularity == "D":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
         elif time_granularity == "H":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
         elif time_granularity == "M":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour, min=x.minute))
+            data[self.timestamp_col] = data[self.timestamp_col].apply(
+                lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month, day=x.day,
+                                                                        hour=x.hour, min=x.minute))
 
         time_interval = data[self.timestamp_col].unique()
 
@@ -478,7 +482,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     lambda x: x[self.platform_col].value_counts().to_dict()).to_dict()
             else:
                 content_over_time = data.groupby(self.timestamp_col).apply(
-                    lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
+                    lambda x: x.groupby(self.platform_col).apply(
+                        lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
 
             all_platforms = get_array(content_over_time)
 
@@ -502,7 +507,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         lambda x: x[self.platform_col].value_counts().to_dict()).to_dict()
                 else:
                     platform_over_time = data.groupby(self.timestamp_col).apply(
-                        lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
+                        lambda x: x.groupby(self.platform_col).apply(
+                            lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
                 content_over_time[idx] = platform_over_time
                 for t in time_interval:
                     try:
@@ -524,7 +530,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         val.append(pearson_corr[0])
                 content_to_correlation[c] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             return content_to_correlation
-
 
     def lifetime_of_spread(self, nodes=None, communities=None):
         """
@@ -550,11 +555,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = self.select_data(nodes, communities)
 
         def lifetime(grp, indx, col):
-            aud = grp.groupby(col).apply(lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).to_dict()
+            aud = grp.groupby(col).apply(
+                lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).to_dict()
             return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
 
         def lifetime_distributions(grp):
-            return grp.groupby(self.content_col).apply(lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).tolist()
+            return grp.groupby(self.content_col).apply(
+                lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).tolist()
 
         if len(nodes) == 0 and len(communities) == 0:
             lifetimes = []
@@ -562,7 +569,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             for inx, group in data.groupby(self.platform_col):
                 life = lifetime_distributions(group)
                 lifetimes.extend(life)
-                plats.extend([inx]*len(life))
+                plats.extend([inx] * len(life))
             return pd.DataFrame({"platform": plats, "value": lifetimes})
         elif len(nodes) > 0:
             return data.groupby(self.content_col).apply(lifetime, indx=0, col=self.platform_col).to_dict()

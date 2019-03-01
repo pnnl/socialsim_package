@@ -2,6 +2,7 @@ from scipy.stats import entropy
 from scipy.stats import ks_2samp
 from scipy.stats import pearsonr
 from scipy.stats import iqr
+from scipy.stats import spearmanr
 
 from scipy.spatial.distance import euclidean
 from sklearn.metrics        import r2_score
@@ -717,3 +718,11 @@ class Metrics:
             return pd.DataFrame({"platform_1":plt_1, "platform_2": plt_2, "metric": m})
         else:
             return pd.DataFrame({"platform": plt_1, "metric": m})
+
+    def spearman(self, ground_truth, simulation, join="inner", fill_value=0):
+
+        df = self.join_dfs(ground_truth, simulation, join=join, fill_value=fill_value)
+        if len(df.index) > 0:
+            return spearmanr(df["value_gt"], df["value_sim"])
+        else:
+            return None
