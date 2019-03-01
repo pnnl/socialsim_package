@@ -35,7 +35,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.measurement_type = 'cross_platform'
 
         if metadata is None:
-            self.community_set = None
+            self.community_set = self.dataset
+            self.community_set[self.community_col] = "Default Community"
         else:
             self.community_set = metadata.communities
 
@@ -72,7 +73,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if len(nodes) > 0:
             data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
         elif len(communities) > 0:
-            data = self.community_set[self.community_set[self.community_col].isin(communities)]
+            data = self.community_set.loc[self.community_set[self.community_col].isin(communities)]
         else:
             data = self.dataset.copy()
         return data
@@ -91,9 +92,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if nodes is None:
             nodes = self.node_list
         elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
+            nodes = self.dataset[self.content_col].unique()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+
         data = self.select_data(nodes, communities)
         platforms = sorted(data[self.platform_col].unique())
 
@@ -134,7 +138,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 return pd.DataFrame({"platform": plt_1, "value": val})
             return keywords_to_order
 
-
     def time_delta(self, time_granularity="s", nodes=None, communities=None):
         """
         Determine the amount of time it takes for a community/content to appear on another platform
@@ -155,8 +158,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
-        # elif communities == "all":
-        #     communities = self.dataset[self.platform_col].tolist()
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+
         data = self.select_data(nodes, communities)
 
         data = data.sort_values(self.timestamp_col)
@@ -221,6 +225,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
         platforms = sorted(data[self.platform_col].unique())
         data['values'] = 1
@@ -285,6 +291,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         if len(communities) > 0:
@@ -319,6 +327,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         def check_zero_speed(row):
@@ -368,6 +378,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         if len(nodes) == 0 and len(communities) == 0:
@@ -409,6 +421,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         def get_array(content_diction):
@@ -505,6 +519,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         def lifetime(grp, indx, col):
@@ -552,6 +568,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(communities=communities)
 
         platforms = sorted(data[self.platform_col].unique())
