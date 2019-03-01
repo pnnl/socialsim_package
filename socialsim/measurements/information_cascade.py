@@ -35,7 +35,7 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'cascade'
 
-        self.main_df         = main_df
+        self.main_df         = main_df.copy()
         self.root_node_col   = root_node_col
         self.parent_node_col = parent_node_col
         self.node_col        = node_col
@@ -43,6 +43,13 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         self.user_col        = user_col
         self.filter_on_col   = filter_on_col
         self.filter_in_list  = filter_in_list
+
+        columns = ['informationID', 'urlDomains', 'partialParentID']
+
+        self.main_df = self.main_df.drop(columns=columns)
+        self.main_df = self.main_df.drop_duplicates()
+
+        self.main_df.drop
 
         if len(self.main_df) > 0:
             # for reddit community measurements
@@ -69,11 +76,8 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         for cascade_identifier, cascade_df in self.main_df.groupby(self.root_node_col):
             if len(cascade_df[cascade_df[self.node_col] == cascade_df[self.root_node_col]].index) > 0:
                 self.scms[cascade_identifier] = SingleCascadeMeasurements(main_df=cascade_df,
-                                                                          parent_node_col=self.parent_node_col,
-                                                                          root_node_col=self.root_node_col,
-                                                                          node_col=self.node_col,
-                                                                          timestamp_col=self.timestamp_col,
-                                                                          user_col=self.user_col)
+                    parent_node_col=self.parent_node_col, root_node_col=self.root_node_col,
+                    node_col=self.node_col, timestamp_col=self.timestamp_col, user_col=self.user_col)
 
 
     @check_empty(default=None)

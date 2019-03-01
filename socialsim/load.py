@@ -5,6 +5,21 @@ import csv
 import os
 import sys
 
+def load_config(filepath):
+    """
+    Description: Loads a json file. Really just a wrapper for the json package.
+
+    Input:
+        :filepath: (str) The filepath to the configuration file. 
+    Output:
+        :config: (dict) The configuration file loaded as a python dictionary. 
+
+    """
+    with open(filepath) as f:
+        config = json.load(f)
+
+    return config
+
 def load_measurements(filepath):
     """
     Description:
@@ -91,6 +106,8 @@ def validate_dataset(filepath, verbose):
     """
     Description: Checks a json submission file and for required fields.
 
+        Note: placeholder function, currently no validation actions are taken.
+
     Input:
         :filepath: (str) The filepath to the submission file.
 
@@ -98,7 +115,6 @@ def validate_dataset(filepath, verbose):
         :check: (bool) A True/False value indicating the success or failure of
                 the validation.
     """
-
     check = True
 
     return check

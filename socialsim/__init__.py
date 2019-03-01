@@ -11,3 +11,5 @@ from .measurements import CrossPlatformMeasurements
 from .measurements import MetaData
 
 from .visualizations import generate_plot
+
+from .load import load_config

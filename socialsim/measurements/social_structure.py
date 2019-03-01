@@ -28,6 +28,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         self.measurement_type = 'social_structure'
         self.main_df = dataset
 
+        
+
         if platform=='reddit':
             build_undirected_graph = self.reddit_build_undirected_graph
         elif platform=='twitter':
