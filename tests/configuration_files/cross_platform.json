@@ -8,9 +8,11 @@
                 "measurement_args": {},
                 "temporal_vs_batch": "Batch",
                 "metrics": {
-                    "rbo": {
-                        "metric": "rbo_score",
-                        "metric_args": {}
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "outer"
+                        }
                     }
                 }
             },
@@ -371,7 +373,9 @@
             "order_of_spread": {
                 "scale": "node",
                 "measurement": "order_of_spread",
-                "measurement_args": {},
+                "measurement_args": {
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
@@ -384,6 +388,7 @@
                 "scale": "node",
                 "measurement": "time_delta",
                 "measurement_args": {
+                    "nodes": "all",
                     "time_granularity": "s"
                 },
                 "temporal_vs_batch": "Batch",
@@ -397,7 +402,9 @@
             "overlapping_users": {
                 "scale": "node",
                 "measurement": "overlapping_users",
-                "measurement_args": {},
+                "measurement_args": {
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rmse": {
@@ -409,7 +416,9 @@
             "size_of_audience": {
                 "scale": "node",
                 "measurement": "size_of_audience",
-                "measurement_args": {},
+                "measurement_args": {
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
@@ -421,7 +430,9 @@
             "speed_of_spread": {
                 "scale": "node",
                 "measurement": "speed_of_spread",
-                "measurement_args": {},
+                "measurement_args": {
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
@@ -433,7 +444,9 @@
             "size_of_shares": {
                 "scale": "node",
                 "measurement": "size_of_shares",
-                "measurement_args": {},
+                "measurement_args": {
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
@@ -446,6 +459,7 @@
                 "scale": "node",
                 "measurement": "temporal_correlation",
                 "measurement_args": {
+                    "nodes": "all",
                     "measure": "share",
                     "time_granularity": "D"
                 },
@@ -461,6 +475,7 @@
                 "scale": "node",
                 "measurement": "temporal_correlation",
                 "measurement_args": {
+                    "nodes": "all",
                     "measure": "audience",
                     "time_granularity": "D"
                 },
@@ -475,7 +490,9 @@
             "lifetime_of_spread": {
                 "scale": "node",
                 "measurement": "lifetime_of_spread",
-                "measurement_args":{},
+                "measurement_args":{
+                    "nodes": "all"
+                },
                 "temporal_vs_batch": "Batch",
                 "metrics": {
                     "rbo": {
