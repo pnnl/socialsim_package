@@ -32,10 +32,9 @@ def add_communities_to_dataset(dataset, communities_directory):
 
     """
 
-    communities_dataset = []
+    community_dataset = []
 
     for community in os.listdir(communities_directory):
-        print(community)
         community_file = communities_directory+community
 
         with open(community_file) as f:
@@ -44,12 +43,12 @@ def add_communities_to_dataset(dataset, communities_directory):
         community_data = pd.DataFrame(community_data, columns=['informationID'])
         community_data['community'] = community[:-4]
 
+        community_dataset.append(community_data)
 
-        for informationID in community_data:
-            row = dataset.loc[dataset['informationID'] == informationID]
-            row = row.copy()
-            row['community'] = community
+    community_dataset = pd.concat(community_dataset)
+    community_dataset = community_dataset.replace(r'\n','', regex=True) 
 
-            communities_dataset.append(row)
+    dataset = dataset.merge(community_dataset, how='outer', on='informationID')
+    dataset = dataset.dropna()
 
     return dataset

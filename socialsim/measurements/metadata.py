@@ -5,7 +5,8 @@ import sys
 import datetime
 
 class MetaData:
-    def __init__(self, content_data=False, user_data=False, verbose=True, ):
+    def __init__(self, content_data=False, user_data=False, verbose=True, 
+        community_directory=None):
         """
         Description:
 
@@ -14,6 +15,11 @@ class MetaData:
         Output:
 
         """
+        if community_directory is None:
+            pass
+        else:
+            self.community_directory = community_directory
+
         if content_data!=False:
             self.use_content_data = True
 

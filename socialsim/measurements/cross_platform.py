@@ -6,13 +6,17 @@ from scipy.stats.stats import pearsonr
 
 from .measurements import MeasurementsBaseClass
 
+from ..utils import add_communities_to_dataset
+
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, platform_col="platform",
-                 timestamp_col="nodeTime", user_col="nodeUserID", content_col="informationID", community_col="community",
-                 log_file='cross_platform_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset, configuration, metadata=None, 
+        platform_col="platform", timestamp_col="nodeTime", 
+        user_col="nodeUserID", content_col="informationID", 
+        community_col="community", 
+        log_file='cross_platform_measurements_log.txt', 
+        node_list=None, community_list=None):
         """
-
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
         :param configuration:
         :param platform_col: name of the column containing the platforms
@@ -22,7 +26,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param community_col: name of the column containing the subset of content in a community
         :param log_file:
         """
-        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
+        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
+            log_file=log_file)
         self.dataset            = dataset
         self.timestamp_col      = timestamp_col
         self.user_col           = user_col
@@ -35,7 +40,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if metadata is None:
             self.community_set = None
         else:
-            self.community_set = metadata.communities
+            community_directory = metadata.community_directory
+            self.dataset = add_communities_to_dataset(dataset, 
+                community_directory)
+
+            self.community_set = self.dataset['community'].unique()
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
