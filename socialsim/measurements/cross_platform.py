@@ -3,6 +3,8 @@ import sys
 import numpy as np
 import pandas as pd
 from scipy.stats.stats import pearsonr
+from itertools import combinations
+import pprint
 
 from .measurements import MeasurementsBaseClass
 
@@ -32,10 +34,15 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.content_col        = content_col
         self.community_col      = community_col
 
+        self.dataset[self.community_col] = np.random.choice(['A','B','C'],len(self.dataset))
+
+        print(self.dataset)
+
         self.measurement_type = 'cross_platform'
 
         if metadata is None:
-            self.community_set = None
+#            self.community_set = None
+            self.community_set = self.dataset
         else:
             self.community_set = metadata.communities
 
@@ -76,6 +83,17 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             data = self.dataset.copy()
         return data
+
+    def time_granularity(self,time_diff,granularity):
+
+        if granularity.lower() == 's':
+            return time_diff.seconds
+        elif granularity.lower() == 'm':
+            return time_diff.minutes
+        elif granularity.lower() == 'h':
+            return time_diff.hours
+        elif granularity.lower() == 'd':
+            return time_diff.days
 
     def order_of_spread(self, nodes=None, communities=None):
         """
@@ -124,8 +142,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             data.drop_duplicates(subset=[self.content_col, self.platform_col], inplace=True)
             data = data.groupby(self.content_col).apply(lambda x: x[self.platform_col].tolist())
+            n_platforms = data.apply(len)
+            data = data[n_platforms > 1] 
             keywords_to_order = data.to_dict()
-            if len(nodes) == 0 and len(communities) == 0:
+            if len(nodes) == 0:
                 plt_1, val = [], []
                 keywords_to_order = platform_order(keywords_to_order)
                 for k, v in keywords_to_order.items():
@@ -157,53 +177,54 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_list
         # elif communities == "all":
         #     communities = self.dataset[self.platform_col].tolist()
+
+
         data = self.select_data(nodes, communities)
 
-        data = data.sort_values(self.timestamp_col)
-        if len(communities) > 0:
-            group_col = [self.community_col, self.content_col, self.platform_col]
-            data.drop_duplicates(subset=group_col, inplace=True)
-            data = data.groupby(self.community_col).apply(
-                lambda x: x.groupby(self.content_col).apply(lambda y: y[[self.timestamp_col, self.platform_col]].values).to_dict())
-            time_delta = data.to_dict()
-            delta = {}
-            for comm, content_diction in time_delta.items():
-                plt_1 = []
-                plt_2 = []
-                deltas = []
-                for k, v in content_diction.items():
-                    if len(v) > 1:
-                        for i in range(1, len(v)):
-                            plt_1.append(v[0][1])
-                            plt_2.append(v[i][1])
-                            deltas.append((np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
-                delta[comm] = pd.DataFrame({"platform_1": plt_1, "platform_2": plt_2, "value": deltas})
-            return delta
-        else:
+
+        if len(communities) == 0:
             group_col = [self.content_col, self.platform_col]
-            data.drop_duplicates(subset=group_col, inplace=True)
-            data.sort_values(by=[self.platform_col], inplace=True)
-            data = data.groupby(self.content_col).apply(lambda x: x[[self.timestamp_col, self.platform_col]].values)
-            time_delta = data.to_dict()
-            delta = {}
-            for k, v in time_delta.items():
-                delta[k] = [0]
-                if len(v) > 1:
-                    for i in range(1, len(v)):
-                        delta[k].append((np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
-            if len(nodes) == 0 and len(communities) == 0:
-                plt_1 = []
-                plt_2 = []
-                deltas = []
-                for k, v in time_delta.items():
-                    if len(v) > 1:
-                        for i in range(len(v)):
-                            plt_1.append(v[0][1])
-                            plt_2.append(v[i][1])
-                            deltas.append(
-                                (np.datetime64(v[i][0]) - np.datetime64(v[0][0])) / np.timedelta64(1, time_granularity))
-                delta = pd.DataFrame({"platform_1": plt_1, "platform_2": plt_2, "value": deltas})
-            return delta
+        else:
+            group_col = [self.content_col, self.community_col, self.platform_col]
+
+        data.drop_duplicates(subset=group_col, inplace=True)
+        data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
+                
+        print(data[group_col + [self.timestamp_col]])
+
+        group_col = [c for c in group_col if c != self.platform_col]
+
+        #get all pairs of timestamps in each group
+        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list).apply(pd.Series).stack().apply(pd.Series)
+        data_combinations.columns = [self.timestamp_col,'next_platform_timestamp']
+        #get time differences for each pair of time stamps
+        data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
+        data_combinations = data_combinations.reset_index()
+ 
+        #merge to get first platform
+        data_combinations = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
+                                                    on=group_col + [self.timestamp_col],how='left')
+
+        #merge to get second platform
+        data = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
+                                       right_on=group_col + [self.timestamp_col],
+                                       left_on=group_col + ['next_platform_timestamp'],
+                                       how='left',suffixes=('_first','_second'))
+
+        data = data[group_col + ['platform_first','platform_second','time_diff']]
+        data = data.rename(columns={'time_diff':'value'})
+
+        data['value'] = data['value'].apply(lambda x: self.time_granularity(x,time_granularity))
+
+        if len(nodes) > 0:
+            data = dict(tuple(data.groupby(self.content_col)))
+        elif len(communities) > 0:
+            data = dict(tuple(data[[self.community_col,'platform_first','platform_second','value']].groupby(self.community_col)))
+        else:
+            data = data[['platform_first','platform_second','value']]
+            
+        return(data)
+
 
     def overlapping_users(self, nodes=None, communities=None):
         """
@@ -222,11 +243,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if communities is None:
             communities = self.community_list
         data = self.select_data(nodes, communities)
+ 
         platforms = sorted(data[self.platform_col].unique())
+        
         data['values'] = 1
         data = data.drop_duplicates(subset=[self.user_col, self.platform_col])
         cols = [self.user_col, self.platform_col, 'values']
         index_cols = [self.user_col]
+
         if len(communities) > 0:
             cols = [self.user_col, self.platform_col, self.community_col, 'values']
             index_cols = [self.user_col, self.community_col]
@@ -242,6 +266,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                                                columns=self.platform_col,
                                                values='values').fillna(0)
         user_platform = user_platform.astype(bool)
+        
+        print(user_platform)
 
         def get_meas(grp):
             pl_1, pl_2, val = [], [], []
@@ -257,6 +283,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         pl_1.append(p1)
                         pl_2.append(p2)
                         val.append(x)
+
             meas = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
             meas = meas.drop_duplicates(subset=["platform_1", "platform_2"])
             return meas
@@ -304,6 +331,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             return data.groupby(group_col).apply(audience).to_dict()
 
     def speed_of_spread(self, nodes=None, communities=None):
+
         """
         Determine the speed at which the information is spreading
         :param nodes: List of nodes
@@ -321,37 +349,36 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_list
         data = self.select_data(nodes, communities)
 
-        def check_zero_speed(row):
-            time = (row[self.timestamp_col].max() - row[self.timestamp_col].min()).seconds
+        group_col = [self.content_col]
+        if len(communities) > 0:
+            group_col = [self.content_col,self.community_col]
+
+        def get_speed(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds / 60.0 / 60.0
             if time == 0:
                 speed = -1
             else:
-                speed = len(row) / time
+                speed = len(grp) / time
             return speed
 
-        def audience_over_time(grp, indx, col):
-            aud = grp.groupby(col).apply(check_zero_speed).to_dict()
-            return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
+        speeds = data.groupby(self.platform_col).apply(lambda x: x.groupby(group_col).apply(get_speed)).reset_index()
+        
+        if 0 not in speeds.columns:
+            speeds = pd.melt(speeds,id_vars=self.platform_col)
 
-        def speed_distribution(grp):
-            aud = grp.groupby(self.platform_col).apply(lambda x: x.groupby(self.content_col).apply(check_zero_speed).tolist()).to_dict()
-            return aud
-
-        if len(communities) > 0:
-            speeds = data.groupby(self.community_col).apply(speed_distribution).to_dict()
-            community_speeds = {}
-            for comm, dists in speeds.items():
-                l = sum([[k] * len(v) for k, v in dists.items()], [])
-                m = sum(dists.values(), [])
-                community_speeds[comm] = pd.DataFrame({"platform": l, "value": m})
-            return community_speeds
-        elif len(nodes) > 0:
-            return data.groupby(self.content_col).apply(audience_over_time, indx=0, col=self.platform_col).to_dict()
+        speeds.columns = [self.platform_col] + group_col + ['value']
+        speeds = speeds[speeds['value'] != -1]
+        
+        if len(nodes) > 0:
+            speeds = dict(tuple(speeds.groupby(self.content_col)))
+            speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
+        elif len(communities) > 0:
+            speeds = dict(tuple(speeds.groupby(self.community_col)[[self.platform_col,'value']]))
+            speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
         else:
-            speeds = speed_distribution(data)
-            l = sum([[k] * len(v) for k, v in speeds.items()], [])
-            m = sum(speeds.values(), [])
-            return pd.DataFrame({"platform": l, "value": m})
+            speeds = speeds[[self.platform_col,'value']]
+
+        return speeds
 
     def size_of_shares(self, nodes=None, communities=None):
         """
@@ -370,19 +397,25 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_list
         data = self.select_data(nodes, communities)
 
-        if len(nodes) == 0 and len(communities) == 0:
-            plat_counts = data[self.platform_col].value_counts().to_dict()
-            return [item[0] for item in sorted(plat_counts.items(), reverse=True, key=lambda kv: kv[1])]
-        elif len(nodes) > 0:
-            group_col = self.content_col
+
+        group_col = [self.content_col]
+        if len(communities) > 0:
+            group_col += [self.community_col]
+
+        share_counts = data.groupby([self.platform_col] + group_col)[self.timestamp_col].count().reset_index()
+        share_counts.columns = [self.platform_col] + group_col + ['value']
+        share_counts = share_counts.sort_values('value',ascending=False)
+
+        if len(nodes) > 0:
+            share_counts = dict(tuple(share_counts.groupby(self.content_col)))
+            share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
         elif len(communities) > 0:
-            group_col = self.community_col
-        plat_counts = {}
-        for index, group in data.groupby(group_col):
-            diction = group[self.platform_col].value_counts().to_dict()
-            plat_counts[index] = [item[0] for item in
-                                  sorted(diction.items(), reverse=True, key=lambda kv: kv[1])]
-        return plat_counts
+            share_counts = dict(tuple(share_counts.groupby([self.platform_col,self.community_col])['value'].mean().reset_index().groupby(self.community_col)))
+            share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
+        else:
+            share_counts = share_counts.groupby(self.platform_col)['value'].mean().reset_index()
+
+        return share_counts
 
     def temporal_correlation(self, measure="share", time_granularity="D", nodes=None, communities=None):
         """
