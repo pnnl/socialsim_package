@@ -2,6 +2,7 @@ from scipy.stats import entropy
 from scipy.stats import ks_2samp
 from scipy.stats import pearsonr
 from scipy.stats import iqr
+from scipy.stats import spearmanr
 
 from scipy.spatial.distance import euclidean
 from sklearn.metrics        import r2_score
@@ -358,6 +359,7 @@ class Metrics:
 
             ground_truth = np.histogram(ground_truth, bins=bins)[0]
             simulation = np.histogram(simulation, bins=bins)[0]
+
         else:
             df = ground_truth.merge(simulation,
                                     on=[c for c in ground_truth.columns if c != 'value'],
@@ -680,7 +682,7 @@ class Metrics:
         return ks_2samp(ground_truth,simulation).statistic
 
 
-    def platform_metrics(self, ground_truth, simulation, **kwargs):
+    def multi_distributions(self, ground_truth, simulation, **kwargs):
         """
         Description:
 
@@ -693,27 +695,40 @@ class Metrics:
         """
         metric = kwargs.pop('metric')
 
-        if "platform_2" in list(ground_truth):
-            group_cols = ["platform_1", "platform_2"]
-        else:
-            group_cols = ["platform"]
-        
-        plt_1, plt_2, m = [], [], []
+        cols = [c for c in ground_truth.columns if c != 'value']
 
-        groups = zip(ground_truth.groupby(group_cols), 
-            simulation.groupby(group_cols))
+        ground_truth['source'] = 'ground_truth'
+        simulation['source'] = 'simulation'
 
-        for (pls_1, gt), (_, sim) in groups:
-            plt_1.append(pls_1[0])
-            if len(group_cols) == 2:
-                plt_2.append(pls_1[1])
+        df = pd.concat([ground_truth,simulation])
+
+        grouped = df.groupby(cols)
+
+        metrics = []
+        for g, grp in grouped:
+            
+            gt = grp[grp['source'] == 'ground_truth']
+            sim = grp[grp['source'] == 'simulation']
+
             if metric == "kl":
-                m.append(self.kl_divergence(gt, sim, **kwargs))
+                m = self.kl_divergence(gt, sim, **kwargs)
             elif metric == "kl_smoothed":
-                m.append(self.kl_divergence_smoothed(gt, sim, **kwargs))
+                m = self.kl_divergence_smoothed(gt, sim, **kwargs)
             elif metric == "js":
-                m.append(self.js_divergence(gt, sim, **kwargs))
-        if len(group_cols) == 2:
-            return pd.DataFrame({"platform_1":plt_1, "platform_2": plt_2, "metric": m})
+                m = self.js_divergence(gt, sim, **kwargs)
+            elif metrics == 'ks':
+                m - self.ks_test(gt,sim, **kwargs)
+
+            if np.isfinite(m):
+                metrics.append(m)
+
+        return(np.mean(metrics))
+
+
+    def spearman(self, ground_truth, simulation, join="inner", fill_value=0):
+
+        df = self.join_dfs(ground_truth, simulation, join=join, fill_value=fill_value)
+        if len(df.index) > 0:
+            return spearmanr(df["value_gt"], df["value_sim"])
         else:
-            return pd.DataFrame({"platform": plt_1, "metric": m})
+            return None

@@ -20,3 +20,6 @@ cross_platform_measurements = ss.CrossPlatformMeasurements(dataset, config,
 
 # Run all measurements in the config file
 results = cross_platform_measurements.run(verbose=True)
+
+
+print(results[0]['community']['size_of_audience'])
