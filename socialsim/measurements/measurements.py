@@ -130,8 +130,6 @@ class MeasurementsBaseClass:
             result = function(**function_arguments)
             log.update({'status' : 'success'})
 
-            if log:
-                self.record_keeper.update(function_name+' complete.')
         except Exception as error:
             result = None
             log.update({'status' : 'failure'})

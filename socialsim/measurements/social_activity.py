@@ -341,7 +341,7 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             return burstiness
 
         b = df.groupby(community_field).apply(burstiness)
-        b.columns = ['community','value']
+        b.columns = ['community', 'value']
 
         measurement = self.getCommunityMeasurementDict(b)
 
