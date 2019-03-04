@@ -7,15 +7,25 @@ import pprint
 
 from .measurements import MeasurementsBaseClass
 
+from ..utils import add_communities_to_dataset
+
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
+<<<<<<< HEAD
     def __init__(self, dataset, configuration, metadata=None,
                  platform_col="platform", timestamp_col="nodeTime",
                  user_col="nodeUserID", content_col="informationID",
                  community_col="community", log_file='cross_platform_measurements_log.txt',
                  node_list=None, community_list=None):
+=======
+    def __init__(self, dataset, configuration, metadata=None, 
+        platform_col="platform", timestamp_col="nodeTime", 
+        user_col="nodeUserID", content_col="informationID", 
+        community_col="community", 
+        log_file='cross_platform_measurements_log.txt', 
+        node_list=None, community_list=None):
+>>>>>>> 6df11723ccc6070a661dc19a81be7cbd3b03f27f
         """
-
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
         :param configuration:
         :param platform_col: name of the column containing the platforms
@@ -25,6 +35,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param community_col: name of the column containing the subset of content in a community
         :param log_file:
         """
+<<<<<<< HEAD
         super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
         self.dataset = dataset
         self.timestamp_col = timestamp_col
@@ -33,6 +44,16 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.content_col = content_col
         self.community_col = community_col
 
+=======
+        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
+            log_file=log_file)
+        self.dataset            = dataset
+        self.timestamp_col      = timestamp_col
+        self.user_col           = user_col
+        self.platform_col       = platform_col
+        self.content_col        = content_col
+        self.community_col      = community_col
+>>>>>>> 6df11723ccc6070a661dc19a81be7cbd3b03f27f
 
         self.measurement_type = 'cross_platform'
 
@@ -40,7 +61,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
         else:
-            self.community_set = metadata.communities
+            community_directory = metadata.community_directory
+            self.dataset = add_communities_to_dataset(dataset, 
+                community_directory)
+
+            self.community_set = self.dataset['community'].unique()
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
