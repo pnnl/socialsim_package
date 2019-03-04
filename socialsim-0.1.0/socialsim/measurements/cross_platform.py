@@ -65,13 +65,22 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
-    def select_data(self,nodes=[], communities=[]):
+        return None
+
+
+    def select_data(self, node_level = False, community_level = False, 
+        nodes=[], communities=[]):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
         :param communities: List of communities
         :return: New DataFrame with the select communities/content only
         """
+
+        if nodes is None:
+            nodes = self.node_list
+        if communities is None:
+            communities = self.community_list
 
         if len(nodes) > 0:
             data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
@@ -106,18 +115,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def preprocess(self, node_level, nodes, community_level, communities):
 
         if node_level and len(nodes) == 0:
-           nodes = self.node_list
+            nodes = self.node_list
         elif node_level and nodes == "all":
-           nodes = self.dataset[self.content_col].unique()
-        elif not node_level:
-           nodes = []
-
+            nodes = self.dataset[self.content_col].unique()
         if community_level and len(communities) == 0:
-           communities = self.community_list
+            communities = self.community_list
         elif community_level and communities == "all":
-           communities = self.community_set[self.community_col].unique()
-        elif not community_level:
-           communities = []
+            communities = self.community_set[self.community_col].unique()
 
         data = self.select_data(nodes, communities)
 
@@ -564,11 +568,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
         if community_level and len(communities) == 0:
-           communities = self.community_list
+            communities = self.community_list
         elif community_level and communities == "all":
-           communities = self.community_set[self.community_col].unique()
-        elif not community_level:
-           communities = []
+            communities = self.community_set[self.community_col].unique()
 
         data = self.select_data(communities=communities)
 
