@@ -11,7 +11,7 @@ from ..utils import add_communities_to_dataset
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-   def __init__(self, dataset, configuration, metadata=None, 
+    def __init__(self, dataset, configuration, metadata=None, 
         platform_col="platform", timestamp_col="nodeTime", 
         user_col="nodeUserID", content_col="informationID", 
         community_col="community", 
@@ -27,8 +27,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param community_col: name of the column containing the subset of content in a community
         :param log_file:
         """
-       super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
-            log_file=log_file)
+        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
+                                                        log_file=log_file)
         self.dataset            = dataset
         self.timestamp_col      = timestamp_col
         self.user_col           = user_col
@@ -65,19 +65,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
-    def select_data(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[],nodes=None, communities=None):
+    def select_data(self,nodes=[], communities=[]):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
         :param communities: List of communities
         :return: New DataFrame with the select communities/content only
         """
-
-        if nodes is None:
-            nodes = self.node_list
-        if communities is None:
-            communities = self.community_list
 
         if len(nodes) > 0:
             data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
@@ -112,13 +106,18 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def preprocess(self, node_level, nodes, community_level, communities):
 
         if node_level and len(nodes) == 0:
-            nodes = self.node_list
+           nodes = self.node_list
         elif node_level and nodes == "all":
-            nodes = self.dataset[self.content_col].unique()
+           nodes = self.dataset[self.content_col].unique()
+        elif not node_level:
+           nodes = []
+
         if community_level and len(communities) == 0:
-            communities = self.community_list
+           communities = self.community_list
         elif community_level and communities == "all":
-            communities = self.community_set[self.community_col].unique()
+           communities = self.community_set[self.community_col].unique()
+        elif not community_level:
+           communities = []
 
         data = self.select_data(nodes, communities)
 
@@ -136,7 +135,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 Else, a dictionary mapping between the content to the ranked list of platforms
         """
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
         
         platforms = sorted(data[self.platform_col].unique())
 
@@ -212,7 +211,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 to preserve the same ordering of platforms in all cases. This can causes negative times.
         """
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         if len(communities) == 0:
             group_col = [self.content_col, self.platform_col]
@@ -267,7 +266,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 share in that community/content across all pairs of platforms
         """
  
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         platforms = sorted(data[self.platform_col].unique())
         
@@ -330,7 +329,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     audience sizes.
         """
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
         if len(communities) > 0:
@@ -368,7 +367,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 Else, a dictionary mapping each content to the ranked list of platforms on which it spreads the fastest
         """
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
         if len(communities) > 0:
@@ -413,7 +412,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
 
         group_col = [self.content_col]
@@ -455,7 +454,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     Else, a dictionary mapping a community/content to the matrix of correlations
         """
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -516,7 +515,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
 
-        data = preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
 
         group_col = [self.content_col]
@@ -565,9 +564,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
         if community_level and len(communities) == 0:
-            communities = self.community_list
+           communities = self.community_list
         elif community_level and communities == "all":
-            communities = self.community_set[self.community_col].unique()
+           communities = self.community_set[self.community_col].unique()
+        elif not community_level:
+           communities = []
 
         data = self.select_data(communities=communities)
 
