@@ -27,9 +27,9 @@ class TaskRunner:
             specified by the configuration dictionary.
 
         Inputs:
-            :ground_truth:
-            :metadata:
-            :configuration:
+            :ground_truth: (pd.DataFrame)
+            :metadata: (ss.MetaData)
+            :configuration: (dict)
         Outputs:
             None
         """
