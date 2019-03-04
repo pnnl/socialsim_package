@@ -76,7 +76,7 @@ class TaskRunner:
         # Log results at the task level
         results = {
             'simulation_results'   : simulation_results, 
-            'ground_truth_results' : ground_truth_results
+            'ground_truth_results' : ground_truth_results,
             'metrics'              : metrics
         }
 
