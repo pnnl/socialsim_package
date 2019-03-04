@@ -2109,7 +2109,8 @@
         "overlapping_users": {
           "scale": "community",
           "measurement": "overlapping_users",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"},
           "temporal_vs_batch": "Batch",
           "metrics": {
             "rmse": {
@@ -2123,11 +2124,13 @@
         "order_of_spread": {
           "scale": "community",
           "measurement": "order_of_spread",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"
+          },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
+            "rmse": {
+              "metric": "rmse",
               "metric_args": {}
             }
           }
@@ -2136,6 +2139,7 @@
           "scale": "community",
           "measurement": "time_delta",
           "measurement_args": {
+            "communities": "all",
             "time_granularity": "s"
           },
           "temporal_vs_batch": "Batch",
@@ -2151,11 +2155,13 @@
         "size_of_audience": {
           "scale": "community",
           "measurement": "size_of_audience",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"
+          },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "rmse": {
-              "metric": "rmse",
+            "rbo": {
+              "metric": "rbo_score",
               "metric_args": {}
             }
           }
@@ -2163,7 +2169,9 @@
         "speed_of_spread": {
           "scale": "community",
           "measurement": "speed_of_spread",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"
+          },
           "temporal_vs_batch": "Batch",
           "metrics": {
             "rbo": {
@@ -2177,7 +2185,9 @@
         "size_of_shares": {
           "scale": "community",
           "measurement": "size_of_shares",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"
+          },
           "temporal_vs_batch": "Batch",
           "metrics": {
             "rbo": {
@@ -2190,6 +2200,7 @@
           "scale": "community",
           "measurement": "temporal_correlation",
           "measurement_args": {
+            "communities": "all",
             "measure": "share",
             "time_granularity": "D"
           },
@@ -2207,6 +2218,7 @@
           "scale": "community",
           "measurement": "temporal_correlation",
           "measurement_args": {
+            "communities": "all",
             "measure": "audience",
             "time_granularity": "D"
           },
@@ -2223,7 +2235,8 @@
         "lifetime_of_spread": {
           "scale": "community",
           "measurement": "lifetime_of_spread",
-          "measurement_args": {},
+          "measurement_args": {
+            "communities": "all"},
           "temporal_vs_batch": "Batch",
           "metrics": {
             "rbo": {
@@ -2238,6 +2251,7 @@
           "scale": "community",
           "measurement": "correlation_of_information",
           "measurement_args": {
+            "communities": "all",
             "measure": "share"
           },
           "temporal_vs_batch": "Batch",
@@ -2254,6 +2268,7 @@
           "scale": "community",
           "measurement": "correlation_of_information",
           "measurement_args": {
+            "communities": "all",
             "measure": "audience"
           },
           "temporal_vs_batch": "Batch",
@@ -2270,6 +2285,7 @@
           "scale": "community",
           "measurement": "correlation_of_information",
           "measurement_args": {
+            "communities": "all",
             "measure": "lifetime"
           },
           "temporal_vs_batch": "Batch",
@@ -2286,6 +2302,7 @@
           "scale": "community",
           "measurement": "correlation_of_information",
           "measurement_args": {
+            "communities": "all",
             "measure": "speed"
           },
           "temporal_vs_batch": "Batch",
