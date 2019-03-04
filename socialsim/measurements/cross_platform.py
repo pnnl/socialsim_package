@@ -39,8 +39,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if metadata is None:
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
-            self.community_set[self.community_col] = np.random.choice(['A','B','C'],len(self.dataset))
-
         else:
             self.community_set = metadata.communities
 
