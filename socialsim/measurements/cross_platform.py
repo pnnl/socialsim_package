@@ -1,8 +1,7 @@
-
 import sys
 import numpy as np
 import pandas as pd
-from scipy.stats.stats import pearsonr
+from scipy.stats.stats import pearsonr, spearmanr
 from itertools import combinations
 import pprint
 
@@ -10,13 +9,13 @@ from .measurements import MeasurementsBaseClass
 
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, 
-        platform_col="platform", timestamp_col="nodeTime", 
-        user_col="nodeUserID", content_col="informationID", 
-        community_col="community", node_list=None, community_list=None,
-        log_file='cross_platform_measurements_log.txt'):
-
+    def __init__(self, dataset, configuration, metadata=None,
+                 platform_col="platform", timestamp_col="nodeTime",
+                 user_col="nodeUserID", content_col="informationID",
+                 community_col="community", log_file='cross_platform_measurements_log.txt',
+                 node_list=None, community_list=None):
         """
+
         :param dataset: dataframe containing all pieces of content and associated data, sorted by time
         :param configuration:
         :param platform_col: name of the column containing the platforms
@@ -27,22 +26,23 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param log_file:
         """
         super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
-        self.dataset            = dataset
-        self.timestamp_col      = timestamp_col
-        self.user_col           = user_col
-        self.platform_col       = platform_col
-        self.content_col        = content_col
-        self.community_col      = community_col
+        self.dataset = dataset
+        self.timestamp_col = timestamp_col
+        self.user_col = user_col
+        self.platform_col = platform_col
+        self.content_col = content_col
+        self.community_col = community_col
 
-        self.dataset[self.community_col] = np.random.choice(['A','B','C'],len(self.dataset))
 
         print(self.dataset)
 
         self.measurement_type = 'cross_platform'
 
         if metadata is None:
-#            self.community_set = None
             self.community_set = self.dataset
+            self.community_set[self.community_col] = "Default Community"
+            self.community_set[self.community_col] = np.random.choice(['A','B','C'],len(self.dataset))
+
         else:
             self.community_set = metadata.communities
 
@@ -79,7 +79,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if len(nodes) > 0:
             data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
         elif len(communities) > 0:
-            data = self.community_set[self.community_set[self.community_col].isin(communities)]
+            data = self.community_set.loc[self.community_set[self.community_col].isin(communities)]
         else:
             data = self.dataset.copy()
         return data
@@ -109,9 +109,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if nodes is None:
             nodes = self.node_list
         elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
+            nodes = self.dataset[self.content_col].unique()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+
         data = self.select_data(nodes, communities)
         platforms = sorted(data[self.platform_col].unique())
 
@@ -123,11 +126,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                     plat_diction[p][pos] += 1
             for k, v in plat_diction.items():
                 if v.sum(axis=0) == 0:
-                    plat_diction[k] = [0]*len(platforms)
+                    plat_diction[k] = [0] * len(platforms)
                 else:
                     plat_diction[k] = v / v.sum(axis=0)
-            # for k, v in plat_diction.items():
-            #     plat_diction[k] = v.tolist()
             return plat_diction
 
         if len(communities) > 0:
@@ -138,22 +139,28 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             keywords_to_order = {}
             for comm, content_diction in community_platform_order.items():
                 keywords_to_order[comm] = platform_order(content_diction)
-            return keywords_to_order
+            plt_1, position, val = [], [], []
+            for k, v in keywords_to_order.items():
+                plt_1.extend([k] * len(v))
+                position.extend([1, 2, 3])
+                val.extend(v)
+            return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
         else:
             data.drop_duplicates(subset=[self.content_col, self.platform_col], inplace=True)
             data = data.groupby(self.content_col).apply(lambda x: x[self.platform_col].tolist())
             n_platforms = data.apply(len)
             data = data[n_platforms > 1] 
             keywords_to_order = data.to_dict()
-            if len(nodes) == 0:
-                plt_1, val = [], []
+
+            if len(nodes) == 0 and len(communities) == 0:
+                plt_1, position, val = [], [], []
                 keywords_to_order = platform_order(keywords_to_order)
                 for k, v in keywords_to_order.items():
-                    plt_1.extend([k]*len(v))
+                    plt_1.extend([k] * len(v))
+                    position.extend([1, 2, 3])
                     val.extend(v)
-                return pd.DataFrame({"platform": plt_1, "value": val})
+                return pd.DataFrame({"platform": plt_1, "position": position, "value": val})
             return keywords_to_order
-
 
     def time_delta(self, time_granularity="s", nodes=None, communities=None):
         """
@@ -175,8 +182,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
-        # elif communities == "all":
-        #     communities = self.dataset[self.platform_col].tolist()
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
 
 
         data = self.select_data(nodes, communities)
@@ -242,6 +249,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
  
         platforms = sorted(data[self.platform_col].unique())
@@ -312,6 +321,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         if len(communities) > 0:
@@ -323,12 +334,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         def audience(grp):
             aud = grp.groupby(self.platform_col).apply(lambda x: len(x[self.user_col].unique())).to_dict()
-            return [item[0] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
+            return [[item[0], item[1]] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
 
         if len(nodes) == 0 and len(communities) == 0:
             return audience(data)
         else:
-            return data.groupby(group_col).apply(audience).to_dict()
+            audience_diction = data.groupby(group_col).apply(audience).to_dict()
+            final_diction = {}
+            for name, sorted_list in audience_diction.items():
+                platform_list, value = [], []
+                for i in sorted_list:
+                    platform_list.append(i[0])
+                    value.append(i[1])
+                final_diction[name] = pd.DataFrame({"platform": platform_list, "value": value})
+            return final_diction
 
     def speed_of_spread(self, nodes=None, communities=None):
 
@@ -347,6 +366,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
         group_col = [self.content_col]
@@ -395,6 +416,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
         data = self.select_data(nodes, communities)
 
 
@@ -417,7 +440,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         return share_counts
 
-    def temporal_correlation(self, measure="share", time_granularity="D", nodes=None, communities=None):
+    def temporal_correlation(self, measure="share", time_granularity="D",
+                             nodes=None, communities=None):
         """
         Calculates the correlation between the activity over time between all pairs of platforms
                 Github | Reddit | Twitter
@@ -442,88 +466,60 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+        
         data = self.select_data(nodes, communities)
 
-        def get_array(content_diction):
-            arrays = {plat: np.zeros((len(content_diction.keys()))) for plat in platforms}
-            index = 0
-            for _, plats in content_diction.items():
-                for p, value in plats.items():
-                    arrays[p][index] = value
-                index += 1
-            return arrays
-
         platforms = sorted(data[self.platform_col].unique())
-        if time_granularity == "D":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}'.format(year=x.year, month=x.month, day=x.day))
-        elif time_granularity == "H":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}:{hour}'.format(year=x.year, month=x.month, day=x.day, hour=x.hour))
-        elif time_granularity == "M":
-            data[self.timestamp_col] = data[self.timestamp_col].apply(
-                lambda x: '{year}-{month:02}-{day}:{hour}:{min}'.format(year=x.year, month=x.month,
-                                                                        day=x.day, hour=x.hour, min=x.minute))
-        time_interval = data[self.timestamp_col].unique()
-        if len(nodes) > 0:
-            group_col = self.content_col
+
+        data = data.set_index(self.timestamp_col)
+        
+        group_col = [self.content_col]
         if len(communities) > 0:
-            group_col = self.community_col
-        content_over_time = {}
-        if len(nodes) == 0 and len(communities) == 0:  # Population level
-            if measure == "share":
-                content_over_time = data.groupby(self.timestamp_col).apply(
-                    lambda x: x[self.platform_col].value_counts().to_dict()).to_dict()
-            else:
-                content_over_time = data.groupby(self.timestamp_col).apply(
-                    lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
+            group_col += [self.community_col]
 
-            all_platforms = get_array(content_over_time)
-            pl_1, pl_2, val = [], [], []
-            for i, (p1, t1) in enumerate(all_platforms.items()):
-                for j, (p2, t2) in enumerate(all_platforms.items()):
-                    pearson_corr = pearsonr(t1, t2)
-                    pl_1.append(p1)
-                    pl_2.append(p2)
-                    val.append(pearson_corr[0])
-            matrix = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
-            return matrix
-
+        if measure == 'share':
+            data = data.groupby(group_col + [self.platform_col,pd.Grouper(freq=time_granularity)])['nodeUserID'].count().reset_index()
         else:
-            for idx, group in data.groupby(group_col):
-                if measure == "share":
-                    platform_over_time = data.groupby(self.timestamp_col).apply(
-                        lambda x: x[self.platform_col].value_counts().to_dict()).to_dict()
-                else:
-                    platform_over_time = data.groupby(self.timestamp_col).apply(
-                        lambda x: x.groupby(self.platform_col).apply(lambda y: len(y[self.user_col].unique())).to_dict()).to_dict()
-                content_over_time[idx] = platform_over_time
-                for t in time_interval:
-                    try:
-                        _ = content_over_time[idx][t]
-                    except KeyError:
-                        content_over_time[idx][t] = {plat: 0 for plat in platforms}
+            data = data.groupby(group_col + [self.platform_col,pd.Grouper(freq=time_granularity)])['nodeUserID'].nunique().reset_index()
 
-            all_platforms = {}
-            for content, diction in content_over_time.items():
-                all_platforms[content] = get_array(diction)
-            content_to_correlation = {}
-            for c, times in all_platforms.items():
-                pl_1, pl_2, val = [], [], []
-                for i, (p1, t1) in enumerate(times.items()):
-                    for j, (p2, t2) in enumerate(times.items()):
-                        pearson_corr = pearsonr(t1, t2)
-                        pl_1.append(p1)
-                        pl_2.append(p2)
-                        val.append(pearson_corr[0])
-                content_to_correlation[c] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
-            return content_to_correlation
+        data = data.rename(columns={'nodeUserID':'value'})
 
-    def lifetime_of_spread(self, nodes=[], communities=None):
+        data = pd.pivot_table(data,values='value',index= group_col + [self.timestamp_col],columns=self.platform_col).fillna(0).reset_index()
+                
+        dfs = []
+        for i, p1 in enumerate(platforms):
+            for j,p2 in enumerate(platforms[i+1:]):
+                df = data.groupby(group_col).apply(lambda x: pearsonr(x[p1],x[p2])[0]).reset_index()
+                df.columns = group_col + ['value']
+                df['platform1'] = p1
+                df['platform2'] = p2
+
+                dfs.append(df)
+                
+        data = pd.concat(dfs)
+        data = data.dropna()
+
+        if len(nodes) > 0:
+            corr = dict(tuple(data.groupby(self.content_col)))
+        elif len(communities) > 0:
+            data = data.drop(self.content_col,axis=1)
+            corr = dict(tuple(data.groupby([self.community_col])))
+            corr = {k:v.drop(self.community_col,axis=1) for k,v in corr.items()}
+        else:
+            corr = data.drop(self.content_col,axis=1)
+
+        return corr
+
+        
+
+    def lifetime_of_spread(self, nodes=None, communities=None,time_unit='H'):
         """
         Ranks the different platforms based on the lifespan of content/community/population
         :param nodes: List of specific content
         :param communities: List of communities
+        :param time_unit: Unit of time to measure lifetime, e.g. 'S','M','H','D'
         :return: If population, a DataFrame (columns = platform, value)
                 If community, a  dictionary mapping each community to a DataFrame (columns= platform, value)
                 If nodes, returns a dictionary mapping each piece of information to a ranked list of platforms
@@ -538,38 +534,48 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             nodes = self.dataset[self.content_col].tolist()
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+
         data = self.select_data(nodes, communities)
 
-        def lifetime(grp, indx, col):
-            aud = grp.groupby(col).apply(lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).to_dict()
-            return [item[indx] for item in sorted(aud.items(), reverse=True, key=lambda kv: kv[1])]
 
-        def lifetime_distributions(grp):
-            return grp.groupby(self.content_col).apply(lambda x: (x[self.timestamp_col].max() - x[self.timestamp_col].min()).seconds).tolist()
+        group_col = [self.content_col]
+        if len(communities) > 0:
+            group_col = [self.content_col,self.community_col]
 
-        if len(nodes) == 0 and len(communities) == 0:
-            lifetimes = []
-            plats = []
-            for inx, group in data.groupby(self.platform_col):
-                life = lifetime_distributions(group)
-                lifetimes.extend(life)
-                plats.extend([inx]*len(life))
-            return pd.DataFrame({"platform": plats, "value": lifetimes})
-        elif len(nodes) > 0:
-            return data.groupby(self.content_col).apply(lifetime, indx=0, col=self.platform_col).to_dict()
+        def get_lifetime(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            if time_unit == 'M':
+                time /= 60.0
+            if time_unit == 'H':
+                time /= 60.0*60.0
+            if time_unit == 'D':
+                time /= 60.0*60.0*24.0
+
+            return time
+
+        lifetimes = data.groupby(self.platform_col).apply(lambda x: x.groupby(group_col).apply(get_lifetime)).reset_index()
+        
+        if 0 not in lifetimes.columns:
+            lifetimes = pd.melt(lifetimes,id_vars=self.platform_col)
+
+        lifetimes.columns = [self.platform_col] + group_col + ['value']
+        lifetimes = lifetimes[lifetimes['value'] != -1]
+        
+        if len(nodes) > 0:
+            lifetimes = dict(tuple(lifetimes.groupby(self.content_col)))
+            lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
         elif len(communities) > 0:
-            community_diction = {}
-            for com_idx, community in data.groupby(self.community_col):
-                lifetimes = []
-                plats = []
-                for inx, group in community.groupby(self.platform_col):
-                    life = lifetime_distributions(group)
-                    lifetimes.extend(life)
-                    plats.extend([inx] * len(life))
-                community_diction[com_idx] = pd.DataFrame({"platform": plats, "value": lifetimes})
-            return community_diction
+            lifetimes = dict(tuple(lifetimes.groupby(self.community_col)[[self.platform_col,'value']]))
+            lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
+        else:
+            lifetimes = lifetimes[[self.platform_col,'value']]
 
-    def correlation_of_information(self, measure="share", communities=None):
+        return lifetimes
+
+
+    def correlation_of_information(self, measure="share", communities=None,time_unit='H'):
         """
         Compute Pearson correlation
         1. Correlation between shares of information across platforms
@@ -578,6 +584,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         4. Correlation between speeds of information across platforms
         :param measure: What to measure: number of share, audience, lifetime, or speed?
         :param communities: List of communities
+        :param time_unit: time unit for speed and lifetime measures
         :return: If population, a matrix of correlations between all platforms based on the measure provided
                 If community, a dictionary mapping each community to a matrix of correlations between all platforms
                     based on the measure provided.
@@ -585,68 +592,72 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         if communities is None:
             communities = self.community_list
+        elif communities == "all":
+            communities = self.community_set[self.community_col].unique()
+
         data = self.select_data(communities=communities)
 
-        platforms = sorted(data[self.platform_col].unique())
-        if len(communities) > 0:
-            group_col = self.community_col
-        else:
-            group_col = self.platform_col
 
-        def get_measurement(grp, ix, plats):
-            for j, (idx, sub_group) in enumerate(grp.groupby(self.content_col)):
-                if measure == "share":
-                    count = len(sub_group)
-                elif measure == "audience":
-                    count = len(sub_group[self.user_col].unique())
-                elif measure == "lifetime":
-                    count = pd.Timedelta(
-                        sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds
-                elif measure == "speed":
-                    denominator = pd.Timedelta(
-                        sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds
-                    if denominator == 0:  # Happens when a piece of content only appears once on a platform
-                        count = 0
-                    else:
-                        count = len(sub_group) / (pd.Timedelta(
-                            sub_group[self.timestamp_col].max() - sub_group[self.timestamp_col].min()).seconds)
-                else:
-                    print("ERROR: Not a valid correlation option. Choices are: share, audience, lifetime, speed.")
-                    count = 0
-                plats[ix][j] = count
-            return plats
-
-        plat_counts = {plat: np.zeros((len(data))) for plat in platforms}
-        community_to_plat = {}
-        for index, group in data.groupby(group_col):
-            if len(communities) > 0:
-                community_to_plat[index] = plat_counts
-                for plat_index, plat_group in group.groupby(self.platform_col):
-                    community_to_plat[index] = get_measurement(plat_group, plat_index, community_to_plat[index])
+        def get_speed(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = get_granularity(time,time_unit)
+            if time == 0:
+                speed = -1
             else:
-                plat_counts = get_measurement(group, index, plat_counts)
+                speed = len(grp) / time
+            return speed
 
+        def get_lifetime(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = get_granularity(time,time_unit)
+            return time
+
+        platforms = sorted(data[self.platform_col].unique())
+
+        group_col = [self.content_col, self.platform_col]
         if len(communities) > 0:
-            community_correlations = {}
-            for comm, plat_diction in community_to_plat.items():
-                pl_1, pl_2, val = [], [], []
-                for i, (p1, t1) in enumerate(plat_diction.items()):
-                    for j, (p2, t2) in enumerate(plat_diction.items()):
-                        pearson_corr = pearsonr(t1, t2)
-                        pl_1.append(p1)
-                        pl_2.append(p2)
-                        val.append(pearson_corr[0])
-                community_correlations[comm] = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
-            return community_correlations
+            group_col += [self.community_col]
+
+        if measure == 'share':
+            data = data.groupby(group_col)['nodeUserID'].count()
+        elif measure == 'audience':
+            data = data.groupby(group_col)['nodeUserID'].nunique()
+        elif measure == 'lifetime':
+            data = data.groupby(group_col).apply(get_lifetime)
+        elif measure == 'speed':
+            data = data.groupby(group_col).apply(get_speed)
+
+        data.name = 'value'
+        data = data.reset_index()
+
+
+        def get_ranking_correlations(grp):
+
+            grp = pd.pivot_table(grp,index=self.platform_col,values='value',columns=self.content_col).fillna(0)
+
+            platform1s = []
+            platform2s = []
+            corrs = []
+
+            for i,p1 in enumerate(platforms):
+                for p2 in platforms[i+1:]:
+                
+                    corr = spearmanr(grp.loc[p1].values,grp.loc[p2].values)[0]
+
+                    platform1s.append(p1)
+                    platform2s.append(p2)
+                    corrs.append(corr)
+            
+            corr = pd.DataFrame({'platform1':platform1s,'platform2':platform2s,'value':corrs})
+            
+            return corr
+
+        if len(communities) == 0:
+            corr = get_ranking_correlations(data)
         else:
-            pl_1, pl_2, val = [], [], []
-            for i, (p1, t1) in enumerate(plat_counts.items()):
-                for j, (p2, t2) in enumerate(plat_counts.items()):
-                    pearson_corr = pearsonr(t1, t2)
-                    pl_1.append(p1)
-                    pl_2.append(p2)
-                    val.append(pearson_corr[0])
+            
+            corr = data.groupby(self.community_col).apply(get_ranking_correlations).reset_index()
+            corr = dict(tuple(corr.groupby(self.community_col)))
+            corr = {k:v[['platform1','platform2','value']] for k,v in corr.items()}
 
-            result = pd.DataFrame({"platform_1": pl_1, "platform_2": pl_2, "value": val})
-
-            return result
+        return corr
