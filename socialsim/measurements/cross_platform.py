@@ -37,16 +37,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.community_col      = community_col
 
         self.measurement_type = 'cross_platform'
-
+        
         if metadata is None:
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
         else:
             community_directory = metadata.community_directory
-            self.dataset = add_communities_to_dataset(dataset, 
+            self.community_set = add_communities_to_dataset(dataset, 
                 community_directory)
-
-            self.community_set = self.dataset['community'].unique()
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
@@ -175,7 +173,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
                 #normalize by the total count across all platforms
                 grp = pd.pivot_table(grp,index='platform',values='count',columns='rank').fillna(0)
-                grp = grp / grp.sum(axis=0)
+                grp = grp.div(grp.sum(axis=1),axis=0)
                 cols = grp.columns
                 
                 grp = pd.melt(grp.reset_index(),id_vars=['platform'],value_vars=cols)
@@ -218,13 +216,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             group_col = [self.content_col, self.community_col, self.platform_col]
 
+
         data.drop_duplicates(subset=group_col, inplace=True)
         data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
                 
         group_col = [c for c in group_col if c != self.platform_col]
+        
 
         #get all pairs of timestamps in each group
-        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list).apply(pd.Series).stack().apply(pd.Series)
+        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list)
+        lengths = data_combinations.apply(len)
+        if (lengths > 1).sum() == 0:
+            return None
+
+        data_combinations = data_combinations.apply(pd.Series).stack().apply(pd.Series)
         data_combinations.columns = [self.timestamp_col,'next_platform_timestamp']
         #get time differences for each pair of time stamps
         data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
