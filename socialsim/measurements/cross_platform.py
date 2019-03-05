@@ -41,25 +41,24 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if metadata is None:
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
+
+            if node_list == "all":
+                self.node_list = self.dataset[self.content_col].tolist()
+            elif node_list is not None:
+                self.node_list = node_list
+            else:
+                self.node_list = []
         else:
             community_directory = metadata.community_directory
             self.community_set = add_communities_to_dataset(dataset, 
                 community_directory)
-
-        if node_list == "all":
-            self.node_list = self.dataset[self.content_col].tolist()
-        elif node_list is not None:
-            self.node_list = node_list
-        else:
-            self.node_list = []
+            self.node_list = metadata.node_list
 
         if self.community_set is not None:
-            if community_list == "all":
-                self.community_list = self.community_set[self.community_col].unique()
-            elif community_list is not None:
+            if community_list is not None and len(community_list) > 0:
                 self.community_list = community_list
             else:
-                self.community_list = []
+                self.community_list = self.community_set[self.community_col].unique()
         else:
             self.community_list = []
 
@@ -140,7 +139,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = data.sort_values(self.timestamp_col)
         
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         data = data.drop_duplicates(subset=[self.content_col,self.platform_col])
@@ -148,7 +147,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         #create column with list of platforms in order of appearance of the info ID
         data = data.groupby(group_col)[self.platform_col].apply(list).reset_index()
 
-        if len(nodes) == 0:
+        if not node_level:
 
             data = data[data[self.platform_col].apply(len) > 1]
             
@@ -180,7 +179,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
                 return(grp)
 
-            if len(communities) == 0:
+            if not community_level:
                 data = get_order_counts(data)
             else:
                 data = data.groupby(self.community_col).apply(get_order_counts).reset_index()
@@ -211,7 +210,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
-        if len(communities) == 0:
+        if not community_level:
             group_col = [self.content_col, self.platform_col]
         else:
             group_col = [self.content_col, self.community_col, self.platform_col]
@@ -250,9 +249,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data['value'] = data['value'].apply(lambda x: self.get_time_diff_granularity(x,time_granularity))
 
-        if len(nodes) > 0:
+        if node_level:
             data = dict(tuple(data.groupby(self.content_col)))
-        elif len(communities) > 0:
+        elif community_level:
             data = dict(tuple(data[[self.community_col,'platform_first','platform_second','value']].groupby(self.community_col)))
         else:
             data = data[['platform_first','platform_second','value']]
@@ -280,11 +279,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         cols = [self.user_col, self.platform_col, 'values']
         index_cols = [self.user_col]
 
-        if len(communities) > 0:
+        if community_level:
             cols = [self.user_col, self.platform_col, self.community_col, 'values']
             index_cols = [self.user_col, self.community_col]
             group_col = self.community_col
-        elif len(nodes) > 0:
+        elif node_level:
             cols = [self.user_col, self.platform_col, self.content_col, 'values']
             index_cols = [self.user_col, self.content_col]
             group_col = self.content_col
@@ -315,7 +314,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             meas = meas.drop_duplicates(subset=["platform_1", "platform_2"])
             return meas
 
-        if len(nodes) != 0 or len(communities) != 0:
+        if node_level or community_level:
             meas = {}
             for i, grp in user_platform.groupby(group_col):
                 meas[i] = get_meas(grp)
@@ -337,7 +336,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         aud = data.groupby(self.platform_col).apply(lambda x: x.groupby(group_col)[self.user_col].nunique()).reset_index()
@@ -348,14 +347,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         aud.columns = [self.platform_col] + group_col + ['value']
         aud = aud[aud['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = aud.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            aud = aud.merge(counts,on=self.content_col)
+            aud = aud[aud['count'] > 1]
+
             aud = dict(tuple(aud.groupby(self.content_col)))
             aud = {k:v[[self.platform_col,'value']] for k,v in aud.items()}
-        elif len(communities) > 0:
-            aud = dict(tuple(aud.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            aud = aud.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+            aud = dict(tuple(aud.groupby(self.community_col)))
             aud = {k:v[[self.platform_col,'value']] for k,v in aud.items()}
         else:
-            aud = aud[[self.platform_col,'value']]
+            aud = aud[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return aud
 
@@ -375,7 +381,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         def get_speed(grp):
@@ -395,14 +401,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         speeds.columns = [self.platform_col] + group_col + ['value']
         speeds = speeds[speeds['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = speeds.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            speeds = speeds.merge(counts,on=self.content_col)
+            speeds = speeds[speeds['count'] > 1]
+
             speeds = dict(tuple(speeds.groupby(self.content_col)))
             speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
-        elif len(communities) > 0:
-            speeds = dict(tuple(speeds.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            speeds = speeds.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+            speeds = dict(tuple(speeds.groupby(self.community_col)))
             speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
         else:
-            speeds = speeds[[self.platform_col,'value']]
+            speeds = speeds[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return speeds
 
@@ -421,17 +434,24 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         share_counts = data.groupby([self.platform_col] + group_col)[self.timestamp_col].count().reset_index()
         share_counts.columns = [self.platform_col] + group_col + ['value']
         share_counts = share_counts.sort_values('value',ascending=False)
 
-        if len(nodes) > 0:
+        if node_level:
+            counts = share_counts.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            share_counts = share_counts.merge(counts,on=self.content_col)
+            share_counts = share_counts[share_counts['count'] > 1]
+
+
             share_counts = dict(tuple(share_counts.groupby(self.content_col)))
             share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
-        elif len(communities) > 0:
+        elif community_level:
             share_counts = dict(tuple(share_counts.groupby([self.platform_col,self.community_col])['value'].mean().reset_index().groupby(self.community_col)))
             share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
         else:
@@ -466,7 +486,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = data.set_index(self.timestamp_col)
         
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         if measure == 'share':
@@ -491,9 +511,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = pd.concat(dfs)
         data = data.dropna()
 
-        if len(nodes) > 0:
+        if node_level:
             corr = dict(tuple(data.groupby(self.content_col)))
-        elif len(communities) > 0:
+        elif community_level:
             data = data.drop(self.content_col,axis=1)
             corr = dict(tuple(data.groupby([self.community_col])))
             corr = {k:v.drop(self.community_col,axis=1) for k,v in corr.items()}
@@ -524,7 +544,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         def get_lifetime(grp):
@@ -540,14 +560,22 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         lifetimes.columns = [self.platform_col] + group_col + ['value']
         lifetimes = lifetimes[lifetimes['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = lifetimes.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            lifetimes = lifetimes.merge(counts,on=self.content_col)
+            lifetimes = lifetimes[lifetimes['count'] > 1]
+
             lifetimes = dict(tuple(lifetimes.groupby(self.content_col)))
             lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
-        elif len(communities) > 0:
-            lifetimes = dict(tuple(lifetimes.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            lifetimes = lifetimes.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+
+            lifetimes = dict(tuple(lifetimes.groupby(self.community_col)))
             lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
         else:
-            lifetimes = lifetimes[[self.platform_col,'value']]
+            lifetimes = lifetimes[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return lifetimes
 
@@ -594,7 +622,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         platforms = sorted(data[self.platform_col].unique())
 
         group_col = [self.content_col, self.platform_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         if measure == 'share':
@@ -621,17 +649,18 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             for i,p1 in enumerate(platforms):
                 for p2 in platforms[i+1:]:
                 
-                    corr = spearmanr(grp.loc[p1].values,grp.loc[p2].values)[0]
+                    if p1 in grp.index and p2 in grp.index:
+                        corr = spearmanr(grp.loc[p1].values,grp.loc[p2].values)[0]
 
-                    platform1s.append(p1)
-                    platform2s.append(p2)
-                    corrs.append(corr)
+                        platform1s.append(p1)
+                        platform2s.append(p2)
+                        corrs.append(corr)
             
             corr = pd.DataFrame({'platform1':platform1s,'platform2':platform2s,'value':corrs})
             
             return corr
 
-        if len(communities) == 0:
+        if not community_level:
             corr = get_ranking_correlations(data)
         else:
             
