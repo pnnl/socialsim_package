@@ -48,8 +48,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         if node_list == "all":
             self.node_list = self.dataset[self.content_col].tolist()
-        elif node_list is not None:
-            self.node_list = node_list
+        elif metadata is not None:
+            self.node_list = metadata.node_list
         else:
             self.node_list = []
 
