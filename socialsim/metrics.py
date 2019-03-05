@@ -141,6 +141,7 @@ class Metrics:
         Output:
         """
         log = {}
+        all_results = {}
 
         if ground_truth is None:
             log.update({'status' : 'failure'})
@@ -214,7 +215,9 @@ class Metrics:
                 message = 'Done. ({0} seconds.)'.format(delta_time)
                 print(message, flush=True)
 
-        return result, log
+            all_results.update({metric:result})
+
+        return all_result, log
 
 
     def check_data_types(self, ground_truth, simulation):
