@@ -217,7 +217,7 @@ class Metrics:
 
             all_results.update({metric:result})
 
-        return all_result, log
+        return all_results, log
 
 
     def check_data_types(self, ground_truth, simulation):
@@ -700,6 +700,9 @@ class Metrics:
 
         cols = [c for c in ground_truth.columns if c != 'value']
 
+        ground_truth = ground_truth.copy()
+        simulation = simulation.copy()
+
         ground_truth['source'] = 'ground_truth'
         simulation['source'] = 'simulation'
 
@@ -719,8 +722,8 @@ class Metrics:
                 m = self.kl_divergence_smoothed(gt, sim, **kwargs)
             elif metric == "js":
                 m = self.js_divergence(gt, sim, **kwargs)
-            elif metrics == 'ks':
-                m - self.ks_test(gt,sim, **kwargs)
+            elif metric == 'ks':
+                m = self.ks_test(gt,sim, **kwargs)
 
             if np.isfinite(m):
                 metrics.append(m)
@@ -731,7 +734,7 @@ class Metrics:
     def spearman(self, ground_truth, simulation, join="inner", fill_value=0):
 
         df = self.join_dfs(ground_truth, simulation, join=join, fill_value=fill_value)
-        if len(df.index) > 0:
-            return spearmanr(df["value_gt"], df["value_sim"])
+        if len(df.index) > 1:
+            return spearmanr(df["value_gt"], df["value_sim"])[0]
         else:
             return None
