@@ -123,14 +123,23 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def order_of_spread(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Determine the order of spread between platforms of a community/content
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a dictionary mapping each platform to an array of percent freq. in each rank
-                If community, a nested dictionary mapping each community to a dictionary mapping each platform
-                    to an array of percent freq. in each rank
-                Else, a dictionary mapping between the content to the ranked list of platforms
+        Description: Determine the order of spread between platforms of content
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level: Dataframe of normalized counts of each platform in each position
+                If community level : a dictionary mapping between each community
+                                     and a dataframe of normalized counts
+                If node level: a dictionary mapping the information to list of platforms in order
         """
+
 
         data = self.preprocess(node_level, nodes, community_level, communities)
         
@@ -196,16 +205,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def time_delta(self, time_granularity="s", node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Determine the amount of time it takes for a community/content to appear on another platform
-        :param time_granularity: Unit of time to calculate {s=seconds, m=minutes, h=hours, D=days}
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a DataFrame with columns platform_1, platform_2, and value
-                If community, a dictionary mapping a community to a DataFrame with columns
-                    platform_1, platform_2, and value
-                Else, a dictionary mapping a content to a list (equal in length to the number of platforms)
-                of the time passed since the first time that content was observed. This list is sorted alphabetically
-                to preserve the same ordering of platforms in all cases. This can causes negative times.
+        Description: Determine the amount of time it takes for a piece of information to appear on another platform.
+
+        Input:
+            time_granularity: Unit of time in which to measure
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the time difference from one platform to another
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to the time differences between platforms
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
@@ -262,12 +276,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def overlapping_users(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Calculate the percentage of users common to all platforms (that share in a community/content)
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a matrix of percentages of common users to any pair of platforms.
-                Else, a dictionary mapping a community/content to a matrix of the percentages of common users that
-                share in that community/content across all pairs of platforms
+        Description: Calculate the percentage of users common to all platforms (that share in a community/content)
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing each pair of platforms and the percentage of common users
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
  
         data = self.preprocess(node_level, nodes, community_level, communities)
@@ -325,12 +347,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def size_of_audience(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Determine the ranking of audience sizes on each platform
-        :param nodes: List of nodes
-        :param communities: List of communities
-        :return: If population, a ranked list of the platforms with the largest audience sizes
-                Else, a dictionary mapping the community/content to a ranked list of the platforms with the largest
-                    audience sizes.
+        Description: The ranking of audience sizes on each platform
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing each platform and audience size
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
@@ -368,14 +398,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
     def speed_of_spread(self, time_unit='h', node_level = False, community_level = False, 
                         nodes=[], communities=[],):
-
         """
-        Determine the speed at which the information is spreading
-        :param nodes: List of nodes
-        :param communities: List of communities
-        :return: If population, a DataFrame with columns platform and value
-                If community, a dictionary mapping a community to a a DataFrame with columns platform and value
-                Else, a dictionary mapping each content to the ranked list of platforms on which it spreads the fastest
+        Description: Determine the speed at which the information is spreading
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the platform and average speed
+                If community level, a dictionary mapping each community to dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
@@ -422,13 +459,21 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def size_of_shares(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Determine the number of shares per platform
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a ranked list of platforms based on total activity
-                Else, a dictionary mapping the community/content to a ranked list of platforms based on activity
-        """
+        Description: Determine the number of shares on each platform
 
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the platform and average number of shares
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
+        """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
@@ -462,21 +507,22 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def temporal_correlation(self, measure="share", time_granularity="D",node_level = False, community_level = False, 
                              nodes=[], communities=[]):
         """
-        Calculates the correlation between the activity over time between all pairs of platforms
-                Github | Reddit | Twitter
-        ---------------------------------
-        Github | 1.0
-        ---------------------------------
-        Reddit |           1.0
-        ---------------------------------
-        Twitter|                   1.0
-        ---------------------------------
-        :param measure: What to measure: number of shares or audience growth?
-        :param time_granularity: The scale on which to aggregate activity {S=seconds, M=minutes, H=hours, D=days}
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a matrix of pearson correlations between platforms.
-                    Else, a dictionary mapping a community/content to the matrix of correlations
+        Description: Calculates the correlation between the activity over time between all pairs of platforms
+
+        Input:
+            measure: What to measure, number of shares ("share") or audience growth ("audience")
+            time_graularity: the scale on which to aggregate activity
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the pearson correlation value between any two platforms
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
@@ -526,19 +572,24 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
     def lifetime_of_spread(self, node_level = False, community_level = False, 
                         nodes=[], communities=[],time_unit='H'):
-        """
-        Ranks the different platforms based on the lifespan of content/community/population
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :param time_unit: Unit of time to measure lifetime, e.g. 'S','M','H','D'
-        :return: If population, a DataFrame (columns = platform, value)
-                If community, a  dictionary mapping each community to a DataFrame (columns= platform, value)
-                If nodes, returns a dictionary mapping each piece of information to a ranked list of platforms
-                    (by longest lifespan).
-                        Ex: {info_1: [github, twitter, reddit],
-                            info_2: [reddit, twitter], ... }
-        """
 
+        """
+        Description: Ranks the different platforms based on the lifespan of the content/community
+
+        Input:
+            time_unit: the unit of time to measure lifetime
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the average lifetime for each platform
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
+        """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
@@ -583,17 +634,25 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def correlation_of_information(self, measure="share", time_unit='H',
                                    community_level=False,communities=[]):
         """
-        Compute Pearson correlation
-        1. Correlation between shares of information across platforms
-        2. Correlation between audience sizes
-        3. Correlation between lifetimes of information pieces across platforms
-        4. Correlation between speeds of information across platforms
-        :param measure: What to measure: number of share, audience, lifetime, or speed?
-        :param communities: List of communities
-        :param time_unit: time unit for speed and lifetime measures
-        :return: If population, a matrix of correlations between all platforms based on the measure provided
-                If community, a dictionary mapping each community to a matrix of correlations between all platforms
-                    based on the measure provided.
+        Description: Compute Pearson correlation
+            1. Correlation between shares of information across platforms
+            2. Correlation between audience sizes
+            3. Correlation between lifetimes of information across platforms
+            4. Correlation between speeds of information across platforms
+
+        Input:
+            measure: What to measure: number of shares, audience, lifetime, or speed?
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the correlation between platforms for each node
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, same as population level
         """
 
         if community_level and len(communities) == 0:
