@@ -4,15 +4,15 @@
 import socialsim as ss
 
 # Load the simulation data
-simulation = 'data/debug_dataset.txt'
+simulation = 'data/test_dataset.txt'
 simulation = ss.load_data(simulation)
 
 # Load the ground truth data
-ground_truth = 'data/debug_dataset.txt'
+ground_truth = 'data/test_dataset.txt'
 ground_truth = ss.load_data(ground_truth)
 
 # Load the configuration file 
-config = 'example_configuration.json'
+config = 'cp1_configuration.json'
 config = ss.load_config(config)
 
 # Get metadata
