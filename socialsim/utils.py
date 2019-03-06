@@ -42,13 +42,14 @@ def add_communities_to_dataset(dataset, communities_directory):
 
         community_data = pd.DataFrame(community_data, columns=['informationID'])
         community_data['community'] = community[:-4]
-
+        community_data = community_data.drop_duplicates()
+        
         community_dataset.append(community_data)
 
     community_dataset = pd.concat(community_dataset)
     community_dataset = community_dataset.replace(r'\n','', regex=True) 
-
+    
     dataset = dataset.merge(community_dataset, how='outer', on='informationID')
-    dataset = dataset.dropna()
+    dataset = dataset.dropna(subset=['actionType'])
 
     return dataset

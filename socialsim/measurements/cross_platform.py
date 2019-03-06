@@ -37,46 +37,38 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         self.community_col      = community_col
 
         self.measurement_type = 'cross_platform'
-
+        
         if metadata is None:
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
+
+            if node_list == "all":
+                self.node_list = self.dataset[self.content_col].tolist()
+            elif node_list is not None:
+                self.node_list = node_list
+            else:
+                self.node_list = []
         else:
             community_directory = metadata.community_directory
-            self.dataset = add_communities_to_dataset(dataset, 
+            self.community_set = add_communities_to_dataset(dataset, 
                 community_directory)
-
-            self.community_set = self.dataset['community'].unique()
-
-        if node_list == "all":
-            self.node_list = self.dataset[self.content_col].tolist()
-        elif node_list is not None:
-            self.node_list = node_list
-        else:
-            self.node_list = []
+            self.node_list = metadata.node_list
 
         if self.community_set is not None:
-            if community_list == "all":
-                self.community_list = self.community_set[self.community_col].unique()
-            elif community_list is not None:
+            if community_list is not None and len(community_list) > 0:
                 self.community_list = community_list
             else:
-                self.community_list = []
+                self.community_list = self.community_set[self.community_col].unique()
         else:
             self.community_list = []
 
-    def select_data(self, nodes=None, communities=None):
+    def select_data(self,nodes=[], communities=[]):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
         :param communities: List of communities
         :return: New DataFrame with the select communities/content only
         """
-
-        if nodes is None:
-            nodes = self.node_list
-        if communities is None:
-            communities = self.community_list
 
         if len(nodes) > 0:
             data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
@@ -107,35 +99,56 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             time /= 60.0*60.0*24.0
 
         return(time)
-        
 
-    def order_of_spread(self, nodes=None, communities=None):
-        """
-        Determine the order of spread between platforms of a community/content
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a dictionary mapping each platform to an array of percent freq. in each rank
-                If community, a nested dictionary mapping each community to a dictionary mapping each platform
-                    to an array of percent freq. in each rank
-                Else, a dictionary mapping between the content to the ranked list of platforms
-        """
+    def preprocess(self, node_level, nodes, community_level, communities):
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].unique()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
+        if node_level and len(nodes) == 0:
+           nodes = self.node_list
+        elif node_level and nodes == "all":
+           nodes = self.dataset[self.content_col].unique()
+        elif not node_level:
+           nodes = []
+
+        if community_level and len(communities) == 0:
+           communities = self.community_list
+        elif community_level and communities == "all":
+           communities = self.community_set[self.community_col].unique()
+        elif not community_level:
+           communities = []
 
         data = self.select_data(nodes, communities)
+
+        return(data)
+
+    def order_of_spread(self, node_level = False, community_level = False, 
+                        nodes=[], communities=[]):
+        """
+        Description: Determine the order of spread between platforms of content
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level: Dataframe of normalized counts of each platform in each position
+                If community level : a dictionary mapping between each community
+                                     and a dataframe of normalized counts
+                If node level: a dictionary mapping the information to list of platforms in order
+        """
+
+
+        data = self.preprocess(node_level, nodes, community_level, communities)
+        
         platforms = sorted(data[self.platform_col].unique())
 
         data = data.sort_values(self.timestamp_col)
         
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         data = data.drop_duplicates(subset=[self.content_col,self.platform_col])
@@ -143,7 +156,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         #create column with list of platforms in order of appearance of the info ID
         data = data.groupby(group_col)[self.platform_col].apply(list).reset_index()
 
-        if len(nodes) == 0:
+        if not node_level:
 
             data = data[data[self.platform_col].apply(len) > 1]
             
@@ -168,14 +181,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
                 #normalize by the total count across all platforms
                 grp = pd.pivot_table(grp,index='platform',values='count',columns='rank').fillna(0)
-                grp = grp / grp.sum(axis=0)
+                grp = grp.div(grp.sum(axis=1),axis=0)
                 cols = grp.columns
                 
                 grp = pd.melt(grp.reset_index(),id_vars=['platform'],value_vars=cols)
 
                 return(grp)
 
-            if len(communities) == 0:
+            if not community_level:
                 data = get_order_counts(data)
             else:
                 data = data.groupby(self.community_col).apply(get_order_counts).reset_index()
@@ -189,45 +202,47 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return(data)
 
 
-    def time_delta(self, time_granularity="s", nodes=None, communities=None):
+    def time_delta(self, time_granularity="s", node_level = False, community_level = False, 
+                        nodes=[], communities=[]):
         """
-        Determine the amount of time it takes for a community/content to appear on another platform
-        :param time_granularity: Unit of time to calculate {s=seconds, m=minutes, h=hours, D=days}
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a DataFrame with columns platform_1, platform_2, and value
-                If community, a dictionary mapping a community to a DataFrame with columns
-                    platform_1, platform_2, and value
-                Else, a dictionary mapping a content to a list (equal in length to the number of platforms)
-                of the time passed since the first time that content was observed. This list is sorted alphabetically
-                to preserve the same ordering of platforms in all cases. This can causes negative times.
+        Description: Determine the amount of time it takes for a piece of information to appear on another platform.
+
+        Input:
+            time_granularity: Unit of time in which to measure
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the time difference from one platform to another
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to the time differences between platforms
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
-
-        data = self.select_data(nodes, communities)
-
-
-        if len(communities) == 0:
+        if not community_level:
             group_col = [self.content_col, self.platform_col]
         else:
             group_col = [self.content_col, self.community_col, self.platform_col]
+
 
         data.drop_duplicates(subset=group_col, inplace=True)
         data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
                 
         group_col = [c for c in group_col if c != self.platform_col]
+        
 
         #get all pairs of timestamps in each group
-        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list).apply(pd.Series).stack().apply(pd.Series)
+        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list)
+        lengths = data_combinations.apply(len)
+        if (lengths > 1).sum() == 0:
+            return None
+
+        data_combinations = data_combinations.apply(pd.Series).stack().apply(pd.Series)
         data_combinations.columns = [self.timestamp_col,'next_platform_timestamp']
         #get time differences for each pair of time stamps
         data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
@@ -248,9 +263,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data['value'] = data['value'].apply(lambda x: self.get_time_diff_granularity(x,time_granularity))
 
-        if len(nodes) > 0:
+        if node_level:
             data = dict(tuple(data.groupby(self.content_col)))
-        elif len(communities) > 0:
+        elif community_level:
             data = dict(tuple(data[[self.community_col,'platform_first','platform_second','value']].groupby(self.community_col)))
         else:
             data = data[['platform_first','platform_second','value']]
@@ -258,26 +273,27 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return(data)
 
 
-    def overlapping_users(self, nodes=None, communities=None):
+    def overlapping_users(self, node_level = False, community_level = False, 
+                        nodes=[], communities=[]):
         """
-        Calculate the percentage of users common to all platforms (that share in a community/content)
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a matrix of percentages of common users to any pair of platforms.
-                Else, a dictionary mapping a community/content to a matrix of the percentages of common users that
-                share in that community/content across all pairs of platforms
-        """
+        Description: Calculate the percentage of users common to all platforms (that share in a community/content)
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-        data = self.select_data(nodes, communities)
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing each pair of platforms and the percentage of common users
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
+        """
  
+        data = self.preprocess(node_level, nodes, community_level, communities)
+
         platforms = sorted(data[self.platform_col].unique())
         
         data['values'] = 1
@@ -285,11 +301,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         cols = [self.user_col, self.platform_col, 'values']
         index_cols = [self.user_col]
 
-        if len(communities) > 0:
+        if community_level:
             cols = [self.user_col, self.platform_col, self.community_col, 'values']
             index_cols = [self.user_col, self.community_col]
             group_col = self.community_col
-        elif len(nodes) > 0:
+        elif node_level:
             cols = [self.user_col, self.platform_col, self.content_col, 'values']
             index_cols = [self.user_col, self.content_col]
             group_col = self.content_col
@@ -320,7 +336,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             meas = meas.drop_duplicates(subset=["platform_1", "platform_2"])
             return meas
 
-        if len(nodes) != 0 or len(communities) != 0:
+        if node_level or community_level:
             meas = {}
             for i, grp in user_platform.groupby(group_col):
                 meas[i] = get_meas(grp)
@@ -328,29 +344,29 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             meas = get_meas(user_platform)
         return meas
 
-    def size_of_audience(self, nodes=None, communities=None):
+    def size_of_audience(self, node_level = False, community_level = False, 
+                        nodes=[], communities=[]):
         """
-        Determine the ranking of audience sizes on each platform
-        :param nodes: List of nodes
-        :param communities: List of communities
-        :return: If population, a ranked list of the platforms with the largest audience sizes
-                Else, a dictionary mapping the community/content to a ranked list of the platforms with the largest
-                    audience sizes.
+        Description: The ranking of audience sizes on each platform
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing each platform and audience size
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-
-        data = self.select_data(nodes, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         aud = data.groupby(self.platform_col).apply(lambda x: x.groupby(group_col)[self.user_col].nunique()).reset_index()
@@ -361,41 +377,48 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         aud.columns = [self.platform_col] + group_col + ['value']
         aud = aud[aud['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = aud.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            aud = aud.merge(counts,on=self.content_col)
+            aud = aud[aud['count'] > 1]
+
             aud = dict(tuple(aud.groupby(self.content_col)))
             aud = {k:v[[self.platform_col,'value']] for k,v in aud.items()}
-        elif len(communities) > 0:
-            aud = dict(tuple(aud.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            aud = aud.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+            aud = dict(tuple(aud.groupby(self.community_col)))
             aud = {k:v[[self.platform_col,'value']] for k,v in aud.items()}
         else:
-            aud = aud[[self.platform_col,'value']]
+            aud = aud[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return aud
 
 
-    def speed_of_spread(self, nodes=None, communities=None, time_unit='h'):
-
+    def speed_of_spread(self, time_unit='h', node_level = False, community_level = False, 
+                        nodes=[], communities=[],):
         """
-        Determine the speed at which the information is spreading
-        :param nodes: List of nodes
-        :param communities: List of communities
-        :return: If population, a DataFrame with columns platform and value
-                If community, a dictionary mapping a community to a a DataFrame with columns platform and value
-                Else, a dictionary mapping each content to the ranked list of platforms on which it spreads the fastest
+        Description: Determine the speed at which the information is spreading
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the platform and average speed
+                If community level, a dictionary mapping each community to dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-        data = self.select_data(nodes, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         def get_speed(grp):
@@ -415,49 +438,65 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         speeds.columns = [self.platform_col] + group_col + ['value']
         speeds = speeds[speeds['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = speeds.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            speeds = speeds.merge(counts,on=self.content_col)
+            speeds = speeds[speeds['count'] > 1]
+
             speeds = dict(tuple(speeds.groupby(self.content_col)))
             speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
-        elif len(communities) > 0:
-            speeds = dict(tuple(speeds.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            speeds = speeds.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+            speeds = dict(tuple(speeds.groupby(self.community_col)))
             speeds = {k:v[[self.platform_col,'value']] for k,v in speeds.items()}
         else:
-            speeds = speeds[[self.platform_col,'value']]
+            speeds = speeds[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return speeds
 
-    def size_of_shares(self, nodes=None, communities=None):
+    def size_of_shares(self, node_level = False, community_level = False, 
+                        nodes=[], communities=[]):
         """
-        Determine the number of shares per platform
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a ranked list of platforms based on total activity
-                Else, a dictionary mapping the community/content to a ranked list of platforms based on activity
+        Description: Determine the number of shares on each platform
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the platform and average number of shares
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-        data = self.select_data(nodes, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         share_counts = data.groupby([self.platform_col] + group_col)[self.timestamp_col].count().reset_index()
         share_counts.columns = [self.platform_col] + group_col + ['value']
         share_counts = share_counts.sort_values('value',ascending=False)
 
-        if len(nodes) > 0:
+        if node_level:
+            counts = share_counts.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            share_counts = share_counts.merge(counts,on=self.content_col)
+            share_counts = share_counts[share_counts['count'] > 1]
+
+
             share_counts = dict(tuple(share_counts.groupby(self.content_col)))
             share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
-        elif len(communities) > 0:
+        elif community_level:
             share_counts = dict(tuple(share_counts.groupby([self.platform_col,self.community_col])['value'].mean().reset_index().groupby(self.community_col)))
             share_counts = {k:v[[self.platform_col,'value']] for k,v in share_counts.items()}
         else:
@@ -465,43 +504,35 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         return share_counts
 
-    def temporal_correlation(self, measure="share", time_granularity="D",
-                             nodes=None, communities=None):
+    def temporal_correlation(self, measure="share", time_granularity="D",node_level = False, community_level = False, 
+                             nodes=[], communities=[]):
         """
-        Calculates the correlation between the activity over time between all pairs of platforms
-                Github | Reddit | Twitter
-        ---------------------------------
-        Github | 1.0
-        ---------------------------------
-        Reddit |           1.0
-        ---------------------------------
-        Twitter|                   1.0
-        ---------------------------------
-        :param measure: What to measure: number of shares or audience growth?
-        :param time_granularity: The scale on which to aggregate activity {S=seconds, M=minutes, H=hours, D=days}
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :return: If population, a matrix of pearson correlations between platforms.
-                    Else, a dictionary mapping a community/content to the matrix of correlations
+        Description: Calculates the correlation between the activity over time between all pairs of platforms
+
+        Input:
+            measure: What to measure, number of shares ("share") or audience growth ("audience")
+            time_graularity: the scale on which to aggregate activity
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the pearson correlation value between any two platforms
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-        
-        data = self.select_data(nodes, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
         platforms = sorted(data[self.platform_col].unique())
 
         data = data.set_index(self.timestamp_col)
         
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         if measure == 'share':
@@ -526,9 +557,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = pd.concat(dfs)
         data = data.dropna()
 
-        if len(nodes) > 0:
+        if node_level:
             corr = dict(tuple(data.groupby(self.content_col)))
-        elif len(communities) > 0:
+        elif community_level:
             data = data.drop(self.content_col,axis=1)
             corr = dict(tuple(data.groupby([self.community_col])))
             corr = {k:v.drop(self.community_col,axis=1) for k,v in corr.items()}
@@ -539,34 +570,32 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         
 
-    def lifetime_of_spread(self, nodes=None, communities=None,time_unit='H'):
+    def lifetime_of_spread(self, node_level = False, community_level = False, 
+                        nodes=[], communities=[],time_unit='H'):
+
         """
-        Ranks the different platforms based on the lifespan of content/community/population
-        :param nodes: List of specific content
-        :param communities: List of communities
-        :param time_unit: Unit of time to measure lifetime, e.g. 'S','M','H','D'
-        :return: If population, a DataFrame (columns = platform, value)
-                If community, a  dictionary mapping each community to a DataFrame (columns= platform, value)
-                If nodes, returns a dictionary mapping each piece of information to a ranked list of platforms
-                    (by longest lifespan).
-                        Ex: {info_1: [github, twitter, reddit],
-                            info_2: [reddit, twitter], ... }
+        Description: Ranks the different platforms based on the lifespan of the content/community
+
+        Input:
+            time_unit: the unit of time to measure lifetime
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the average lifetime for each platform
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, a dictionary mapping each node to a dataframe
         """
 
-        if nodes is None:
-            nodes = self.node_list
-        elif nodes == "all":
-            nodes = self.dataset[self.content_col].tolist()
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
-
-        data = self.select_data(nodes, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities)
 
 
         group_col = [self.content_col]
-        if len(communities) > 0:
+        if community_level:
             group_col = [self.content_col,self.community_col]
 
         def get_lifetime(grp):
@@ -582,40 +611,58 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         lifetimes.columns = [self.platform_col] + group_col + ['value']
         lifetimes = lifetimes[lifetimes['value'] != -1]
         
-        if len(nodes) > 0:
+        if node_level:
+            counts = lifetimes.groupby(self.content_col)[self.platform_col].count()
+            counts.name = 'count'
+            counts = counts.reset_index()
+            lifetimes = lifetimes.merge(counts,on=self.content_col)
+            lifetimes = lifetimes[lifetimes['count'] > 1]
+
             lifetimes = dict(tuple(lifetimes.groupby(self.content_col)))
             lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
-        elif len(communities) > 0:
-            lifetimes = dict(tuple(lifetimes.groupby(self.community_col)[[self.platform_col,'value']]))
+        elif community_level:
+            lifetimes = lifetimes.groupby([self.platform_col,self.community_col])['value'].mean().reset_index()
+
+            lifetimes = dict(tuple(lifetimes.groupby(self.community_col)))
             lifetimes = {k:v[[self.platform_col,'value']] for k,v in lifetimes.items()}
         else:
-            lifetimes = lifetimes[[self.platform_col,'value']]
+            lifetimes = lifetimes[[self.platform_col,'value']].groupby(self.platform_col).mean().reset_index()
 
         return lifetimes
 
 
-    def correlation_of_information(self, measure="share", communities=None,time_unit='H'):
+    def correlation_of_information(self, measure="share", time_unit='H',
+                                   community_level=False,communities=[]):
         """
-        Compute Pearson correlation
-        1. Correlation between shares of information across platforms
-        2. Correlation between audience sizes
-        3. Correlation between lifetimes of information pieces across platforms
-        4. Correlation between speeds of information across platforms
-        :param measure: What to measure: number of share, audience, lifetime, or speed?
-        :param communities: List of communities
-        :param time_unit: time unit for speed and lifetime measures
-        :return: If population, a matrix of correlations between all platforms based on the measure provided
-                If community, a dictionary mapping each community to a matrix of correlations between all platforms
-                    based on the measure provided.
+        Description: Compute Pearson correlation
+            1. Correlation between shares of information across platforms
+            2. Correlation between audience sizes
+            3. Correlation between lifetimes of information across platforms
+            4. Correlation between speeds of information across platforms
+
+        Input:
+            measure: What to measure: number of shares, audience, lifetime, or speed?
+            node_level: If true, computes order of spread of nodes passed or from metadate object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level, a dataframe containing the correlation between platforms for each node
+                If community level, a dictionary mapping each community to a dataframe
+                If node level, same as population level
         """
 
-        if communities is None:
-            communities = self.community_list
-        elif communities == "all":
-            communities = self.community_set[self.community_col].unique()
+        if community_level and len(communities) == 0:
+           communities = self.community_list
+        elif community_level and communities == "all":
+           communities = self.community_set[self.community_col].unique()
+        elif not community_level:
+           communities = []
 
         data = self.select_data(communities=communities)
-
 
         def get_speed(grp):
             time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
@@ -634,7 +681,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         platforms = sorted(data[self.platform_col].unique())
 
         group_col = [self.content_col, self.platform_col]
-        if len(communities) > 0:
+        if community_level:
             group_col += [self.community_col]
 
         if measure == 'share':
@@ -661,17 +708,18 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             for i,p1 in enumerate(platforms):
                 for p2 in platforms[i+1:]:
                 
-                    corr = spearmanr(grp.loc[p1].values,grp.loc[p2].values)[0]
+                    if p1 in grp.index and p2 in grp.index:
+                        corr = spearmanr(grp.loc[p1].values,grp.loc[p2].values)[0]
 
-                    platform1s.append(p1)
-                    platform2s.append(p2)
-                    corrs.append(corr)
+                        platform1s.append(p1)
+                        platform2s.append(p2)
+                        corrs.append(corr)
             
             corr = pd.DataFrame({'platform1':platform1s,'platform2':platform2s,'value':corrs})
             
             return corr
 
-        if len(communities) == 0:
+        if not community_level:
             corr = get_ranking_correlations(data)
         else:
             

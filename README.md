@@ -1,22 +1,45 @@
+## Install Instructions
+It is highly recommended that you install the SocialSim measurements package in a conda environment.
+
+##### Step 1: Create a conda environment with required python packages 
+``` bash
+conda create --name myenv --file requirements.txt python=3.6
+```
+
+##### Step 2: Install Snap
+
+Download the OS-specific distribution file here: http://snap.stanford.edu/snappy/release/beta/ 
+``` bash
+tar -xvzf snap_distribution.tar.gz
+cd snap_distribution.tar.gz
+python setup.py install
+```
+##### Step 3: Install the SocialSim package using pip
+``` bash
+pip install socialsim-0.1.0.tar.gz
+```
 ## Examples of the SocialSim Package API
 
 ```python
 import socialsim as ss
 
 # Load the simulation data
-simulation = 'data/debug_dataset.txt'
+simulation = 'data/test_dataset.txt'
 simulation = ss.load_data(simulation)
 
 # Load the ground truth data
-ground_truth = 'data/debug_dataset.txt'
+ground_truth = 'data/test_dataset.txt'
 ground_truth = ss.load_data(ground_truth)
 
 # Load the configuration file 
-config = 'example_configuration.json'
+config = 'cp1_configuration.json'
 config = ss.load_config(config)
 
+# Get metadata
+metadata = ss.MetaData(community_directory='data/communities/')
+
 # Instantiate the task runner 
-task_runner = ss.TaskRunner(ground_truth, config, test=True)
+task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
 
 # Run measurements and metrics on the simulation data
 results = task_runner(simulation, verbose=True)

@@ -26,7 +26,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -62,7 +62,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -98,7 +98,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -134,7 +134,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -170,7 +170,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -206,7 +206,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -241,7 +241,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -276,7 +276,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -311,7 +311,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -397,7 +397,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -433,7 +433,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -730,7 +730,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -793,7 +793,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1043,7 +1043,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1086,7 +1086,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1129,7 +1129,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1413,7 +1413,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1449,7 +1449,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1485,7 +1485,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1521,7 +1521,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1557,7 +1557,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1593,7 +1593,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1628,7 +1628,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1663,7 +1663,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1698,7 +1698,7 @@
               "metric_args": {
                 "join": "inner",
                 "fill_value": 0,
-                "relative": false
+                "relative": true
               }
             },
             "r2": {
@@ -1900,556 +1900,6 @@
             },
             "absolute_percentage_error": {
               "metric": "absolute_percentage_error",
-              "metric_args": {}
-            }
-          }
-        }
-      }
-    }
-  },
-  "cross_platform": {
-    "cross_platform": {
-      "population": {
-        "overlapping_users": {
-          "scale": "population",
-          "measurement": "overlapping_users",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "order_of_spread": {
-          "scale": "population",
-          "measurement": "order_of_spread",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "time_delta": {
-          "scale": "population",
-          "measurement": "time_delta",
-          "measurement_args": {
-            "time_granularity": "s"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "size_of_audience": {
-          "scale": "population",
-          "measurement": "size_of_audience",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "speed_of_spread": {
-          "scale": "population",
-          "measurement": "speed_of_spread",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "size_of_shares": {
-          "scale": "population",
-          "measurement": "size_of_shares",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "temporal_correlation_share": {
-          "scale": "population",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "measure": "share",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "temporal_correlation_audience": {
-          "scale": "population",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "measure": "audience",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "lifetime_of_spread": {
-          "scale": "population",
-          "measurement": "lifetime_of_spread",
-          "measurement_args": {},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "correlation_of_shares": {
-          "scale": "population",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "measure": "share"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_audiences": {
-          "scale": "population",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "measure": "audience"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_lifetimes": {
-          "scale": "population",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "measure": "lifetime"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_speeds": {
-          "scale": "population",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "measure": "speed"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        }
-      },
-      "community": {
-        "overlapping_users": {
-          "scale": "community",
-          "measurement": "overlapping_users",
-          "measurement_args": {
-            "communities": "all"},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "order_of_spread": {
-          "scale": "community",
-          "measurement": "order_of_spread",
-          "measurement_args": {
-            "communities": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {}
-            }
-          }
-        },
-        "time_delta": {
-          "scale": "community",
-          "measurement": "time_delta",
-          "measurement_args": {
-            "communities": "all",
-            "time_granularity": "s"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "size_of_audience": {
-          "scale": "community",
-          "measurement": "size_of_audience",
-          "measurement_args": {
-            "communities": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "speed_of_spread": {
-          "scale": "community",
-          "measurement": "speed_of_spread",
-          "measurement_args": {
-            "communities": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "size_of_shares": {
-          "scale": "community",
-          "measurement": "size_of_shares",
-          "measurement_args": {
-            "communities": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "temporal_correlation_share": {
-          "scale": "community",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "share",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "temporal_correlation_audience": {
-          "scale": "community",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "audience",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "lifetime_of_spread": {
-          "scale": "community",
-          "measurement": "lifetime_of_spread",
-          "measurement_args": {
-            "communities": "all"},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "platform_metrics",
-              "metric_args": {
-                "metric": "kl"
-              }
-            }
-          }
-        },
-        "correlation_of_shares": {
-          "scale": "community",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "share"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_audiences": {
-          "scale": "community",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "audience"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_lifetimes": {
-          "scale": "community",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "lifetime"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "correlation_of_speeds": {
-          "scale": "community",
-          "measurement": "correlation_of_information",
-          "measurement_args": {
-            "communities": "all",
-            "measure": "speed"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        }
-      },
-      "node": {
-        "overlapping_users": {
-          "scale": "node",
-          "measurement": "overlapping_users",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "order_of_spread": {
-          "scale": "node",
-          "measurement": "order_of_spread",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "time_delta": {
-          "scale": "node",
-          "measurement": "time_delta",
-          "measurement_args": {
-            "nodes": "all",
-            "time_granularity": "s"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {}
-            }
-          }
-        },
-        "size_of_audience": {
-          "scale": "node",
-          "measurement": "size_of_audience",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "speed_of_spread": {
-          "scale": "node",
-          "measurement": "speed_of_spread",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "size_of_shares": {
-          "scale": "node",
-          "measurement": "size_of_shares",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {}
-            }
-          }
-        },
-        "temporal_correlation_share": {
-          "scale": "node",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "nodes": "all",
-            "measure": "share",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "temporal_correlation_audience": {
-          "scale": "node",
-          "measurement": "temporal_correlation",
-          "measurement_args": {
-            "nodes": "all",
-            "measure": "audience",
-            "time_granularity": "D"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            }
-          }
-        },
-        "lifetime_of_spread": {
-          "scale": "node",
-          "measurement": "lifetime_of_spread",
-          "measurement_args": {
-            "nodes": "all"
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
               "metric_args": {}
             }
           }
