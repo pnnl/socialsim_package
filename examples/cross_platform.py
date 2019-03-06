@@ -1,11 +1,11 @@
 import socialsim as ss
 
 # Load the example dataset
-dataset = 'data/debug_dataset.txt'
+dataset = 'data/test_dataset.txt'
 dataset = ss.load_data(dataset)
 
 # Load the configuration file
-config = 'data/example_configuration.json'
+config = 'data/cp1_configuration.json'
 config = ss.load_config(config)
 
 # Subset the configuration for the given task 
