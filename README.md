@@ -1,3 +1,23 @@
+## Install Instructions
+It is highly recommended that you install the SocialSim measurements package in a conda environment.
+
+##### Step 1: Create a conda environment with required python packages 
+``` bash
+conda create --name myenv --file requirements.txt python=3.6
+```
+
+##### Step 2: Install Snap
+
+Download the OS-specific distribution file here: http://snap.stanford.edu/snappy/release/beta/ 
+``` bash
+tar -xvzf snap_distribution.tar.gz
+cd snap_distribution.tar.gz
+python setup.py install
+```
+##### Step 3: Install the SocialSim package using pip
+``` bash
+pip install socialsim-0.1.0.tar.gz
+```
 ## Examples of the SocialSim Package API
 
 ```python
