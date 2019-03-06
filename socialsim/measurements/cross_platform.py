@@ -27,8 +27,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         :param community_col: name of the column containing the subset of content in a community
         :param log_file:
         """
-        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
-
+        super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
+            log_file=log_file)
         self.dataset            = dataset
         self.timestamp_col      = timestamp_col
         self.user_col           = user_col
