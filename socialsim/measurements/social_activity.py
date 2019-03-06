@@ -77,14 +77,21 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
         if metadata is not None:
+            print('I have metadata!')
             if metadata.use_content_data:
                 self.useContentMetaData = True
                 self.contentMetaData    = metadata.content_data
+            else:
+                self.useContentMetaData = False
 
             if metadata.use_user_data:
                 self.useUserMetaData = True
                 self.UserMetaData    = metadata.user_data
+            else:
+                self.useUserMetaData = False
+
         else:
+            print('I dont have metadata')
             self.useContentMetaData = False
             self.useUserMetaData    = False
 
