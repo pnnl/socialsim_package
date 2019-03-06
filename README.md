@@ -15,8 +15,11 @@ ground_truth = ss.load_data(ground_truth)
 config = 'example_configuration.json'
 config = ss.load_config(config)
 
+# Get metadata
+metadata = ss.MetaData(community_directory='data/communities/')
+
 # Instantiate the task runner 
-task_runner = ss.TaskRunner(ground_truth, config, test=True)
+task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
 
 # Run measurements and metrics on the simulation data
 results = task_runner(simulation, verbose=True)
