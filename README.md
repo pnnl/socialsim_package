@@ -31,8 +31,9 @@ simulation = ss.load_data(simulation)
 ground_truth = 'data/test_dataset.txt'
 ground_truth = ss.load_data(ground_truth)
 
-# Load the configuration file 
-config = 'cp1_configuration.json'
+# Load the configuration file
+# There are configuration files provided for CP1 and CP2 measurements 
+config = 'data/cp2_configuration.json'
 config = ss.load_config(config)
 
 # Get metadata
