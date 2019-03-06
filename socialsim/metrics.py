@@ -319,7 +319,11 @@ class Metrics:
         Absolute difference between ground truth simulation measurement
         Meant for scalar valued measurements
         """
-        result = np.abs(float(simulation) - float(ground_truth))
+        
+        if not ground_truth is None and not simulation is None:
+            result = np.abs(float(simulation) - float(ground_truth))
+        else:
+            result = None
         
         return result
 
@@ -330,7 +334,7 @@ class Metrics:
         Meant for scalar valued measurements
         """
 
-        if ground_truth==0:
+        if ground_truth is None or ground_truth==0:
             result =  None
         else:
             result = self.absolute_difference(ground_truth, simulation)
