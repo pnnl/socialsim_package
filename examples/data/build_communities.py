@@ -5,7 +5,7 @@ import random
 
 n = 50
 
-dataset = 'example_dataset.txt'
+dataset = 'test_dataset.txt'
 dataset = ss.load_data(dataset)
 
 dataset = dataset['informationID'].tolist()
