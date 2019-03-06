@@ -76,7 +76,7 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metadata:
+        if metadata is not None:
             if metadata.use_content_data:
                 self.useContentMetaData = True
                 self.contentMetaData    = metadata.content_data
