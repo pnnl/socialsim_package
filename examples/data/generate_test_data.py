@@ -41,7 +41,7 @@ class Generator:
 
         """
 
-        test_data = dataset_directory + 'test_data.json'
+        test_data = dataset_directory + 'test_dataset.txt'
 
         count = 0
 
