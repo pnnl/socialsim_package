@@ -42,7 +42,14 @@ metadata = ss.MetaData(community_directory='data/communities/')
 task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
 
 # Run measurements and metrics on the simulation data
-results = task_runner(simulation, verbose=True)
+results, logs = task_runner(simulation, verbose=True)
+
+# Get simulation measurements
+results["simulation_results"]
+# Get ground truth measurements
+results["ground_truth_results"]
+# Get metrics
+results["metrics"]
 ```
 _______________________________________________________________________________
 
