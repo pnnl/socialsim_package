@@ -10,7 +10,7 @@ import pandas as pd
 class Generator:
     def __init__(self):
 
-        k = 10000
+        k = 5000
 
         last30 = pd.datetime.now().replace(microsecond=0) - pd.Timedelta('30H')
 
