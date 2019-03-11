@@ -9,7 +9,7 @@ ground_truth = 'data/test_dataset.txt'
 ground_truth = ss.load_data(ground_truth)
 
 # Load the configuration file 
-config = 'data/cp1_configuration.json'
+config = 'data/cp2_configuration.json'
 config = ss.load_config(config)
 
 # Get metadata
