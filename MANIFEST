@@ -11,7 +11,9 @@ socialsim/measurements/cross_platform.py
 socialsim/measurements/information_cascade.py
 socialsim/measurements/measurements.py
 socialsim/measurements/metadata.py
+socialsim/measurements/multi_platform.py
 socialsim/measurements/persistent_groups.py
+socialsim/measurements/recurrence.py
 socialsim/measurements/social_activity.py
 socialsim/measurements/social_structure.py
 socialsim/measurements/validators.py

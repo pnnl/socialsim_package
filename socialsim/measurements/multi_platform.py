@@ -23,7 +23,6 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         super(MultiPlatformMeasurements, self).__init__(dataset, configuration, log_file=log_file)
 
         self.dataset = dataset
-        self.community_set = metadata.communities
         self.timestamp_col = timestamp_col
         self.user_col = user_col
         self.platform_col = platform_col
