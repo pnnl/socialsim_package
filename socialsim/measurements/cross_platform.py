@@ -71,7 +71,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
         if len(nodes) > 0:
-            data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
+            if nodes=='all':
+                data = self.dataset.copy()
+            else:
+                data = self.dataset.loc[self.dataset[self.content_col].isin(nodes)]
         elif len(communities) > 0:
             data = self.community_set.loc[self.community_set[self.community_col].isin(communities)]
         else:
