@@ -1,5 +1,6 @@
 import pandas as pd
 
+from collections import Counter
 from .measurements import MeasurementsBaseClass
 from ..utils import add_communities_to_dataset
 
@@ -55,7 +56,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
-    def select_data(self, nodes=None, communities=None, platform="all"):
+    def select_data(self, nodes=[], communities=[], platform="all"):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
@@ -74,8 +75,11 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             platform_list = [platform]
 
         if len(nodes) > 0:
-            data = self.dataset.loc[(self.dataset[self.content_col].isin(nodes)) &
-                                    (self.dataset[self.platform_col].isin(platform_list))]
+            if nodes == 'all':
+                data = self.dataset.loc[self.dataset[self.platform_col].isin(platform_list)]
+            else:
+                data = self.dataset.loc[(self.dataset[self.content_col].isin(nodes)) &
+                                        (self.dataset[self.platform_col].isin(platform_list))]
         elif len(communities) > 0:
             data = self.community_set[(self.community_set[self.community_col].isin(communities)) &
                                       (self.community_set[self.platform_col].isin(platform_list))]
@@ -129,7 +133,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         return data
 
-    def number_of_shares(self, node_level=False, community_level=False, nodes=None, communities=None, platform="all"):
+    def number_of_shares(self, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
         Description: Determine the number of times a piece of information is shared
 
@@ -148,6 +152,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
+        time = data[[self.timestamp_col]]
 
         def counts(group):
             grp_count = group[self.content_col].value_counts()
@@ -162,8 +167,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         return num_shares
 
-    def number_of_shares_over_time(self, node_level=False, community_level=False, nodes=None,
-                                   communities=None, platform="all"):
+    def number_of_shares_over_time(self, node_level=False, community_level=False,
+                                   nodes=[], communities=[], platform="all"):
         """
         Description: Determine the number of times a piece of information is shared over time
 
@@ -182,14 +187,16 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe of every node and their counts at each time
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
-        all_times = sorted(data[self.timestamp_col].unique())
 
         def get_count_at_time(grp, content):
-            counts = []
-            for time in all_times:
-                counts.append((grp[self.timestamp_col] == time).sum())
-            value_counts = pd.DataFrame([content] + counts, index=["node"] + all_times).transpose()
-            value_counts = value_counts.set_index("node")
+            value_counts = grp.groupby(self.timestamp_col).apply(lambda x: len(x))
+            value_counts = value_counts.rename("value")
+            value_counts.index.name = self.timestamp_col
+            value_counts = value_counts.reset_index().transpose()
+            value_counts.columns = value_counts.iloc[0]
+            value_counts = value_counts.reindex(value_counts.index.drop(self.timestamp_col))
+            value_counts[self.content_col] = content
+            value_counts = value_counts.reset_index(drop=True)
             return value_counts
 
         if community_level:
@@ -198,19 +205,47 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 single_comm_df = []
                 for i, subgroup in group.groupby(self.content_col):
                     single_comm_df.append(get_count_at_time(subgroup, i))
-                time_series = pd.concat(single_comm_df)
+                time_series = pd.concat(single_comm_df, sort=False).fillna(0).reset_index(drop=True)
+                time_series = time_series.set_index(self.content_col)
+                time_series = time_series.reindex(sorted(time_series.columns), axis=1)
                 community_dict[comm] = time_series.mean()
         else:
             content_df = []
             for i, group in data.groupby(self.content_col):
                 content_df.append(get_count_at_time(group, i))
-            time_series = pd.concat(content_df)
+            time_series = pd.concat(content_df, sort=False).fillna(0).reset_index(drop=True)
+            time_series = time_series.set_index(self.content_col)
+            time_series = time_series.reindex(sorted(time_series.columns), axis=1)
             if node_level:
                 return time_series
             else:
                 return time_series.mean()
 
-    def top_info_shared(self, k, node_level=False, community_level=False, nodes=None, communities=None, platform="all"):
+    def distribution_of_shares(self, node_level=False, community_level=False,
+                               nodes=[], communities=[], platform="all"):
+        """
+        Description:
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadata object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level:
+                If community level :
+                If node level:
+        """
+        data = self.preprocess(node_level, nodes, community_level, communities, platform)
+        if node_level:
+            count = data[self.content_col].value_counts().tolist()
+            counter = Counter(count)
+            return pd.DataFrame({"share_amount": list(counter.keys()), "info_count": list(counter.values())})
+
+    def top_info_shared(self, k, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -233,7 +268,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         def get_top_k(grp):
             counts_of_shared = grp.groupby(self.content_col).apply(lambda x: len(x))
-            counts_of_shared.reset_index(inplace=True)
+            counts_of_shared = counts_of_shared.reset_index()
             counts_of_shared.rename(index=str, columns={0: "value"}, inplace=True)
             return counts_of_shared.nlargest(k, "value").reset_index(drop=True)
 
@@ -245,7 +280,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 community_dict[i] = get_top_k(group)
             return community_dict
 
-    def unique_users(self, node_level=False, community_level=False, nodes=None, communities=None, platform="all"):
+    def unique_users(self, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -267,8 +302,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         if node_level:
             return data.groupby(self.content_col).apply(lambda x: len(x[self.user_col].unique())).to_dict()
 
-    def unique_users_over_time(self, node_level=False, community_level=False, nodes=None,
-                               communities=None, platform="all"):
+    def unique_users_over_time(self, node_level=False, community_level=False,
+                               nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -287,14 +322,16 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                at each time step
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
-        all_times = sorted(data[self.timestamp_col].unique())
 
         def get_count_at_time(grp, content):
-            counts = []
-            for time in all_times:
-                counts.append(len((grp.loc[grp[self.timestamp_col] == time, self.user_col]).unique()))
-            value_counts = pd.DataFrame([content] + counts, index=["node"] + all_times).transpose()
-            value_counts = value_counts.set_index("node")
+            value_counts = grp.groupby(self.timestamp_col).apply(lambda x: len(x[self.user_col].unique()))
+            value_counts = value_counts.rename("value")
+            value_counts.index.name = self.timestamp_col
+            value_counts = value_counts.reset_index().transpose()
+            value_counts.columns = value_counts.iloc[0]
+            value_counts = value_counts.reindex(value_counts.index.drop(self.timestamp_col))
+            value_counts[self.content_col] = content
+            value_counts = value_counts.reset_index(drop=True)
             return value_counts
 
         if community_level:
@@ -303,20 +340,48 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 single_comm_df = []
                 for i, subgroup in group.groupby(self.content_col):
                     single_comm_df.append(get_count_at_time(subgroup, i))
-                time_series = pd.concat(single_comm_df)
+                time_series = pd.concat(single_comm_df, sort=False).fillna(0).reset_index(drop=True)
+                time_series = time_series.set_index(self.content_col)
+                time_series = time_series.reindex(sorted(time_series.columns), axis=1)
                 community_dict[comm] = time_series.mean()
         else:
             users_over_time = []
             for i, group in data.groupby(self.content_col):
                 users_over_time.append(get_count_at_time(group, i))
-            time_series = pd.concat(users_over_time)
+            time_series = pd.concat(users_over_time, sort=False).fillna(0).reset_index(drop=True)
+            time_series = time_series.set_index(self.content_col)
+            time_series = time_series.reindex(sorted(time_series.columns), axis=1)
             if node_level:
                 return time_series
             else:
                 return time_series.mean()
 
-    def top_audience_reach(self, k, node_level=False, community_level=False, nodes=None,
-                           communities=None, platform="all"):
+    def distribution_of_users(self, node_level=False, community_level=False,
+                              nodes=[], communities=[], platform="all"):
+        """
+        Description:
+
+        Input:
+            node_level: If true, computes order of spread of nodes passed or from metadata object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level:
+                If community level :
+                If node level:
+        """
+        data = self.preprocess(node_level, nodes, community_level, communities, platform)
+        if node_level:
+            user_counts = Counter(
+                data.groupby(self.content_col).apply(lambda x: len(x[self.user_col].unique())).tolist())
+            return pd.DataFrame({"user_amount": list(user_counts.keys()), "info_count": list(user_counts.values())})
+
+    def top_audience_reach(self, k, node_level=False, community_level=False,
+                           nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -339,7 +404,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         def get_top_k(grp):
             counts_of_shared = grp.groupby(self.content_col).apply(lambda x: len(x[self.user_col].unique()))
-            counts_of_shared.reset_index(inplace=True)
+            counts_of_shared = counts_of_shared.reset_index()
             counts_of_shared.rename(index=str, columns={0: "value"}, inplace=True)
             return counts_of_shared.nlargest(k, "value").reset_index(drop=True)
 
@@ -351,7 +416,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 community_dict[i] = get_top_k(group)
             return community_dict
 
-    def lifetime_of_info(self, node_level=False, community_level=False, nodes=None, communities=None, platform="all"):
+    def lifetime_of_info(self, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -390,7 +455,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 community_dict[i] = get_lifetime(comm).mean()
             return community_dict
 
-    def top_lifetimes(self, k, node_level=False, community_level=False, nodes=None, communities=None, platform="all"):
+    def top_lifetimes(self, k, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -414,7 +479,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         def get_top_k(grp):
             counts_of_shared = grp.groupby(self.content_col).apply(
                 lambda x: x[self.timestamp_col].max() - x[self.timestamp_col].min())
-            counts_of_shared.reset_index(inplace=True)
+            counts_of_shared = counts_of_shared.reset_index()
             counts_of_shared.rename(index=str, columns={0: "value"}, inplace=True)
             return counts_of_shared.nlargest(k, "value").reset_index(drop=True)
 
@@ -426,8 +491,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 community_dict[i] = get_top_k(group)
             return community_dict
 
-    def speed_of_info(self, time_unit="h", node_level=False, community_level=False, nodes=None,
-                      communities=None, platform="all"):
+    def speed_of_info(self, time_unit="h", node_level=False, community_level=False,
+                      nodes=[], communities=[], platform="all"):
         """
         Description:
 
@@ -462,9 +527,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             speeds = speeds[speeds['value'] != -1]
             return speeds
 
-    def speed_of_info_over_time(self, time_unit="h", node_level=False, community_level=False, nodes=None,
-                                communities=None, platform="all"):
+    def speed_of_info_over_time(self, time_unit="h", node_level=False, community_level=False,
+                                nodes=[], communities=[], platform="all"):
         """
+        TODO: How to calculate individual hours
         Description:
 
         Input:
@@ -495,3 +561,94 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         if node_level:
             data.groupby(self.content_col).apply()
+
+    def distribution_of_speed(self, time_unit="h", node_level=False, community_level=False,
+                              nodes=[], communities=[], platform="all"):
+        """
+        Description:
+
+        Input:
+            k: Int. Specifies the number of pieces of information ranked
+            node_level: If true, computes order of spread of nodes passed or from metadata object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level:
+                If community level :
+                If node level:
+        """
+        data = self.preprocess(node_level, nodes, community_level, communities, platform)
+
+        def get_speed(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = self.get_time_granularity(time, time_unit)
+            if time == 0:
+                speed = -1
+            else:
+                speed = len(grp) / time
+            return speed
+
+        def distro(grp):
+            speeds = grp.groupby(self.content_col).apply(get_speed).reset_index()
+            speeds.columns = ["speed", 'value']
+            speeds = speeds[speeds['value'] != -1]
+            counts = speeds["value"].value_counts()
+            counts = counts.rename_axis("content")
+            counts = counts.rename("value")
+            return pd.DataFrame({"speed": counts.index, "value": counts.values})
+
+        if community_level:
+            community_distributions = {}
+            for i, group in data.groupby(self.community_col):
+                community_distributions[i] = distro(group)
+            return community_distributions
+        else:
+            return distro(data)
+
+    def top_speeds(self, k, time_unit="h", node_level=False, community_level=False,
+                   nodes=[], communities=[], platform="all"):
+        """
+        Description:
+
+        Input:
+            k: Int. Specifies the number of pieces of information ranked
+            node_level: If true, computes order of spread of nodes passed or from metadata object
+            community_level: If true, computes order of spread of nodes within each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level:
+                If community level :
+                If node level:
+        """
+        data = self.preprocess(node_level, nodes, community_level, communities, platform)
+
+        def get_speed(grp):
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = self.get_time_granularity(time, time_unit)
+            if time == 0:
+                speed = -1
+            else:
+                speed = len(grp) / time
+            return speed
+
+        def get_top_k(grp):
+            counts_of_shared = grp.groupby(self.content_col).apply(lambda x: get_speed(x))
+            counts_of_shared = counts_of_shared.reset_index()
+            counts_of_shared.rename(index=str, columns={0: "value"}, inplace=True)
+            return counts_of_shared.nlargest(k, "value").reset_index(drop=True)
+
+        if community_level:
+            community_speeds = {}
+            for i, group in data.groupby(self.community_col):
+                community_speeds[i] = get_top_k(group)
+            return community_speeds
+        else:
+            return get_top_k(data)
