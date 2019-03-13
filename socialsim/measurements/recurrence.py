@@ -9,7 +9,7 @@ from .measurements import MeasurementsBaseClass
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, meatadata=None, communities=None, community_col="community", log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, meatadata=None, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -23,7 +23,6 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.timestamp_col = timestamp_col
         self.id_col = id_col
         self.userid_col = userid_col
-        self.community_col = community_col
         self.platform_col = platform_col
         self.measurement_type = 'recurrence'
         self.get_per_epoch_counts()
@@ -134,7 +133,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
 
 class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, meatadata=None, communities=None, community_col="coin", log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, metadata=None, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -147,15 +146,16 @@ class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
         self.timestamp_col      = timestamp_col
         self.id_col             = id_col
         self.userid_col         = userid_col
-        self.community_col      = community_col
         self.platform_col       = platform_col
         self.measurement_type   = 'recurrence'
+        self.metadata           = metadata
         self.get_percommunity_recurrence_measurements()
 
     def get_percommunity_recurrence_measurements(self):
         self.percommunity_recurrence_measurements = {}
-        for community, community_df in self.dataset_df.groupby(self.community_col):
-            self.percommunity_recurrence_measurements[community] = RecurrenceMeasurements(dataset_df=self.dataset_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, configuration=self.configuration, community_col=self.community_col)
+        for community, community_ids in self.metadata.communities.items():
+            community_df = self.dataset_df[self.dataset_df[self.id_col].isin(community_ids)]
+            self.percommunity_recurrence_measurements[community] = RecurrenceMeasurements(dataset_df=self.community_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, configuration=self.configuration)
 
     def run_for_all_communities(self, measurement_name):
         return [getattr(percommunity_recurrence_measurements, measurement_name)() for community, percommunity_recurrence_measurements in self.percommunity_recurrence_measurements.items()]
