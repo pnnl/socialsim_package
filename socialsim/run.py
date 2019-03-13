@@ -27,9 +27,9 @@ class TaskRunner:
             specified by the configuration dictionary.
 
         Inputs:
-            :ground_truth:
-            :metadata:
-            :configuration:
+            :ground_truth: (pd.DataFrame)
+            :metadata: (ss.MetaData)
+            :configuration: (dict)
         Outputs:
             None
         """
@@ -74,8 +74,17 @@ class TaskRunner:
             ground_truth_results, configuration, verbose)
 
         # Log results at the task level
-        results = [simulation_results, ground_truth_results, metrics]
-        logs    = [simulation_logs, ground_truth_logs, metrics_logs]
+        results = {
+            'simulation_results'   : simulation_results, 
+            'ground_truth_results' : ground_truth_results,
+            'metrics'              : metrics
+        }
+
+        logs    = {
+            'simulation_logs'   : simulation_logs,
+            'ground_truth_logs' : ground_truth_logs,
+            'metrics_logs'      : metrics_logs
+        }
 
         return results, logs
 

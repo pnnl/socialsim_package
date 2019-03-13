@@ -9,8 +9,10 @@ from .measurements import InformationCascadeMeasurements
 from .measurements import SocialStructureMeasurements
 from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
+from .measurements import MultiPlatformMeasurements 
 from .measurements import MetaData
 
 from .visualizations import generate_plot
 
 from .utils import subset_for_test
+from .utils import add_communities_to_dataset

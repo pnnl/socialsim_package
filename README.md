@@ -1,165 +1,81 @@
+## Install Instructions
+It is highly recommended that you install the SocialSim measurements package in a conda environment.
+
+##### Step 1: Create a conda environment with required python packages 
+``` bash
+conda create --name myenv --file requirements.txt python=3.6
+```
+
+##### Step 2: Install Snap
+
+Download the OS-specific distribution file here: http://snap.stanford.edu/snappy/release/beta/ 
+``` bash
+tar -xvzf snap_distribution.tar.gz
+cd snap_distribution.tar.gz
+python setup.py install
+```
+##### Step 3: Install the SocialSim package using pip
+``` bash
+pip install socialsim-0.1.0.tar.gz
+```
 ## Examples of the SocialSim Package API
 
 ```python
-metadata = ss.load_metadata(path)
-
-infospread_measurements    = ss.InfoSpreadMeasurements(dataset, metadata, configuration)
-cascade_measurements       = ss.CascadeMeasurements(dataset, configuration)
-network_measurements       = ss.NetworkMeasurements(dataset, configuration)
-crossplatform_measurements = ss.CrossPlatformMeasurements(dataset, configuration)
-
-measurements = ss.AllMeasurements(dataset, metadata, configuration)
-
-measurements_output = measurements.run()
-
-
-
-
-
-
-
-
-
-
-
-task_runner = ss.TaskRunner(ground_truth, metadata, configuration)
-
-results = task_runner(dataset, configuration)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### Measurements
-
-Run a single measurement:
-
-```python
 import socialsim as ss
 
-dataset            = ss.load(directory)
-measurement_object = ss.MeasurementObject(Dataset, config_file)
-measurement        = measurement_object.run(measurement_name)
-```
+# Load the simulation data
+simulation = 'data/test_dataset.txt'
+simulation = ss.load_data(simulation)
 
-Run all measurements
+# Load the ground truth data
+ground_truth = 'data/test_dataset.txt'
+ground_truth = ss.load_data(ground_truth)
 
-```python
-import socialsim as ss
+# Load the configuration file
+# There are configuration files provided for CP1 and CP2 measurements 
+config = 'data/cp2_configuration.json'
+config = ss.load_config(config)
 
-dataset            = ss.load(directory)
-measurement_object = ss.MeasurementObject(dataset, config_file)
-measurements       = measurement_object.run()
-```
+# Get metadata
+metadata = ss.MetaData(community_directory='data/communities/')
 
-Get a list of available measurements
+# Instantiate the task runner 
+task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
 
-```python
-import socialsim as ss
+# Run measurements and metrics on the simulation data
+results, logs = task_runner(simulation, verbose=True)
 
-dataset            = ss.load(directory)
-measurement_object = ss.MeasurementObject(dataset)
-measurement_names  = measurement_object.measurements()
-```
-
-#### Metrics
-
-Run metrics
-
-```python
-import socialsim as ss
-
-simulation_dataset            = ss.load(simulation_directory)
-simulation_measurement_object = ss.MeasurementObject(simulation_dataset)
-simulation_measurements       = measurement_object.run()
-
-ground_truth_dataset            = ss.load(ground_truth_directory)
-ground_truth_measurement_object = ss.MeasurementObject(ground_truth_dataset)
-ground_truth_measurements       = ground_truth_measurement_object.run()
-
-# run a single metric on a single measurement
-metric  = run_metrics(simulation_measurement, ground_truth_measurement, measurement_name, metric_name)
-
-# run a single metric on all the measurements
-metric  = run_metrics(simulation_measurement, ground_truth_measurement, metric=metric_name)
-
-# run all valid metrics on a single measurement
-metric  = run_metrics(simulation_measurement, ground_truth_measurement, measurement=measurement_name)
-
-# run all metrics (valid) on all measurements
-run_metrics(simulation_measurement, ground_truth_measurement)
-```
-
-#### Analysis of results
-
-Create measurement plots
-
-```python
-import socialsim as ss
-
-ss.plot(measurements)
-```
-
-Create text file report for various outputs
-
-```python
-import socialsim as ss
-
-ss.produce_report(measurements, metrics)
-ss.produce_report(measurements)
-ss.produce_report(metrics)
+# Get simulation measurements
+results["simulation_results"]
+# Get ground truth measurements
+results["ground_truth_results"]
+# Get metrics
+results["metrics"]
 ```
 _______________________________________________________________________________
 
 ## Social Network Representation Files
 
-Submission files are made of individual json dictionaries on each line with a
-header json as the first entry. The format is as follows:
+Dataset files are made of individual json dictionaries on each line with a
+header json as the first entry. 
+
+The minimal format is shown below. Some measurements may require additional 
+fields.
 
 ```python
-{'identifier': identifier, 'team': team, 'scenario': scenario, 'domain': domain}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'identifier': identifier, 'team': team, 'scenario': scenario}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
                 .                                                               .
                 .                                                               .
                 .                                                               .
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'rootID': value, 'parentID': value, 'nodeTime': value, 'actionType': value, 'actionSubType': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
 ```
 
-## Function Documentation
+## Notes to contributors
 
 All functions should follow the format shown below:
 
@@ -183,25 +99,3 @@ On line length: Lines have a hard limit of 80 characters.
 
 On everything else: Try to follow PEP8 where possible. Always follow local
 conventions.
-
-_______________________________________________________________________________
-
-Measurements list
-
-    Baseline Measurements
-        Node
-        Community
-        Population
-
-    Network Measurements
-        Population
-
-    Cascade Measurements
-        Node
-        Community
-        Population
-
-    Cross-Platform Measurements
-        Node
-        Community
-        Population

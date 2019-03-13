@@ -76,14 +76,19 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
         # For userCentric
         self.selectedUsers = self.main_df[self.main_df.user.isin(user_node_ids)]
 
-        if metadata:
+        if metadata is not None:
             if metadata.use_content_data:
                 self.useContentMetaData = True
                 self.contentMetaData    = metadata.content_data
+            else:
+                self.useContentMetaData = False
 
             if metadata.use_user_data:
                 self.useUserMetaData = True
                 self.UserMetaData    = metadata.user_data
+            else:
+                self.useUserMetaData = False
+
         else:
             self.useContentMetaData = False
             self.useUserMetaData    = False
@@ -341,7 +346,7 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             return burstiness
 
         b = df.groupby(community_field).apply(burstiness)
-        b.columns = ['community','value']
+        b.columns = ['community', 'value']
 
         measurement = self.getCommunityMeasurementDict(b)
 

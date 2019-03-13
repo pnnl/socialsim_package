@@ -5,15 +5,26 @@ import sys
 import datetime
 
 class MetaData:
-    def __init__(self, content_data=False, user_data=False, verbose=True, ):
+    def __init__(self, content_data=False, user_data=False, verbose=True, 
+        community_directory=None, node_file=None):
         """
         Description:
 
         Input:
 
         Output:
-
+        
         """
+        if node_file is None:
+            self.node_list = 'all'
+        else:
+            self.node_list = self.load_node_list(node_file)
+
+        if community_directory is None:
+            pass
+        else:
+            self.community_directory = community_directory
+
         if content_data!=False:
             self.use_content_data = True
 
@@ -100,3 +111,20 @@ class MetaData:
 
         dataset['created_at'] = pd.to_datetime(dataset['created_at'])
         return dataset
+
+
+    def load_node_list(self, node_file):
+        """
+        Description: 
+
+        Input:
+            :node_file
+
+        Output:
+            :node_list:
+        """
+
+        with open(node_file) as f:
+            node_list = f.read().splitlines()
+
+        return node_list

@@ -46,7 +46,7 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
 
         columns = ['informationID', 'urlDomains', 'partialParentID']
 
-        self.main_df = self.main_df.drop(columns=columns)
+        self.main_df = self.main_df.drop(columns=columns,errors='ignore')
         self.main_df = self.main_df.drop_duplicates()
 
         self.main_df.drop
