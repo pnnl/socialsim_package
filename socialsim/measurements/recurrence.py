@@ -9,7 +9,10 @@ from .measurements import MeasurementsBaseClass
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, meatadata=None, communities=None, community_col="community", log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset_df, id_col='informationID', timestamp_col="nodeTime", 
+        userid_col="nodeUserID", platform_col="platform", configuration={}, 
+        metadata=None, communities=None, community_col="community", 
+        log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
