@@ -77,7 +77,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             platform_list = [platform]
 
         if len(nodes) > 0:
-            if nodes == 'all':
+            if str(nodes) == 'all':
                 data = self.dataset.loc[self.dataset[self.platform_col].isin(platform_list)]
             else:
                 data = self.dataset.loc[(self.dataset[self.content_col].isin(nodes)) &
@@ -116,6 +116,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return time
 
     def preprocess(self, node_level, nodes, community_level, communities, platform):
+
+        print(nodes)
 
         if node_level and len(nodes) == 0:
             nodes = self.node_list
@@ -168,7 +170,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         return num_shares
 
-    def number_of_shares_over_time(self, node_level=False, community_level=False,
+    def number_of_shares_over_time(self, time_bin='D',delta_t = False,
+                                   node_level=False, community_level=False,
                                    nodes=[], communities=[], platform="all"):
         """
         Description: Determine the number of times a piece of information is shared over time
@@ -189,38 +192,44 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
 
-        def get_count_at_time(grp, content):
-            value_counts = grp.groupby(self.timestamp_col).apply(lambda x: len(x))
-            value_counts = value_counts.rename("value")
-            value_counts.index.name = self.timestamp_col
-            value_counts = value_counts.reset_index().transpose()
-            value_counts.columns = value_counts.iloc[0]
-            value_counts = value_counts.reindex(value_counts.index.drop(self.timestamp_col))
-            value_counts[self.content_col] = content
-            value_counts = value_counts.reset_index(drop=True)
-            return value_counts
-
+        group_cols = [self.content_col]
         if community_level:
-            community_dict = {}
-            for comm, group in data.groupby(self.community_col):
-                single_comm_df = []
-                for i, subgroup in group.groupby(self.content_col):
-                    single_comm_df.append(get_count_at_time(subgroup, i))
-                time_series = pd.concat(single_comm_df, sort=False).fillna(0).reset_index(drop=True)
-                time_series = time_series.set_index(self.content_col)
-                time_series = time_series.reindex(sorted(time_series.columns), axis=1)
-                community_dict[comm] = time_series.mean()
+            group_cols += [self.community_col]
+
+        if not delta_t:
+            #get time series in absolute time
+            data = data.set_index(self.timestamp_col)
+            data = data.groupby([pd.Grouper(freq=time_bin)] + group_cols)[self.id_col].count().reset_index()
         else:
-            content_df = []
-            for i, group in data.groupby(self.content_col):
-                content_df.append(get_count_at_time(group, i))
-            time_series = pd.concat(content_df, sort=False).fillna(0).reset_index(drop=True)
-            time_series = time_series.set_index(self.content_col)
-            time_series = time_series.reindex(sorted(time_series.columns), axis=1)
-            if node_level:
-                return time_series
-            else:
-                return time_series.mean()
+            #get time series as function of time elapsed since first event
+            grouped = data.groupby(group_cols)[self.timestamp_col].min().reset_index()
+            grouped.columns = group_cols + ['first_event_time']
+            data = data.merge(grouped,on=group_cols)
+            data[self.timestamp_col] = data[self.timestamp_col] - data['first_event_time']
+
+            if time_bin == 'D':
+                data[self.timestamp_col] = data[self.timestamp_col].dt.days
+            elif time_bin.lower() == 'h':
+                data[self.timestamp_col] = data[self.timestamp_col].dt.hours
+            elif time_bin.lower() == 'm':
+                data[self.timestamp_col] = data[self.timestamp_col].dt.minutes
+                
+            data = data.groupby([self.timestamp_col] + group_cols)[self.id_col].count().reset_index()
+
+        data = pd.pivot_table(data,index=self.timestamp_col,columns=self.content_col,values=self.id_col).fillna(0)
+
+        if node_level:
+            meas = {col:pd.DataFrame(data[col]).rename(columns={col:'value'}) for col in data.columns}
+        else:
+            data = data.mean(axis=1)
+            data.name = 'value'
+            meas = data.reset_index()
+        
+        print(meas)
+
+        return(meas)
+
+
 
     def distribution_of_shares(self, node_level=False, community_level=False, nodes=[], communities=[], platform="all"):
         """
