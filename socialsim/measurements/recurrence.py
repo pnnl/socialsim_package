@@ -4,14 +4,14 @@ import numpy as np
 import pandas as pd
 from scipy.stats.stats import pearsonr
 import burst_detection as bd
-
+import os
 from .measurements import MeasurementsBaseClass
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", 
-        userid_col="nodeUserID", platform_col="platform", configuration={}, 
-        metadata=None, communities=None, 
+    def __init__(self, dataset_df, configuration_subset=None, metadata=None, 
+        id_col='nodeID', timestamp_col="nodeTime", 
+        userid_col="nodeUserID", platform_col="platform", configuration={}, communities=None, 
         log_file='recurrence_measurements_log.txt', node_list=None, 
         community_list=None):
         """
@@ -31,13 +31,14 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.measurement_type = 'recurrence'
         self.get_per_epoch_counts()
         self.detect_bursts()
-        self.time_between_bursts_distribution = None
+        self._time_between_bursts_distribution = None
 
     def get_per_epoch_counts(self, time_granularity='Min'):
         '''
         group activity by provided time granularity and get size and unique user counts per epoch
         time_granularity: s, Min, 10Min, 30Min, H, D, ...
         '''
+        self.dataset_df[self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
         self.counts_df = self.dataset_df.set_index(self.timestamp_col).groupby(pd.Grouper(
             freq=time_granularity))[[self.id_col, self.userid_col]].nunique().reset_index()
 
@@ -159,7 +160,7 @@ class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
         self.percommunity_recurrence_measurements = {}
         for community, community_ids in self.metadata.communities.items():
             community_df = self.dataset_df[self.dataset_df[self.id_col].isin(community_ids)]
-            self.percommunity_recurrence_measurements[community] = RecurrenceMeasurements(dataset_df=self.community_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, configuration=self.configuration)
+            self.percommunity_recurrence_measurements[community] = RecurrenceMeasurements(dataset_df=community_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, configuration=self.configuration)
 
     def run_for_all_communities(self, measurement_name):
         return [getattr(percommunity_recurrence_measurements, measurement_name)() for community, percommunity_recurrence_measurements in self.percommunity_recurrence_measurements.items()]
