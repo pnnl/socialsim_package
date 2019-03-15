@@ -138,7 +138,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
 
 class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, metadata=None, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
+    def __init__(self, dataset_df, configuration_subset=None, metadata=None,
+    id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
