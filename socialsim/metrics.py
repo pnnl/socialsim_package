@@ -5,6 +5,7 @@ from scipy.stats import iqr
 from scipy.stats import spearmanr
 
 from scipy.spatial.distance import euclidean
+from scipy.optimize import minimize_scalar
 from sklearn.metrics        import r2_score
 
 import fastdtw as fdtw
@@ -421,11 +422,11 @@ class Metrics:
             return None
 
 
-    def dtw(self, ground_truth, simulation):
+    def dtw(self, ground_truth, simulation, join='outer', fill_value = 0):
         """
         Dynamic Time Warping implemenation
         """
-        df = self.join_dfs(ground_truth,simulation,join='outer',fill_value=0.0)
+        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
 
         try:
             ground_truth = df['value_gt'].values
@@ -442,11 +443,14 @@ class Metrics:
         return dist
 
 
-    def fast_dtw(self, ground_truth, simulation):
+    def fast_dtw(self, ground_truth, simulation, join = 'outer', fill_value = 0):
         """
         Fast Dynamic Time Warping implemenation
         """
         # Can we change this try except to a if statement?
+
+        df = self.join_dfs(ground_truth,simulation,join=join,fill_value=fill_value)
+
         try:
             ground_truth = ground_truth['value'].values
             simulation = simulation['value'].values
@@ -514,7 +518,7 @@ class Metrics:
             return None
 
 
-    def rbo_score(self, ground_truth, simulation, p=0.95):
+    def rbo_score(self, ground_truth, simulation, p=-1):
         """
         Rank biased overlap (RBO) implementation
         http://codalism.com/research/papers/wmz10_tois.pdf
@@ -528,6 +532,7 @@ class Metrics:
             p = 0 means only the first element is considered
             p = 1 means all ranks are weighted equally
         """
+
         if type(ground_truth) is list or type(ground_truth) is np.ndarray:
             pass
         else:
@@ -540,6 +545,12 @@ class Metrics:
             else:
                 ground_truth = ground_truth.index.tolist()
                 simulation = simulation.index.tolist()
+
+        if p == -1:
+            func = lambda x: np.abs(self.rbo_weight(len(ground_truth), x) - 0.995)
+            res = minimize_scalar(func,method='bounded',bounds=(0,1))
+            p = res.x
+
 
         sl, ll = sorted([(len(ground_truth), ground_truth), (len(simulation), simulation)])
         s, S = sl
