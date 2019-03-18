@@ -20,6 +20,3 @@ multi_platform_measurements = ss.MultiPlatformMeasurements(dataset, config,
 
 # Run all measurements in the config file
 results = multi_platform_measurements.run(verbose=True)
-
-
-print(results[0]['community']['size_of_audience'])
