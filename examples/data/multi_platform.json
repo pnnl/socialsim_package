@@ -13,9 +13,10 @@
                 "join": "outer"
               }
             },
-         "dtw": {
+            "dtw": {
               "metric": "dtw",
               "metric_args": {
+	        "join": "outer"
               }
             }
           }
@@ -35,6 +36,7 @@
          "dtw": {
               "metric": "dtw",
               "metric_args": {
+	        "join":"outer"
               }
             }
           }
@@ -48,6 +50,11 @@
           "metrics": {
             "absolute_percentage_error": {
               "metric": "absolute_percentage_error",
+              "metric_args": {
+              }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
               "metric_args": {
               }
             }
@@ -89,27 +96,15 @@
           "measurement_args": {},
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "js": {
-              "metric": "multi_distributions",
+	    "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
               "metric_args": {
-                "metric": "js"
               }
             },
-            "ks": {
-              "metric": "multi_distributions",
+	    "absolute_difference": {
+              "metric": "absolute_difference",
               "metric_args": {
-	        "metric":"ks"
               }
-            },
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            },
-            "r2": {
-              "metric": "r2",
-              "metric_args": {}
             }
           }
         },
@@ -119,11 +114,15 @@
           "measurement_args": {},
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "ks_test": {
+            "ks": {
               "metric": "ks_test",
               "metric_args": {}
+            },
+	   "js": {
+              "metric": "js_divergence",
+              "metric_args": {}
             }
-          }
+	  }
         },
         "top_lifetimes": {
           "scale": "population",
@@ -167,15 +166,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -217,6 +214,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
               }
+            },
+	    "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         },
@@ -228,15 +230,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -259,15 +259,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -293,9 +291,14 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
     	      }
+             },
+	    "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
-          }
-        }
+	  }
+	}
       },
       "community": {
         "unique_users": {
@@ -308,6 +311,11 @@
           "metrics": {
             "absolute_percentage_error": {
               "metric": "absolute_percentage_error",
+              "metric_args": {
+              }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
               "metric_args": {
               }
             }
@@ -325,6 +333,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
               }
+            },
+	    "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         },
@@ -359,6 +372,7 @@
 	        "dtw": {
               "metric": "dtw",
               "metric_args": {
+	         "join":"outer"
               }
             }
           }
@@ -394,6 +408,7 @@
 	        "dtw": {
               "metric": "dtw",
               "metric_args": {
+	         "join":"outer"
               }
             }
           }
@@ -404,27 +419,15 @@
           "measurement_args": {"community_level": true},
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "js": {
-              "metric": "multi_distributions",
+	    "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
               "metric_args": {
-                "metric": "js"
-              }
+    	      }
             },
-            "ks": {
-              "metric": "multi_distributions",
+	    "absolute_difference": {
+              "metric": "absolute_difference",
               "metric_args": {
-	        "metric":"ks"
               }
-            },
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            },
-            "r2": {
-              "metric": "r2",
-              "metric_args": {}
             }
           }
         },
@@ -434,8 +437,12 @@
           "measurement_args": {"community_level": true},
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "ks_test": {
+            "ks": {
               "metric": "ks_test",
+              "metric_args": {}
+            },
+	    "js": {
+              "metric": "js_divergence",
               "metric_args": {}
             }
           }
@@ -469,11 +476,14 @@
               "metric": "rmse",
               "metric_args": {
                 "join": "outer"
+
               }
             },
             "dtw": {
               "metric": "dtw",
-              "metric_args": {}
+              "metric_args": {
+	         "join":"outer"
+	      }
             }
           }
         },
@@ -484,15 +494,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -533,15 +541,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -565,15 +571,13 @@
           "temporal_vs_batch": "Batch",
           "metrics": {
             "js": {
-              "metric": "multi_distributions",
+              "metric": "js_divergence",
               "metric_args": {
-                "metric": "js"
               }
             },
             "ks": {
-              "metric": "multi_distributions",
+              "metric": "ks_test",
               "metric_args": {
-	        "metric":"ks"
               }
             },
             "rmse": {
@@ -600,6 +604,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
     	      }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         }
@@ -616,11 +625,14 @@
             "rmse": {
               "metric": "rmse",
               "metric_args": {
-           }
+	        "join":"outer"
+             }
             },
             "dtw": {
               "metric": "dtw",
-              "metric_args": {}
+              "metric_args": {
+	         "join":"outer"
+	      }
             }
           }
         },
@@ -635,11 +647,14 @@
             "rmse": {
               "metric": "rmse",
               "metric_args": {
-           }
+	         "join":"outer"
+              }
             },
             "dtw": {
               "metric": "dtw",
-              "metric_args": {}
+              "metric_args": {
+	         "join":"outer"
+	      }
             }
           }
         },
@@ -653,6 +668,11 @@
           "metrics": {
             "absolute_percentage_error": {
               "metric": "absolute_percentage_error",
+              "metric_args": {
+              }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
               "metric_args": {
               }
             }
@@ -670,6 +690,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
               }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         },
@@ -685,6 +710,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
 	      }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         },
@@ -696,25 +726,13 @@
           },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "ks_test": {
+            "ks": {
               "metric": "ks_test",
               "metric_args": {}
-            }
-          }
-        },
-        "top_audience_reach": {
-          "scale": "node",
-          "measurement": "top_audience_reach",
-          "measurement_args": {
-            "k": 50,
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {
-              }
+            },
+	    "js": {
+              "metric": "js_divergence",
+              "metric_args": {}
             }
           }
         },
@@ -730,6 +748,11 @@
               "metric": "absolute_percentage_error",
               "metric_args": {
     	      }
+            },
+	   "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+              }
             }
           }
         },
@@ -750,150 +773,9 @@
             },
             "dtw": {
               "metric": "dtw",
-              "metric_args": {}
-            }
-          }
-        },
-        "distribution_of_shares": {
-          "scale": "node",
-          "measurement": "distribution_of_shares",
-          "measurement_args": {
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "js": {
-              "metric": "multi_distributions",
               "metric_args": {
-                "metric": "js"
-              }
-            },
-            "ks": {
-              "metric": "multi_distributions",
-              "metric_args": {
-	        "metric":"ks"
-              }
-            },
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            },
-            "r2": {
-              "metric": "r2",
-              "metric_args": {}
-            }
-          }
-        },
-        "top_lifetimes": {
-          "scale": "node",
-          "measurement": "top_lifetimes",
-          "measurement_args": {
-            "k": 50,
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {
-              }
-            }
-          }
-        },
-        "distribution_of_users": {
-          "scale": "node",
-          "measurement": "distribution_of_users",
-          "measurement_args": {
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "js": {
-              "metric": "multi_distributions",
-              "metric_args": {
-                "metric": "js"
-              }
-            },
-            "ks": {
-              "metric": "multi_distributions",
-              "metric_args": {
-	        "metric":"ks"
-              }
-            },
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            },
-            "r2": {
-              "metric": "r2",
-              "metric_args": {}
-            }
-          }
-        },
-        "top_info": {
-          "scale": "node",
-          "measurement": "top_info_shared",
-          "measurement_args": {
-            "k": 50,
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {
-              }
-            }
-          }
-        },
-        "distribution_of_speed": {
-          "scale": "node",
-          "measurement": "distribution_of_speed",
-          "measurement_args": {"node_level": true},
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "js": {
-              "metric": "multi_distributions",
-              "metric_args": {
-                "metric": "js"
-              }
-            },
-            "ks": {
-              "metric": "multi_distributions",
-              "metric_args": {
-	        "metric":"ks"
-              }
-            },
-            "rmse": {
-              "metric": "rmse",
-              "metric_args": {
-                "join": "outer"
-              }
-            },
-            "r2": {
-              "metric": "r2",
-              "metric_args": {}
-            }
-          }
-        },
-        "top_speeds": {
-          "scale": "node",
-          "measurement": "top_speeds",
-          "measurement_args": {
-            "k": 50,
-            "node_level": true
-          },
-          "temporal_vs_batch": "Batch",
-          "metrics": {
-            "rbo": {
-              "metric": "rbo_score",
-              "metric_args": {
-
-              }
+	         "join":"outer"
+	      }
             }
           }
         }
