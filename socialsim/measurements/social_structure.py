@@ -65,8 +65,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         return 2.0*ig.Graph.ecount(self.gUNig)/ig.Graph.vcount(self.gUNig)
 
     def degree_distribution(self):
-        degVals = ig.Graph.degree(self.gUNig)
-        return pd.DataFrame([{'node': idx, 'value': degVals[idx]} for idx in range(self.gUNig.vcount())])
+        vertices = [ v.attributes()['name'] for v in self.gUNig.vs]
+	degVals = self.gUNig.degree(vertices) 
+        return pd.DataFrame([{'node': vertices[idx], 'value': degVals[idx]} for idx in range(len(vertices))])
 
     def community_modularity(self):
         return ig.Graph.modularity(self.gUNig,ig.Graph.community_multilevel(self.gUNig))
