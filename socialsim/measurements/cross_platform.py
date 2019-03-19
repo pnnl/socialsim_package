@@ -58,7 +58,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             if community_list is not None and len(community_list) > 0:
                 self.community_list = community_list
             else:
-                self.community_list = self.community_set[self.community_col].unique()
+                self.community_list = self.community_set[self.community_col].dropna().unique()
         else:
             self.community_list = []
 
@@ -115,7 +115,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if community_level and len(communities) == 0:
            communities = self.community_list
         elif community_level and communities == "all":
-           communities = self.community_set[self.community_col].unique()
+           communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
            communities = []
 
