@@ -80,10 +80,15 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             if metadata.use_content_data:
                 self.useContentMetaData = True
                 self.contentMetaData    = metadata.content_data
+            else:
+                self.useContentMetaData = False
 
             if metadata.use_user_data:
                 self.useUserMetaData = True
                 self.UserMetaData    = metadata.user_data
+            else:
+                self.useUserMetaData = False
+
         else:
             self.useContentMetaData = False
             self.useUserMetaData    = False
