@@ -66,7 +66,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
     def degree_distribution(self):
         vertices = [ v.attributes()['name'] for v in self.gUNig.vs]
-	degVals = self.gUNig.degree(vertices) 
+        degVals = self.gUNig.degree(vertices) 
         return pd.DataFrame([{'node': vertices[idx], 'value': degVals[idx]} for idx in range(len(vertices))])
 
     def community_modularity(self):
