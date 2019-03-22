@@ -194,9 +194,10 @@ class Metrics:
                 if s in ['node', 'community']:
                     result = {}
                     for a in ground_truth.keys():
-                        sub_result = metric_function(ground_truth[a], 
-                            simulation[a], **metric_args)
-                        result.update({a:sub_result})
+                        if a in simulation.keys():
+                            sub_result = metric_function(ground_truth[a], 
+                                                         simulation[a], **metric_args)
+                            result.update({a:sub_result})
                 else:
                     result = metric_function(ground_truth, simulation, 
                         **metric_args)
@@ -335,7 +336,7 @@ class Metrics:
         Meant for scalar valued measurements
         """
 
-        if ground_truth is None or ground_truth==0:
+        if ground_truth is None or ground_truth==0 or simulation is None:
             result =  None
         else:
             result = self.absolute_difference(ground_truth, simulation)
