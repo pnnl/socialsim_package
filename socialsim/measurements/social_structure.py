@@ -55,8 +55,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
     def number_of_connected_components(self):
         return len(ig.Graph.components(self.gUNig, mode="WEAK"))
 
-    def average_clustering_coefficient(self):
-        return sn.GetClustCf(self.gUNsn)
+#    def average_clustering_coefficient(self):
+#        return sn.GetClustCf(self.gUNsn)
 
     def max_node_degree(self):
         return max(ig.Graph.degree(self.gUNig))

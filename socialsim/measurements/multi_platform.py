@@ -290,7 +290,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         values = values.reset_index()
 
         if community_level:
-            meas = values.groupby(self.community_col).apply(lambda x: x.nlargest(k,"value"))
+            meas = values.groupby(self.community_col).apply(lambda x: x.nlargest(k,"value")).reset_index(drop=True)
             meas = dict(tuple(meas.groupby(self.community_col)))
             meas = {k:v[[self.content_col,'value']].reset_index(drop=True) for k,v in meas.items()}
         else:

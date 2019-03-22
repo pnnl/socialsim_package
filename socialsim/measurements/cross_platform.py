@@ -29,6 +29,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
         super(CrossPlatformMeasurements, self).__init__(dataset, configuration, 
             log_file=log_file)
+
         self.dataset            = dataset
         self.timestamp_col      = timestamp_col
         self.user_col           = user_col
@@ -187,7 +188,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 grp = grp.div(grp.sum(axis=1),axis=0)
                 cols = grp.columns
                 
-                grp = pd.melt(grp.reset_index(),id_vars=['platform'],value_vars=cols)
+                if len(grp) > 0:
+                    grp = pd.melt(grp.reset_index(),id_vars=['platform'],value_vars=cols)
 
                 return(grp)
 
@@ -202,7 +204,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             data = data.set_index(self.content_col)[self.platform_col]
             data = data.to_dict()
 
-        return(data)
+        if len(data) > 0:
+            return(data)
+        else:
+            return(None)
 
 
     def time_delta(self, time_granularity="s", node_level = False, community_level = False, 
@@ -226,6 +231,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
         data = self.preprocess(node_level, nodes, community_level, communities)
+
 
         if not community_level:
             group_col = [self.content_col, self.platform_col]
@@ -251,6 +257,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
         data_combinations = data_combinations.reset_index()
  
+
         #merge to get first platform
         data_combinations = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
                                                     on=group_col + [self.timestamp_col],how='left')
@@ -299,7 +306,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         platforms = sorted(data[self.platform_col].unique())
         
-        data['values'] = 1
+        data.loc[:,'values'] = 1
         data = data.drop_duplicates(subset=[self.user_col, self.platform_col])
         cols = [self.user_col, self.platform_col, 'values']
         index_cols = [self.user_col]
