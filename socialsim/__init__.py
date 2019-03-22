@@ -7,7 +7,6 @@ from .run  import run_measurements
 from .measurements import SocialActivityMeasurements
 from .measurements import InformationCascadeMeasurements
 from .measurements import SocialStructureMeasurements
-from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements 
 from .measurements import MetaData
