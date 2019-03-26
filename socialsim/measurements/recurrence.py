@@ -38,7 +38,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         group activity by provided time granularity and get size and unique user counts per epoch
         time_granularity: s, Min, 10Min, 30Min, H, D, ...
         '''
-        self.dataset_df[self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
+        self.dataset_df.loc[:,self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
         self.counts_df = self.dataset_df.set_index(self.timestamp_col).groupby(pd.Grouper(
             freq=time_granularity))[[self.id_col, self.userid_col]].nunique().reset_index()
 
@@ -68,7 +68,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         for idx, burst_interval in enumerate(self.burst_intervals):
             self.dataset_df.loc[self.dataset_df[self.timestamp_col].between(
                 burst_interval[0], burst_interval[1], inclusive=False), 'burst_index'] = idx
-        self.grouped_bursts = self.dataset_df.dropna().groupby('burst_index')
+        if 'burst_index' in self.dataset_df:
+            self.grouped_bursts = self.dataset_df.dropna().groupby('burst_index')
 
     @property
     def time_between_bursts_distribution(self):
@@ -139,7 +140,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
 class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration_subset=None, metadata=None,
-    id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
+    id_col='informationID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", configuration={}, communities=None, log_file='recurrence_measurements_log.txt', node_list=None, community_list=None):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -155,12 +156,15 @@ class RecurrenceCommunityMeasurements(MeasurementsBaseClass):
         self.platform_col       = platform_col
         self.measurement_type   = 'recurrence'
         self.metadata           = metadata
+        self.metadata.read_communities()
         self.get_percommunity_recurrence_measurements()
 
     def get_percommunity_recurrence_measurements(self):
         self.percommunity_recurrence_measurements = {}
         for community, community_ids in self.metadata.communities.items():
+            print(community_ids)
             community_df = self.dataset_df[self.dataset_df[self.id_col].isin(community_ids)]
+            print(community_df)
             self.percommunity_recurrence_measurements[community] = RecurrenceMeasurements(dataset_df=community_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, configuration=self.configuration)
 
     def run_for_all_communities(self, measurement_name):

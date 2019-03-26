@@ -14,6 +14,9 @@ from .measurements import InformationCascadeMeasurements
 from .measurements import SocialStructureMeasurements
 from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
+from .measurements import MultiPlatformMeasurements
+from .measurements import RecurrenceCommunityMeasurements
+
 
 from .load   import load_measurements
 from .record import RecordKeeper
@@ -135,6 +138,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = SocialStructureMeasurements
             elif measurement_type=='cross_platform':
                 Measurement = CrossPlatformMeasurements
+            elif measurement == 'recurrence':
+                Measurement = RecurrenceCommunityMeasurements
 
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]

@@ -11,6 +11,7 @@ from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements 
 from .measurements import RecurrenceMeasurements
+from .measurements import RecurrenceCommunityMeasurements
 from .measurements import MetaData
 
 from .visualizations import generate_plot

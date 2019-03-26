@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy  as np
 import sys
+import glob
 
 import datetime
 
@@ -50,6 +51,23 @@ class MetaData:
             self.user_data = self.preprocessUserMeta(self.user_data)
         else:
             self.use_user_data = False
+
+    def read_communities(self):
+
+        community_fns = glob.glob(self.community_directory + '/*')
+        
+        self.communities = {}
+        for fn in community_fns:
+            
+            comm_id = fn.split('/')[-1].split('.')[0]
+            comm_members = []
+            with open(fn,'r') as f:
+                comm_members = [line.rstrip('\n') for line in f]
+
+            if len(comm_members) > 0:
+                self.communities[comm_id] = comm_members
+
+            print(self.communities)
 
     def build_communities(self, content_data, user_data):
         """
