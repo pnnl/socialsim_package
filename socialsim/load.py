@@ -138,6 +138,8 @@ def convert_datetime(dataset, verbose):
             dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'], unit='ms')
         except:
             dataset['nodeTime'] = pd.to_datetime(dataset['nodeTime'])
+        
+    dataset['nodeTime'] = dataset['nodeTime'].dt.tz_localize(None)
 
     if verbose:
         print(' Done')
