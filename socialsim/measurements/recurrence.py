@@ -57,7 +57,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         if len(self.dataset_df) < 2:
             self.burst_intervals = None
             return
-        # print('DID NOT PASS')
         r = self.counts_df[self.id_col].values
         n = len(r)
         d = np.array([sum(r)] * n, dtype=float)
@@ -70,13 +69,12 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         time_granularity = index_date[1] - index_date[0]
         self.burst_intervals = [(burst['begin_timestamp'], burst['end_timestamp'] +
                                  time_granularity) for _, burst in bursts_df.iterrows()]
-        print('number of bursts: ', len(self.burst_intervals))
-        print(self.dataset_df[[self.timestamp_col]].sort_values(self.timestamp_col))
+        # print('number of bursts: ', len(self.burst_intervals))
+        # print(self.dataset_df[[self.timestamp_col]].sort_values(self.timestamp_col))
         self.update_with_burst()
 
     def update_with_burst(self):
         '''update dataset_df with burst index'''
-        # print('1len(dataset_df): ', len(self.dataset_df))
         self.dataset_df['burst_index'] = None
         if self.burst_intervals is None:
             self.grouped_bursts = None
@@ -85,7 +83,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
             self.dataset_df.loc[self.dataset_df[self.timestamp_col].between(
                 burst_interval[0], burst_interval[1], inclusive=False), 'burst_index'] = idx
         self.grouped_bursts = self.dataset_df.dropna(subset=['burst_index']).groupby('burst_index')
-        # print('2len(dataset_df): ', len(self.dataset_df))
 
     @property
     def time_between_bursts_distribution(self):
@@ -98,7 +95,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         '''
         How many renewed bursts of activity are there?
         '''
-        # print('fdas:', self.dataset_df.dropna())
         return len(self.burst_intervals)
 
     def time_between_bursts(self):
@@ -112,8 +108,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         '''
         How many times is the information shared per burst on average?
         '''
-        # print(self.dataset_df.dropna())
-        # print(self.grouped_bursts.size().reset_index(name='size'))
         return self.grouped_bursts.size().reset_index(name='size')['size'].mean()
 
     def average_number_of_users_per_burst(self):
@@ -139,8 +133,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
             old_len = len(users)
             users.update(single_burst_df[self.userid_col].unique())
             num_new_users.append(len(users) - old_len)
-#             print(old_len)
-#         print(num_new_users)
         return np.mean(num_new_users)
 
     def lifetime_of_each_burst(self):
@@ -188,8 +180,6 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
     def initialize_recurrence_measurements(self):
         self.content_recurrence_measurements = {}
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
-            # print('cointype: ', content_id)
-            # print(content_df)
             self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, content_col=self.content_col, configuration=self.configuration, content_id=content_id, time_granularity=self.time_granularity)
 
     def run_content_level_measurement(self, measurement_name, scale='node',
@@ -203,7 +193,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
     def run_community_level_measurement(self, measurement_name, selected_communties=None):
         if self.community_contentids is None:
-            print('No communities')
+            print('No communities provided')
             return
         selected_communties = next(x for x in [selected_communties, self.selected_communties, self.community_contentids.keys()] if x is not None)
         return {community: pd.DataFrame(list(self.run_content_level_measurement(measurement_name, 
