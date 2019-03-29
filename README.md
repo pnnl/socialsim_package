@@ -37,7 +37,8 @@ config = 'data/cp2_configuration.json'
 config = ss.load_config(config)
 
 # Get metadata
-metadata = ss.MetaData(community_directory='data/communities/')
+metadata = ss.MetaData(community_directory='data/communities/',
+		       node_file='data/node_lists.txt')
 
 # Instantiate the task runner 
 task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
@@ -52,6 +53,27 @@ results["ground_truth_results"]
 # Get metrics
 results["metrics"]
 ```
+
+## Generating test data and example community and node files
+
+There are several scripts to generate example test data and community and node files.  These files are meant to illustrate the format for the input data and do not contain realistic interaction structure.
+
+To generate example input data:
+``` bash
+python data/generate_test_data.py
+```
+
+To generate example community files:
+``` bash
+python data/build_communities.py
+```
+
+To generate an examples node list file:
+``` bash
+python data/build_communities.py
+```
+
+
 _______________________________________________________________________________
 
 ## Social Network Representation Files
