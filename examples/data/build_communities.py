@@ -8,7 +8,7 @@ n = 50
 dataset = 'test_dataset.txt'
 dataset = ss.load_data(dataset)
 
-dataset = dataset['informationID'].tolist()
+dataset = dataset['informationID'].unique().tolist()
 
 random.shuffle(dataset)
 
