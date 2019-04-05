@@ -53,3 +53,13 @@ def add_communities_to_dataset(dataset, communities_directory):
     dataset = dataset.dropna(subset=['actionType'])
 
     return dataset
+
+def get_community_contentids(communities_directory: str) -> dict:
+    '''Get a list of nodeIDs for all communities from the communities directory
+    '''
+    community_contentids = {}
+    for community_fname in sorted(next(os.walk(communities_directory))[2]):
+        with open(os.path.join(communities_directory, community_fname)) as fhandle:
+            community_contentids[os.path.splitext(community_fname)[0]] = [x.strip() for x in fhandle.readlines()]
+    return community_contentids
+

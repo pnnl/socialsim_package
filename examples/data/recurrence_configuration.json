@@ -1,0 +1,338 @@
+{"cross_platform": {
+    "recurrence": {
+        "node": {
+            "number_of_bursts": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "number_of_bursts"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "time_between_bursts": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "time_between_bursts"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "average_size_of_each_burst": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_size_of_each_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "average_number_of_users_per_burst": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_number_of_users_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "burstiness_of_burst_timing": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "burstiness_of_burst_timing"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "new_users_per_burst": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "new_users_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "lifetime_of_each_burst": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "lifetime_of_each_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            },
+            "average_proportion_of_top_platform_per_burst": {
+                "scale": "node",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_proportion_of_top_platform_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference":{
+		        "metric":"absolute_difference",
+			"metric_args":{}
+		    }
+                }
+            }
+        },
+        "community": {
+            "distribution_of_number_of_bursts": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "number_of_bursts"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_time_between_bursts": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "time_between_bursts"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_average_burst_size": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "average_size_of_each_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_average_number_of_users_per_burst": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "average_number_of_users_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_timing_burstiness": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "burstiness_of_burst_timing"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_new_users_per_burst": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "new_users_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_lifetime": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "lifetime_of_each_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_platform_proportion": {
+                "scale": "community",
+                "measurement": "run_community_level_measurement",
+                "measurement_args": {"measurement_name": "average_proportion_of_top_platform_per_burst"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            }
+        },
+        "population": {
+            "distribution_of_number_of_bursts": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "number_of_bursts",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js_divergence": {
+                        "metric": "js_divergence",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_time_between_bursts": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "time_between_bursts",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_average_burst_size": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_size_of_each_burst",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_average_number_of_users_per_burst": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_number_of_users_per_burst",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_timing_burstiness": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "burstiness_of_burst_timing",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_new_users_per_burst": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "new_users_per_burst",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_lifetime": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "lifetime_of_each_burst",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_burst_platform_proportion": {
+                "scale": "population",
+                "measurement": "run_content_level_measurement",
+                "measurement_args": {"measurement_name": "average_proportion_of_top_platform_per_burst",
+				     "scale":"population"},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks_test": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            }
+        }
+    }
+}}
