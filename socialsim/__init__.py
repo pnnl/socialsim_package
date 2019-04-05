@@ -9,6 +9,7 @@ from .measurements import InformationCascadeMeasurements
 from .measurements import SocialStructureMeasurements
 from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements 
+from .measurements import RecurrenceMeasurements
 from .measurements import MetaData
 
 from .visualizations import generate_plot

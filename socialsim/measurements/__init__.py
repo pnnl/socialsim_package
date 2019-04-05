@@ -3,5 +3,6 @@ from .information_cascade import InformationCascadeMeasurements
 from .social_structure    import SocialStructureMeasurements
 from .cross_platform      import CrossPlatformMeasurements
 from .multi_platform      import MultiPlatformMeasurements
+from .recurrence          import RecurrenceMeasurements
 
 from .metadata import MetaData
