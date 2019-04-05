@@ -1,6 +1,6 @@
 import pandas as pd
 import igraph as ig
-import snap   as sn
+#import snap   as sn
 import numpy  as np
 
 from time import time
