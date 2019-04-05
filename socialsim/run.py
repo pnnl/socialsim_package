@@ -138,7 +138,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = SocialStructureMeasurements
             elif measurement_type=='cross_platform':
                 Measurement = CrossPlatformMeasurements
-            elif measurement == 'recurrence':
+            elif measurement_type == 'recurrence':
                 Measurement = RecurrenceMeasurements
 
             # Get data and configuration subset

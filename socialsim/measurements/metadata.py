@@ -6,8 +6,8 @@ import glob
 import datetime
 
 class MetaData:
-    def __init__(self, content_data=False, user_data=False, verbose=True, 
-        community_directory=None, node_file=None):
+    def __init__(self, content_data=False, user_data=False, info_data=False,
+                 community_directory=None, node_file=None, verbose=True):
         """
         Description:
 
@@ -51,6 +51,16 @@ class MetaData:
             self.user_data = self.preprocessUserMeta(self.user_data)
         else:
             self.use_user_data = False
+
+        if info_data != False:
+            self.use_info_data = True
+ 
+            if verbose: print('Loading info metadata... ', end='', flush=True)
+            self.info_data = pd.read_csv(info_data)
+            if verbose: print('Done.', flush=True)
+        else:
+            self.use_info_data = False
+
 
     def read_communities(self):
 

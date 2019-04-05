@@ -193,9 +193,10 @@ class Metrics:
                 if s in ['node', 'community']:
                     result = {}
                     for a in ground_truth.keys():
-                        sub_result = metric_function(ground_truth[a], 
-                            simulation[a], **metric_args)
-                        result.update({a:sub_result})
+                        if a in simulation.keys():
+                            sub_result = metric_function(ground_truth[a], 
+                                                         simulation[a], **metric_args)
+                            result.update({a:sub_result})
                 else:
                     result = metric_function(ground_truth, simulation, 
                         **metric_args)

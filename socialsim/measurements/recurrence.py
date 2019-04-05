@@ -5,8 +5,12 @@ import pandas as pd
 from scipy.stats.stats import pearsonr
 import burst_detection as bd
 import os
+
+from tsfresh import extract_features
+
 from .measurements import MeasurementsBaseClass
 from ..utils import get_community_contentids
+import pprint
 
 class ContentRecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, 
@@ -14,7 +18,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         userid_col="nodeUserID", platform_col="platform", 
         content_col="informationID", communities=None, 
         log_file='recurrence_measurements_log.txt', content_id=None, 
-        time_granularity='D'):
+        time_granularity='H',gamma=0.3):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -35,7 +39,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         self.content_id = content_id
         self.time_granularity = time_granularity
         self.get_per_epoch_counts()
-        self.detect_bursts()
+        self.detect_bursts(gamma=gamma)
         self._time_between_bursts_distribution = None
 
     def get_per_epoch_counts(self):
@@ -43,9 +47,16 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         group activity by provided time granularity and get size and unique user counts per epoch
         time_granularity: s, Min, 10Min, 30Min, H, D, ...
         '''
-        self.dataset_df.loc[:,self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
+        #self.dataset_df.loc[:,self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
         self.counts_df = self.dataset_df.set_index(self.timestamp_col).groupby(pd.Grouper(
             freq=self.time_granularity))[[self.id_col, self.userid_col]].nunique().reset_index()
+
+    def predict_gamma(self,time_series):
+        '''
+        Placeholder for function for predicting the best gamma based on time series properties
+        '''
+
+        return 0.3
 
     def detect_bursts(self, s=2, gamma=0.3):
         '''
@@ -55,43 +66,64 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         burst_detection library: https://pypi.org/project/burst_detection/
        '''
         if len(self.dataset_df) < 2:
-            self.burst_intervals = None
+            self.grouped_bursts = None
+            self.burst_intervals = []
             return
         r = self.counts_df[self.id_col].values
+
+        if gamma == -1:
+            gamma = self.predict_gamma(r)
+
         n = len(r)
         d = np.array([sum(r)] * n, dtype=float)
-        q = bd.burst_detection(r, d, n, s, gamma, 1)[0]
-        bursts_df = bd.enumerate_bursts(q, 'burstLabel')
-        index_date = pd.Series(
-            self.counts_df[self.timestamp_col].values, index=self.counts_df.index).to_dict()
-        bursts_df['begin_timestamp'] = bursts_df['begin'].map(index_date)
-        bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
-        time_granularity = index_date[1] - index_date[0]
-        self.burst_intervals = [(burst['begin_timestamp'], burst['end_timestamp'] +
-                                 time_granularity) for _, burst in bursts_df.iterrows()]
-        # print('number of bursts: ', len(self.burst_intervals))
-        # print(self.dataset_df[[self.timestamp_col]].sort_values(self.timestamp_col))
+        if len(r) > 1:
+            q = bd.burst_detection(r, d, n, s, gamma, 1)[0]
+            bursts_df = bd.enumerate_bursts(q, 'burstLabel')
+            index_date = pd.Series(
+                self.counts_df[self.timestamp_col].values, index=self.counts_df.index).to_dict()
+            bursts_df['begin_timestamp'] = bursts_df['begin'].map(index_date)
+            bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
+            time_granularity = index_date[1] - index_date[0]
+            self.burst_intervals = [(burst['begin_timestamp'], burst['end_timestamp'] +
+                                     time_granularity) for _, burst in bursts_df.iterrows()]
+        else:
+            self.burst_intervals = []
         self.update_with_burst()
 
     def update_with_burst(self):
         '''update dataset_df with burst index'''
-        self.dataset_df['burst_index'] = None
-        if self.burst_intervals is None:
+        self.dataset_df.loc['burst_index',:] = None
+        if len(self.burst_intervals) == 0:
             self.grouped_bursts = None
             return
         for idx, burst_interval in enumerate(self.burst_intervals):
             self.dataset_df.loc[self.dataset_df[self.timestamp_col].between(
                 burst_interval[0], burst_interval[1], inclusive=False), 'burst_index'] = idx
 
-        if 'burst_index' in self.dataset_df:
+        if 'burst_index' in self.dataset_df.columns:
             self.grouped_bursts = self.dataset_df.dropna(subset=['burst_index']).groupby('burst_index')
+        else:
+            self.grouped_burst = None
 
     @property
     def time_between_bursts_distribution(self):
         if self._time_between_bursts_distribution is None:
-            self._time_between_bursts_distribution = [(start_j - end_i).total_seconds() / (60*60*24) for (_, end_i), (start_j, _) in zip(self.burst_intervals[:-1], self.burst_intervals[1:])]
+            self._time_between_bursts_distribution = [(start_j - end_i).total_seconds() for (_, end_i), (start_j, _) in zip(self.burst_intervals[:-1], self.burst_intervals[1:])]
         return self._time_between_bursts_distribution
 
+
+    def time_granularity_scaling(self,time_granularity):
+
+        if time_granularity == 'M':
+            return 60.0
+        elif time_granularity == 'H':
+            return 60.0*60.0
+        elif time_granularity == 'D':
+            return 60.0*60.0*24.0
+        elif time_granularity == 'W':
+            return 60.0*60.0*24.0*7.0
+        elif time_granularity == 'm':
+            return 60.0*60.0*24.0*30.5
 
     def number_of_bursts(self):
         '''
@@ -99,36 +131,52 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         '''
         return len(self.burst_intervals)
 
-    def time_between_bursts(self):
+    def time_between_bursts(self,time_granularity = 'D'):
         '''
         How much time elapses between renewed bursts of activity on average?
         Time granularity: days
         '''
-        return np.mean(self.time_between_bursts_distribution)
+
+        delta_t = np.mean(self.time_between_bursts_distribution)
+
+        return delta_t / self.time_granularity_scaling(time_granularity)
 
     def average_size_of_each_burst(self):
         '''
         How many times is the information shared per burst on average?
         '''
+        if self.grouped_bursts is None:
+            return None
+
         return self.grouped_bursts.size().reset_index(name='size')['size'].mean()
 
     def average_number_of_users_per_burst(self):
         '''
         How many users are reached by the information during each burst on average?
         '''
+        if self.grouped_bursts is None:
+            return None
+
         return self.grouped_bursts[[self.userid_col]].nunique().reset_index()[self.userid_col].mean()
 
     def burstiness_of_burst_timing(self):
         '''Do multiple bursts of renewed activity tend to cluster together?'''
-        std = np.std(self.time_between_bursts_distribution)
-        mean = np.mean(self.time_between_bursts_distribution)
-        return (std - mean) / (std + mean) if std + mean > 0 else 0
+
+        if len(self.time_between_bursts_distribution) > 2:
+            std = np.std(self.time_between_bursts_distribution)
+            mean = np.mean(self.time_between_bursts_distribution)
+            return (std - mean) / (std + mean) if std + mean > 0 else 0
+        else:
+            return None
 
     def new_users_per_burst(self):
         '''
         How many new users are reached by the information during each burst on average?
         First burst is also counted.
         '''
+        if self.grouped_bursts is None:
+            return None
+
         users = set()
         num_new_users = []
         for _, single_burst_df in self.grouped_bursts:
@@ -137,23 +185,26 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
             num_new_users.append(len(users) - old_len)
         return np.mean(num_new_users)
 
-    def lifetime_of_each_burst(self):
+    def lifetime_of_each_burst(self, time_granularity='H'):
         '''
         How long does each burst last on average?
         Time granularity: minutes
         '''
-        return np.mean([(end_i - start_i).total_seconds() / 60 for (start_i, end_i) in self.burst_intervals])
+        return np.mean([(end_i - start_i).total_seconds() / self.time_granularity_scaling(time_granularity) for (start_i, end_i) in self.burst_intervals])
 
     def average_proportion_of_top_platform_per_burst(self):
         '''
         Do individual bursts tend to occur on a single platform or are they distributed among platforms?
         '''
+        if self.grouped_bursts is None:
+            return None
+
         return np.mean([single_burst_df[self.platform_col].value_counts().max()/len(single_burst_df) for _, single_burst_df in self.grouped_bursts])
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, metadata=None,
-    id_col='id_h', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt', selected_content=None, selected_communties=None, time_granularity='D'):
+    id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt', selected_content=None, selected_communties=None, time_granularity='H'):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -175,29 +226,57 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.selected_communties = selected_communties
         self.community_contentids = None
         self.time_granularity = time_granularity
+        
+        self.gammas = {k:-1 for k in self.dataset_df[self.content_col].unique()}
+
         if self.metadata is not None:
             self.community_contentids = get_community_contentids(self.metadata.community_directory)
+            if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
+                self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
+
         self.initialize_recurrence_measurements()
 
     def initialize_recurrence_measurements(self):
         self.content_recurrence_measurements = {}
+        n_ids = self.dataset_df[self.content_col].nunique()
+        print('Number of info IDs:',n_ids)
+        count = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
-            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, timestamp_col=self.timestamp_col, userid_col=self.userid_col, platform_col=self.platform_col, content_col=self.content_col, configuration=self.configuration, content_id=content_id, time_granularity=self.time_granularity)
+            count += 1
+            if count % 50 == 0:
+                print('{}/{}'.format(count,n_ids))
+            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, 
+                                                                                             timestamp_col=self.timestamp_col, userid_col=self.userid_col, 
+                                                                                             platform_col=self.platform_col, content_col=self.content_col, 
+                                                                                             configuration=self.configuration, content_id=content_id, 
+                                                                                             time_granularity=self.time_granularity,gamma=self.gammas[content_id])
 
     def run_content_level_measurement(self, measurement_name, scale='node',
-                selected_content=None):
-        selected_content = next(x for x in [selected_content, self.selected_content, self.content_recurrence_measurements.keys()] if x is not None)
-        contentid_value = {content_id: getattr(self.content_recurrence_measurements[content_id], measurement_name)() for content_id in selected_content}
+                                      selected_content=None,**kwargs):
+        #determine selected nodes in order of priority from the argument to this function, the selected nodes from the metadata, and all nodes
+        if scale == 'node':
+            selected_content = next(x for x in [selected_content, self.selected_content, self.metadata.node_list, self.content_recurrence_measurements.keys()] if x is not None and x != 'all')
+        else:
+            selected_content = self.dataset_df[self.content_col].unique()
+        
+        contentid_value = {content_id: getattr(self.content_recurrence_measurements[content_id], measurement_name)(**kwargs) for content_id in selected_content if content_id in self.content_recurrence_measurements.keys()}
+        contentid_value = {k:v for k,v in contentid_value.items() if not v is None and not np.isnan(v)}
         if scale == 'node':
             return contentid_value
         elif scale == 'population':
             return pd.DataFrame(list(contentid_value.items()), columns=[self.content_col, 'value'])
 
-    def run_community_level_measurement(self, measurement_name, selected_communties=None):
+    def run_community_level_measurement(self, measurement_name, selected_communties=None,**kwargs):
         if self.community_contentids is None:
             print('No communities provided')
             return
-        selected_communties = next(x for x in [selected_communties, self.selected_communties, self.community_contentids.keys()] if x is not None)
-        return {community: pd.DataFrame(list(self.run_content_level_measurement(measurement_name, 
-                selected_content=self.community_contentids[community]).items()), columns=[self.content_col, 'value']) for community in selected_communties}
+        selected_communities = next(x for x in [selected_communties, self.selected_communties, self.community_contentids.keys()] if x is not None)
 
+        meas = {}
+        for community in selected_communities:
+            meas[community] = pd.DataFrame(list(self.run_content_level_measurement(measurement_name, 
+                                                                                   selected_content=self.community_contentids[community],
+                                                                                   **kwargs).items()), 
+                                           columns=[self.content_col, 'value'])
+
+        return meas
