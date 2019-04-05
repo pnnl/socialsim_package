@@ -15,6 +15,8 @@ from .measurements import SocialStructureMeasurements
 from .measurements import PersistentGroupsMeasurements
 from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements
+from .measurements import RecurrenceMeasurements
+
 
 from .load   import load_measurements
 from .record import RecordKeeper
@@ -114,7 +116,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
             message = message + platform+' data... '
             print(message, end='', flush=True)
 
-        if platform=='cross_platform' or platform == 'multi_platform':
+        if platform=='multi_platform':
             dataset_subset = dataset
 
         else:
@@ -138,6 +140,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = CrossPlatformMeasurements
             elif measurement_type=='multi_platform':
                 Measurement = MultiPlatformMeasurements
+            elif measurement_type == 'recurrence':
+                Measurement = RecurrenceMeasurements
 
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]
@@ -149,7 +153,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                     message = message+measurement_type+'... '
                     print(message, end='', flush=True)
 
-                if platform=='cross_platform' or platform=='multi_platform':
+                if platform=='multi_platform':
                     measurement = Measurement(dataset_subset,
                         configuration_subset, metadata)
                 else:

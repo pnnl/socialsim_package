@@ -340,7 +340,7 @@ class Metrics:
             result =  None
         else:
             result = self.absolute_difference(ground_truth, simulation)
-            result = 100.0 * result / float(ground_truth)
+            result = 100.0 * result / np.abs(float(ground_truth))
 
         return result
 
