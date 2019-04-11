@@ -149,6 +149,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         
         platforms = sorted(data[self.platform_col].unique())
 
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+
         data = data.sort_values(self.timestamp_col)
         
         group_col = [self.content_col]
@@ -232,6 +236,11 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
+        platforms = sorted(data[self.platform_col].unique())
+
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
 
         if not community_level:
             group_col = [self.content_col, self.platform_col]
@@ -305,7 +314,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data = self.preprocess(node_level, nodes, community_level, communities)
 
         platforms = sorted(data[self.platform_col].unique())
-        
+
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
+ 
         data.loc[:,'values'] = 1
         data = data.drop_duplicates(subset=[self.user_col, self.platform_col])
         cols = [self.user_col, self.platform_col, 'values']
@@ -375,6 +389,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
+        platforms = sorted(data[self.platform_col].unique())
+
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+
         group_col = [self.content_col]
         if community_level:
             group_col = [self.content_col,self.community_col]
@@ -427,6 +447,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
+        platforms = sorted(data[self.platform_col].unique())
+
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
         group_col = [self.content_col]
         if community_level:
             group_col = [self.content_col,self.community_col]
@@ -487,7 +513,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
+        platforms = sorted(data[self.platform_col].unique())
 
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
         group_col = [self.content_col]
         if community_level:
             group_col += [self.community_col]
@@ -539,6 +570,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         platforms = sorted(data[self.platform_col].unique())
 
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
         data = data.set_index(self.timestamp_col)
         
         group_col = [self.content_col]
@@ -603,7 +638,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         data = self.preprocess(node_level, nodes, community_level, communities)
 
+        platforms = sorted(data[self.platform_col].unique())
 
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
         group_col = [self.content_col]
         if community_level:
             group_col = [self.content_col,self.community_col]
@@ -673,6 +713,13 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
            communities = []
 
         data = self.select_data(communities=communities)
+
+        platforms = sorted(data[self.platform_col].unique())
+
+        if len(platforms) <= 1:
+            warnings.warn("Not enough platforms for cross-platform measurements")
+            return(None)
+       
 
         def get_speed(grp):
             time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
