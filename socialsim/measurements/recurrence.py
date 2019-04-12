@@ -239,12 +239,10 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
     def initialize_recurrence_measurements(self):
         self.content_recurrence_measurements = {}
         n_ids = self.dataset_df[self.content_col].nunique()
-        print('Number of info IDs:',n_ids)
+        # print('Number of info IDs:',n_ids)
         count = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
             count += 1
-            if count % 50 == 0:
-                print('{}/{}'.format(count,n_ids))
             self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, 
                                                                                              timestamp_col=self.timestamp_col, userid_col=self.userid_col, 
                                                                                              platform_col=self.platform_col, content_col=self.content_col, 
