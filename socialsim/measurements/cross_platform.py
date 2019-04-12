@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.stats.stats import pearsonr, spearmanr
 from itertools import combinations
 import pprint
+import warnings
 
 from .measurements import MeasurementsBaseClass
 
