@@ -1,22 +1,33 @@
 ## Install Instructions
 It is highly recommended that you install the SocialSim measurements package in a conda environment.
 
-##### Step 1: Create a conda environment with required python packages 
+#### Step 1: Create and activate a conda environment
 ``` bash
-conda create --name myenv --file requirements.txt python=3.6
+conda create --name myenv
+source activate myenv
 ```
 
-##### Step 2: Install Snap
+#### Step 2: Install Snap and iGraph
 
 Download the OS-specific distribution file here: http://snap.stanford.edu/snappy/release/beta/ 
 ``` bash
+# Snap installation
 tar -xvzf snap_distribution.tar.gz
 cd snap_distribution.tar.gz
 python setup.py install
+
+# iGraph installation
+# Note: The iGraph installation process may vary from system to system
+conda install -c conda-forge/label/gcc7 python-igraph 
+
+# For Mac OSX, you may to need install matplotlib with conda rather than 
+# relying on the pip install below
+conda install matplotlib
 ```
-##### Step 3: Install the SocialSim package using pip
+
+#### Step 3: Install the SocialSim package using pip
 ``` bash
-pip install socialsim-0.1.0.tar.gz
+pip install socialsim.tar.gz
 ```
 ## Examples of the SocialSim Package API
 
@@ -70,7 +81,7 @@ python data/build_communities.py
 
 To generate an examples node list file:
 ``` bash
-python data/build_communities.py
+python data/build_node_list.py
 ```
 
 
