@@ -19,6 +19,10 @@ python setup.py install
 # iGraph installation
 # Note: The iGraph installation process may vary from system to system
 conda install -c conda-forge/label/gcc7 python-igraph 
+
+# For Mac OSX, you may to need install matplotlib with conda rather than 
+# relying on the pip install below
+conda install matplotlib
 ```
 
 #### Step 3: Install the SocialSim package using pip
@@ -77,7 +81,7 @@ python data/build_communities.py
 
 To generate an examples node list file:
 ``` bash
-python data/build_communities.py
+python data/build_node_list.py
 ```
 
 
