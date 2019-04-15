@@ -6,12 +6,97 @@ from scipy.stats.stats import pearsonr
 import burst_detection as bd
 import os
 
-from tsfresh import extract_features
+# from tsfresh import extract_features
 
 from .measurements import MeasurementsBaseClass
 from ..utils import get_community_contentids
 import pprint
 
+
+class BurstDetection():
+    def __init__(self, dataset_df, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='H'):
+        self.dataset_df = dataset_df
+        self.timestamp_col = timestamp_col
+        self.id_col = id_col
+        self.platform_col = platform_col
+        self.time_granularity = time_granularity
+
+    def detect_bursts(self, gamma=None):
+        '''
+        detect bursts for each platform separately and then merge overlapping bursts
+        time_granularity: s, Min, 10Min, 30Min, H, D, ...
+        '''
+        def merge_bursts(all_bursts_df):
+            '''
+            merge bursts from timeseries of different platforms 
+            '''
+            burst_intervals = []
+            all_bursts_df = all_bursts_df.sort_values('start_timestamp').reset_index(drop=True)
+            for idx, burst in all_bursts_df.iterrows():
+                if idx == 0:
+                    burst_intervals.append((burst['start_timestamp'], burst['end_timestamp']))
+                    continue
+                if can_be_merged(burst_intervals[-1], burst['start_timestamp']):
+                    burst_intervals[-1] = (min(burst_intervals[-1][0], burst['start_timestamp']),
+                                           max(burst_intervals[-1][1], burst['end_timestamp']))
+                else:
+                    burst_intervals.append((burst['start_timestamp'], burst['end_timestamp']))
+
+            return burst_intervals
+
+        def can_be_merged(earlier_interval, later_interval_start):
+            '''
+            check if two burst intervals can be merged
+            '''
+            if earlier_interval[0] <= later_interval_start <= earlier_interval[1]:
+                return True
+
+        all_bursts_dfs = []
+        for platform, platform_df in self.dataset_df.groupby(self.platform_col):
+            counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[[self.id_col]].nunique().reset_index()
+            bursts_df = self.detect_bursts_of_a_timeseries(counts_df, gamma=gamma)
+            if bursts_df is None:
+                continue
+            bursts_df['platform'] = platform
+            all_bursts_dfs.append(bursts_df)
+        if len(all_bursts_dfs) > 0:
+            all_bursts_df = pd.concat(all_bursts_dfs).reset_index(drop=True)
+            return merge_bursts(all_bursts_df)
+        else:
+            print('No bursts found on any platform.')
+            return []
+
+    def predict_gamma_for_timeseries(self, timeseries_df):
+        '''
+        Placeholder for function for predicting the best gamma based on time series properties
+        '''
+        return 0.1
+
+    def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None):
+        '''
+        detect intervals with bursts of activity: [start_timestamp, end_timestamp)
+        :param ts_df: timeseries_df for a single platform
+        :param s: multiplicative distance between states (input to burst_detection library)
+        :param gamma: difficulty associated with moving up a state (input to burst_detection library)
+        burst_detection library: https://pypi.org/project/burst_detection/
+        '''
+        if len(timeseries_df) < 2:
+            return None
+        r = timeseries_df[self.id_col].values
+        n = len(r)
+        d = np.array([sum(r)] * n, dtype=float)
+        if gamma is None:
+            gamma = self.predict_gamma_for_timeseries(timeseries_df)
+        q = bd.burst_detection(r, d, n, s=2, gamma=gamma, smooth_win=1)[0]
+        bursts_df = bd.enumerate_bursts(q, 'burstLabel') # returns a df with 'begin' and 'end' columns for a burst where both begin and end indices are included. 
+        index_date = pd.Series(
+            timeseries_df[self.timestamp_col].values, index=timeseries_df.index).to_dict()
+        bursts_df['start_timestamp'] = bursts_df['begin'].map(index_date)
+        bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
+        if len(bursts_df) > 0:
+            return bursts_df
+
+# self.update_with_burst()
 class ContentRecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, 
         id_col='nodeID', timestamp_col="nodeTime", 
@@ -38,57 +123,12 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         self.measurement_type = 'recurrence'
         self.content_id = content_id
         self.time_granularity = time_granularity
-        self.get_per_epoch_counts()
-        self.detect_bursts(gamma=gamma)
-        self._time_between_bursts_distribution = None
-
-    def get_per_epoch_counts(self):
-        '''
-        group activity by provided time granularity and get size and unique user counts per epoch
-        time_granularity: s, Min, 10Min, 30Min, H, D, ...
-        '''
-        #self.dataset_df.loc[:,self.timestamp_col] = pd.to_datetime(self.dataset_df[self.timestamp_col])
-        self.counts_df = self.dataset_df.set_index(self.timestamp_col).groupby(pd.Grouper(
-            freq=self.time_granularity))[[self.id_col, self.userid_col]].nunique().reset_index()
-
-    def predict_gamma(self,time_series):
-        '''
-        Placeholder for function for predicting the best gamma based on time series properties
-        '''
-
-        return 0.3
-
-    def detect_bursts(self, s=2, gamma=0.3):
-        '''
-        detect intervals with bursts of activity: [begin_timestamp, end_timestamp)
-        :param s: multiplicative distance between states (input to burst_detection library)
-        :param gamma: difficulty associated with moving up a state (input to burst_detection library)
-        burst_detection library: https://pypi.org/project/burst_detection/
-       '''
-        if len(self.dataset_df) < 2:
-            self.grouped_bursts = None
-            self.burst_intervals = []
-            return
-        r = self.counts_df[self.id_col].values
-
-        if gamma == -1:
-            gamma = self.predict_gamma(r)
-
-        n = len(r)
-        d = np.array([sum(r)] * n, dtype=float)
-        if len(r) > 1:
-            q = bd.burst_detection(r, d, n, s, gamma, 1)[0]
-            bursts_df = bd.enumerate_bursts(q, 'burstLabel')
-            index_date = pd.Series(
-                self.counts_df[self.timestamp_col].values, index=self.counts_df.index).to_dict()
-            bursts_df['begin_timestamp'] = bursts_df['begin'].map(index_date)
-            bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
-            time_granularity = index_date[1] - index_date[0]
-            self.burst_intervals = [(burst['begin_timestamp'], burst['end_timestamp'] +
-                                     time_granularity) for _, burst in bursts_df.iterrows()]
-        else:
-            self.burst_intervals = []
+        burstDetection = BurstDetection(dataset_df=self.dataset_df, id_col=self.id_col,
+                            timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
+                            time_granularity=self.time_granularity)
+        self.burst_intervals = burstDetection.detect_bursts()
         self.update_with_burst()
+        self._time_between_bursts_distribution = None
 
     def update_with_burst(self):
         '''update dataset_df with burst index'''
@@ -98,7 +138,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
             return
         for idx, burst_interval in enumerate(self.burst_intervals):
             self.dataset_df.loc[self.dataset_df[self.timestamp_col].between(
-                burst_interval[0], burst_interval[1], inclusive=False), 'burst_index'] = idx
+                burst_interval[0], burst_interval[1], inclusive=True), 'burst_index'] = idx
 
         if 'burst_index' in self.dataset_df.columns:
             self.grouped_bursts = self.dataset_df.dropna(subset=['burst_index']).groupby('burst_index')
@@ -110,7 +150,6 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         if self._time_between_bursts_distribution is None:
             self._time_between_bursts_distribution = [(start_j - end_i).total_seconds() for (_, end_i), (start_j, _) in zip(self.burst_intervals[:-1], self.burst_intervals[1:])]
         return self._time_between_bursts_distribution
-
 
     def time_granularity_scaling(self,time_granularity):
 
@@ -239,7 +278,6 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
     def initialize_recurrence_measurements(self):
         self.content_recurrence_measurements = {}
         n_ids = self.dataset_df[self.content_col].nunique()
-        # print('Number of info IDs:',n_ids)
         count = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
             count += 1
