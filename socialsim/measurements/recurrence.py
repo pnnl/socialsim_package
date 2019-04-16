@@ -70,7 +70,7 @@ class BurstDetection():
         '''
         Placeholder for function for predicting the best gamma based on time series properties
         '''
-        model_dir = ""
+        model_dir = "./model_parameters/best_model.pkl"
         estimator = joblib.load(model_dir)
         gamma = estimator.predict(timeseries_df)
 
