@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.stats.stats import pearsonr
 import burst_detection as bd
 import os
-
+import joblib
 # from tsfresh import extract_features
 
 from .measurements import MeasurementsBaseClass
@@ -70,7 +70,11 @@ class BurstDetection():
         '''
         Placeholder for function for predicting the best gamma based on time series properties
         '''
-        return 0.1
+        model_dir = ""
+        estimator = joblib.load(model_dir)
+        gamma = estimator.predict(timeseries_df)
+
+        return gamma
 
     def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None):
         '''
