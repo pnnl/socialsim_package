@@ -6,16 +6,18 @@ from scipy.stats.stats import pearsonr
 import burst_detection as bd
 import os
 import joblib
-# from tsfresh import extract_features
+from tsfresh import extract_features
 
 from .measurements import MeasurementsBaseClass
 from ..utils import get_community_contentids
 import pprint
-
+import pickle as pkl
+from .model_parameters.selected_features import selected_features
 
 class BurstDetection():
-    def __init__(self, dataset_df, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='H'):
+    def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='H'):
         self.dataset_df = dataset_df
+        self.metadata = metadata
         self.timestamp_col = timestamp_col
         self.id_col = id_col
         self.platform_col = platform_col
@@ -66,16 +68,6 @@ class BurstDetection():
             print('No bursts found on any platform.')
             return []
 
-    def predict_gamma_for_timeseries(self, timeseries_df):
-        '''
-        Placeholder for function for predicting the best gamma based on time series properties
-        '''
-        model_dir = "./model_parameters/best_model.pkl"
-        estimator = joblib.load(model_dir)
-        gamma = estimator.predict(timeseries_df)
-
-        return gamma
-
     def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None):
         '''
         detect intervals with bursts of activity: [start_timestamp, end_timestamp)
@@ -100,9 +92,22 @@ class BurstDetection():
         if len(bursts_df) > 0:
             return bursts_df
 
-# self.update_with_burst()
+    def predict_gamma_for_timeseries(self, timeseries_df):
+        '''
+        Placeholder for function for predicting the best gamma based on time series properties
+        '''
+        timeseries_df['dummy_col'] = 'dummy'   # the library requires an id column, but all ids are the same for our timeseries, so adding a dummy id column
+        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), column_id='dummy_col', column_sort=self.timestamp_col)#[selected_features]
+        print(features_df.columns)
+        # gamma = estimator.predict(feats)
+        gamma = self.metadata.estimator.predict(features_df.fillna(0))
+        return gamma
+        # return 0.3
+
+
 class ContentRecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, 
+        metadata=None,
         id_col='nodeID', timestamp_col="nodeTime", 
         userid_col="nodeUserID", platform_col="platform", 
         content_col="informationID", communities=None, 
@@ -118,6 +123,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         super(ContentRecurrenceMeasurements, self).__init__(
             dataset_df, configuration, log_file=log_file)
         self.dataset_df = dataset_df
+        self.metadata = metadata 
         self.community_set = communities
         self.timestamp_col = timestamp_col
         self.id_col = id_col
@@ -127,7 +133,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         self.measurement_type = 'recurrence'
         self.content_id = content_id
         self.time_granularity = time_granularity
-        burstDetection = BurstDetection(dataset_df=self.dataset_df, id_col=self.id_col,
+        burstDetection = BurstDetection(dataset_df=self.dataset_df, metadata=self.metadata,id_col=self.id_col,
                             timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
                             time_granularity=self.time_granularity)
         self.burst_intervals = burstDetection.detect_bursts()
@@ -272,7 +278,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         
         self.gammas = {k:-1 for k in self.dataset_df[self.content_col].unique()}
 
-        if self.metadata is not None:
+        if hasattr(self.metadata, 'community_directory'):
             self.community_contentids = get_community_contentids(self.metadata.community_directory)
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
                 self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
@@ -285,7 +291,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         count = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
             count += 1
-            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, 
+            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, metadata=self.metadata,
                                                                                              timestamp_col=self.timestamp_col, userid_col=self.userid_col, 
                                                                                              platform_col=self.platform_col, content_col=self.content_col, 
                                                                                              configuration=self.configuration, content_id=content_id, 
