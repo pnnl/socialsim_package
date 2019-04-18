@@ -229,7 +229,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         
         self.gammas = {k:-1 for k in self.dataset_df[self.content_col].unique()}
 
-        if self.metadata is not None:
+        if not self.metadata is None and hasattr(self.metadata, 'community_directory'):
             self.community_contentids = get_community_contentids(self.metadata.community_directory)
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
                 self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
