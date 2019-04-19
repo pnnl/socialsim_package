@@ -81,6 +81,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         df['parentUserID'] = df[parent_node_col].map(tweet_uids)
         df.loc[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull()), 'parentUserID'] = \
             df[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull())][root_node_col].map(tweet_uids)
+        
+        df = df[df['nodeUserID'] != df['parentUserID']]
+        
         return df
 
 
