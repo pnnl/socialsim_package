@@ -2,7 +2,7 @@ import pandas as pd
 import numpy  as np
 import sys
 import glob
-
+import joblib
 import datetime
 
 class MetaData:
@@ -61,6 +61,8 @@ class MetaData:
         else:
             self.use_info_data = False
 
+        model_dir = "socialsim/measurements/model_parameters/best_model.pkl"
+        self.estimator = joblib.load(model_dir)
 
     def read_communities(self):
 

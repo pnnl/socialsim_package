@@ -326,6 +326,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         cols = [self.user_col, self.platform_col, 'values']
         index_cols = [self.user_col]
 
+
         if community_level:
             cols = [self.user_col, self.platform_col, self.community_col, 'values']
             index_cols = [self.user_col, self.community_col]
@@ -337,11 +338,14 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             group_col = []
 
+
         user_platform = data[cols].pivot_table(index=index_cols,
                                                columns=self.platform_col,
                                                values='values').fillna(0)
         user_platform = user_platform.astype(bool)
         
+        platforms = list(user_platform.columns.values)
+
         def get_meas(grp):
             pl_1, pl_2, val = [], [], []
             for i, p1 in enumerate(platforms):
