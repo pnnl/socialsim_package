@@ -6,7 +6,7 @@ package_structure = ['socialsim',
 ]
 
 setup(name='socialsim',
-      version='0.1.2',
+      version='0.1.3',
       packages=package_structure,
       license='License to be determined at a future date',
       url='URL to be determined at a future date',
