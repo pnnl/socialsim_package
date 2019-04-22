@@ -87,22 +87,23 @@ class BurstDetection():
         bursts_df = bd.enumerate_bursts(q, 'burstLabel') # returns a df with 'begin' and 'end' columns for a burst where both begin and end indices are included. 
         index_date = pd.Series(
             timeseries_df[self.timestamp_col].values, index=timeseries_df.index).to_dict()
+        time_granularity = index_date[1] - index_date[0]
         bursts_df['start_timestamp'] = bursts_df['begin'].map(index_date)
         bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
+        bursts_df['end_timestamp'] = bursts_df['end_timestamp'] + time_granularity
         if len(bursts_df) > 0:
             return bursts_df
 
     def predict_gamma_for_timeseries(self, timeseries_df):
         '''
-        Placeholder for function for predicting the best gamma based on time series properties
+        Predict the best gamma based on time series properties
         '''
         timeseries_df['dummy_col'] = 'dummy'   # the library requires an id column, but all ids are the same for our timeseries, so adding a dummy id column
-        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), column_id='dummy_col', column_sort=self.timestamp_col)#[selected_features]
-        print(features_df.columns)
-        # gamma = estimator.predict(feats)
-        gamma = self.metadata.estimator.predict(features_df.fillna(0))
+        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), column_id='dummy_col', column_sort=self.timestamp_col)[selected_features]
+        # print(len(features_df.columns))
+        gamma = self.metadata.estimator.predict(features_df)[0]
+        print('gamma: ', gamma)
         return gamma
-        # return 0.3
 
 
 class ContentRecurrenceMeasurements(MeasurementsBaseClass):
@@ -112,7 +113,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         userid_col="nodeUserID", platform_col="platform", 
         content_col="informationID", communities=None, 
         log_file='recurrence_measurements_log.txt', content_id=None, 
-        time_granularity='H',gamma=0.3):
+        time_granularity='H',gamma=None):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -288,9 +289,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
     def initialize_recurrence_measurements(self):
         self.content_recurrence_measurements = {}
         n_ids = self.dataset_df[self.content_col].nunique()
-        count = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
-            count += 1
+            print('information: ', content_id)
             self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, metadata=self.metadata,
                                                                                              timestamp_col=self.timestamp_col, userid_col=self.userid_col, 
                                                                                              platform_col=self.platform_col, content_col=self.content_col, 
