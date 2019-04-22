@@ -96,16 +96,16 @@ The minimal format is shown below. Some measurements may require additional
 fields.
 
 ```python
-{'identifier': identifier, 'team': team, 'scenario': scenario}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{"identifier": identifier, "team": team, "scenario": scenario}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
                 .                                                               .
                 .                                                               .
                 .                                                               .
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
-{'nodeID': value, 'nodeUserID': value, 'actionType': value, 'nodeTime': value, 'platform': platform}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
+{"nodeID": value, "nodeUserID": value, "actionType": value, "nodeTime": value, "platform": platform}
 ```
 
 ## Notes to contributors

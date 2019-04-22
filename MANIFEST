@@ -16,4 +16,6 @@ socialsim\measurements\recurrence.py
 socialsim\measurements\social_activity.py
 socialsim\measurements\social_structure.py
 socialsim\measurements\validators.py
+socialsim\measurements\model_parameters\__init__.py
+socialsim\measurements\model_parameters\selected_features.py
 socialsim\visualizations\__init__.py
