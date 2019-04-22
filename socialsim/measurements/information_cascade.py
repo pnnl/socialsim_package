@@ -321,13 +321,13 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         if not community_grouper:
             root_node_users = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]][
                 self.user_col].values
-            return pysal.inequality.gini.Gini(list(Counter(root_node_users).values())).g
+            return pysal.explore.inequality.gini.Gini(list(Counter(root_node_users).values())).g
         elif community_grouper in self.main_df.columns:
             meas = {}
             for community in self.main_df[community_grouper].unique():
                 root_node_users = self.main_df[(self.main_df[self.node_col] == self.main_df[self.root_node_col]) & (
                             self.main_df[community_grouper] == community)][self.user_col].values
-                meas[community] = pysal.inequality.gini.Gini(list(Counter(root_node_users).values())).g
+                meas[community] = pysal.explore.inequality.gini.Gini(list(Counter(root_node_users).values())).g
             return meas
         else:
             return None
@@ -356,12 +356,12 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
     def cascade_collection_participation_gini(self, community_grouper=None):
         if not community_grouper:
             all_node_users = self.main_df[self.user_col].values
-            return pysal.inequality.gini.Gini(list(Counter(all_node_users).values())).g
+            return pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g
         elif community_grouper in self.main_df.columns:
             meas = {}
             for community in self.main_df[community_grouper].unique():
                 all_node_users = self.main_df[self.main_df[community_grouper] == community][self.user_col].values
-                meas[community] = pysal.inequality.gini.Gini(list(Counter(all_node_users).values())).g
+                meas[community] = pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g
             return meas
         else:
             return None
@@ -766,7 +766,7 @@ class SingleCascadeMeasurements:
     @check_empty(default=None)
     @check_root_only(default=0)
     def cascade_participation_gini(self):
-        return pysal.inequality.gini.Gini(self.node_participation()).g
+        return pysal.explore.inequality.gini.Gini(self.node_participation()).g
 
     @check_empty(default=None)
     @check_root_only(default=None)
