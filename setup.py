@@ -15,7 +15,8 @@ package_requirements = [
       'pysal>=1.14.4',
       'tqdm>=4.31.1',
       'burst_detection>=0.1.3',
-      'tsfresh>=0.11.2'
+      'tsfresh>=0.11.2',
+      'joblib>=0.13.2'
 ]
 
 setup(name='socialsim',
