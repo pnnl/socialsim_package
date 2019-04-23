@@ -11,17 +11,24 @@ from tsfresh import extract_features
 from .measurements import MeasurementsBaseClass
 from ..utils import get_community_contentids
 import pprint
-import pickle as pkl
 from .model_parameters.selected_features import selected_features
 
 class BurstDetection():
-    def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='H'):
+    def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='D',
+                 min_date=None,max_date=None,content_id=''):
         self.dataset_df = dataset_df
         self.metadata = metadata
         self.timestamp_col = timestamp_col
         self.id_col = id_col
         self.platform_col = platform_col
         self.time_granularity = time_granularity
+        self.min_date = min_date
+        self.max_date = max_date
+        if not min_date is None:
+            self.min_date = pd.Timestamp(min_date)
+        if not max_date is None:
+            self.max_date = pd.Timestamp(max_date)
+        self.content_id = content_id
 
     def detect_bursts(self, gamma=None):
         '''
@@ -55,7 +62,20 @@ class BurstDetection():
 
         all_bursts_dfs = []
         for platform, platform_df in self.dataset_df.groupby(self.platform_col):
-            counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[[self.id_col]].nunique().reset_index()
+
+            counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[[self.id_col]].nunique()#.reset_index()
+            
+            #make sure the time series covers the full range
+            if not self.min_date is None and counts_df.index.min() > self.min_date:
+                counts_df.loc[self.min_date] = 0
+            if not self.max_date is None and counts_df.index.max() < self.max_date:
+                counts_df.loc[self.max_date] = 0
+
+            #fill in missing time stamps with a zero count
+            counts_df = counts_df.resample(self.time_granularity).mean().fillna(0)
+                
+            counts_df = counts_df.reset_index()
+
             bursts_df = self.detect_bursts_of_a_timeseries(counts_df, gamma=gamma)
             if bursts_df is None:
                 continue
@@ -65,7 +85,6 @@ class BurstDetection():
             all_bursts_df = pd.concat(all_bursts_dfs).reset_index(drop=True)
             return merge_bursts(all_bursts_df)
         else:
-            print('No bursts found on any platform.')
             return []
 
     def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None):
@@ -81,8 +100,13 @@ class BurstDetection():
         r = timeseries_df[self.id_col].values
         n = len(r)
         d = np.array([sum(r)] * n, dtype=float)
-        if gamma is None:
+        if gamma is None and np.max(r) >= 5:
             gamma = self.predict_gamma_for_timeseries(timeseries_df)
+            with open('predicted_gammas.csv','a') as f:
+                f.write(self.content_id + ',' + str(gamma) + '\n')
+        else:
+            return None
+
         q = bd.burst_detection(r, d, n, s=2, gamma=gamma, smooth_win=1)[0]
         bursts_df = bd.enumerate_bursts(q, 'burstLabel') # returns a df with 'begin' and 'end' columns for a burst where both begin and end indices are included. 
         index_date = pd.Series(
@@ -99,21 +123,24 @@ class BurstDetection():
         Predict the best gamma based on time series properties
         '''
         timeseries_df['dummy_col'] = 'dummy'   # the library requires an id column, but all ids are the same for our timeseries, so adding a dummy id column
-        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), column_id='dummy_col', column_sort=self.timestamp_col)[selected_features]
-        # print(len(features_df.columns))
+        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), 
+                                       column_id='dummy_col', column_sort=self.timestamp_col,
+                                       disable_progressbar=True)[selected_features].fillna(0)
+        features_df = features_df.replace(np.inf, 0)
+        features_df = features_df.replace(-np.inf, 0)
         gamma = self.metadata.estimator.predict(features_df)[0]
-        print('gamma: ', gamma)
         return gamma
 
 
 class ContentRecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, 
-        metadata=None,
-        id_col='nodeID', timestamp_col="nodeTime", 
-        userid_col="nodeUserID", platform_col="platform", 
-        content_col="informationID", communities=None, 
-        log_file='recurrence_measurements_log.txt', content_id=None, 
-        time_granularity='H',gamma=None):
+                 metadata=None,
+                 id_col='nodeID', timestamp_col="nodeTime", 
+                 userid_col="nodeUserID", platform_col="platform", 
+                 content_col="informationID", communities=None, 
+                 log_file='recurrence_measurements_log.txt', content_id=None, 
+                 time_granularity='D',gamma=None,
+                 min_date = None,max_date=None):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -123,7 +150,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         """
         super(ContentRecurrenceMeasurements, self).__init__(
             dataset_df, configuration, log_file=log_file)
-        self.dataset_df = dataset_df
+        self.dataset_df = dataset_df.copy()
         self.metadata = metadata 
         self.community_set = communities
         self.timestamp_col = timestamp_col
@@ -135,9 +162,12 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
         self.content_id = content_id
         self.time_granularity = time_granularity
         burstDetection = BurstDetection(dataset_df=self.dataset_df, metadata=self.metadata,id_col=self.id_col,
-                            timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
-                            time_granularity=self.time_granularity)
-        self.burst_intervals = burstDetection.detect_bursts()
+                                        timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
+                                        time_granularity=self.time_granularity,
+                                        min_date = min_date,
+                                        max_date = max_date,
+                                        content_id=content_id)
+        self.burst_intervals = burstDetection.detect_bursts(gamma)
         self.update_with_burst()
         self._time_between_bursts_distribution = None
 
@@ -254,7 +284,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, metadata=None,
-    id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt', selected_content=None, selected_communties=None, time_granularity='H'):
+    id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt', selected_content=None, selected_communties=None, time_granularity='12H'):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -277,9 +307,12 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.community_contentids = None
         self.time_granularity = time_granularity
         
-        self.gammas = {k:-1 for k in self.dataset_df[self.content_col].unique()}
+        self.gammas = {k:None for k in self.dataset_df[self.content_col].unique()}
 
-        if hasattr(self.metadata, 'community_directory'):
+        self.min_date = self.dataset_df[self.timestamp_col].min()
+        self.max_date = self.dataset_df[self.timestamp_col].max()
+
+        if not self.metadata is None and hasattr(self.metadata, 'community_directory'):
             self.community_contentids = get_community_contentids(self.metadata.community_directory)
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
                 self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
@@ -290,12 +323,19 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.content_recurrence_measurements = {}
         n_ids = self.dataset_df[self.content_col].nunique()
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
-            print('information: ', content_id)
-            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, id_col=self.id_col, metadata=self.metadata,
-                                                                                             timestamp_col=self.timestamp_col, userid_col=self.userid_col, 
-                                                                                             platform_col=self.platform_col, content_col=self.content_col, 
-                                                                                             configuration=self.configuration, content_id=content_id, 
-                                                                                             time_granularity=self.time_granularity,gamma=self.gammas[content_id])
+            self.content_recurrence_measurements[content_id] = ContentRecurrenceMeasurements(dataset_df=content_df, 
+                                                                                             id_col=self.id_col, 
+                                                                                             metadata=self.metadata,
+                                                                                             timestamp_col=self.timestamp_col, 
+                                                                                             userid_col=self.userid_col, 
+                                                                                             platform_col=self.platform_col, 
+                                                                                             content_col=self.content_col, 
+                                                                                             configuration=self.configuration, 
+                                                                                             content_id=content_id, 
+                                                                                             time_granularity=self.time_granularity,
+                                                                                             gamma=self.gammas[content_id],
+                                                                                             min_date = self.min_date,
+                                                                                             max_date = self.max_date)
 
     def run_content_level_measurement(self, measurement_name, scale='node',
                                       selected_content=None,**kwargs):

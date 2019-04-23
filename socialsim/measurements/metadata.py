@@ -64,8 +64,6 @@ class MetaData:
         model_dir = "socialsim/measurements/model_parameters/best_model.pkl"
         self.estimator = joblib.load(model_dir)
 
-
-
     def read_communities(self):
 
         community_fns = glob.glob(self.community_directory + '/*')
