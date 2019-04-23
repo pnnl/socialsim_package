@@ -6,6 +6,7 @@ import pandas as pd
 import networkx as nx
 import community
 from collections import defaultdict
+import pysal
 
 # community detection algorithms
 # More algorithms: https://networkx.github.io/documentation/stable/reference/algorithms/community.html
@@ -23,7 +24,7 @@ def louvain_method(g):
 
 
 class PersistentGroupsMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, configuration={}, metadata=None, id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", log_file='group_formation_measurements_log.txt', selected_content=None, time_granularity='H', parentid_col='parentID', community_detection_algorithm=louvain_method):
+    def __init__(self, dataset_df, configuration={}, metadata=None, id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", log_file='group_formation_measurements_log.txt', selected_content=None, time_granularity='12H', parentid_col='parentID', community_detection_algorithm=louvain_method):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -41,9 +42,9 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.content_col = content_col
         self.measurement_type    = 'persistent_groups'
         self.metadata            = metadata 
-        if self.metadata.node_list == 'all':
-            self.metadata.node_list = None
         self.selected_content = selected_content if selected_content is not None else self.metadata.node_list
+        if self.selected_content == 'all':
+            self.selected_content = None
         self.time_granularity = time_granularity
         self.parentid_col = parentid_col
         self.community_detection_algorithm = community_detection_algorithm
@@ -71,9 +72,12 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             return content_user_connections
 
         user_connections = []
+        count = 0
+        n_ids = self.dataset_df[self.content_col].nunique()
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
             if self.selected_content is not None and content_id not in self.selected_content:
                 continue
+            count += 1
             burstDetection = BurstDetection(dataset_df=content_df, metadata=self.metadata, id_col=self.id_col,
                                 timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
                                 time_granularity=self.time_granularity)
@@ -82,11 +86,11 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 continue
             for burst_interval in burst_intervals:
                 user_connections.extend(get_burst_user_connections_df(content_id, content_df, burst_interval))
+            
         user_network_df = pd.DataFrame(user_connections)
         user_network_df = user_network_df.groupby(['uid1', 'uid2'])['weight'].sum().reset_index()
 
         self.user_network_df = user_network_df[user_network_df['weight']>=user_interaction_weight_threshold]
-        print(self.user_network_df)
         user_interaction_nx = nx.from_pandas_edgelist(user_network_df,
                                     'uid1', 'uid2', 'weight')
         print('num nodes: ', user_interaction_nx.number_of_nodes(), 'num edges: ', user_interaction_nx.number_of_edges())
@@ -101,14 +105,28 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         '''How large are the groups of users?'''	
         return [len(group_users) for group_users in self.groups]
         
-    def distribution_of_coin_discussion_over_groups(self):	
-        '''Do groups focus on individual coins or a larger set of coins?'''	
-        coin_group_distribution = defaultdict(list)
+    def distribution_of_content_discussion_over_groups(self):	
+        '''Do groups focus on individual information IDs or a larger set of info IDs?'''	
+
+        content_ids = self.dataset_df.groupby(self.content_col)[self.id_col].count().reset_index()
+        content_ids.columns = [self.content_col,'total_value']
+
+        meas = []
         for i, group_users in enumerate(self.groups):
             group_df = self.dataset_df[self.dataset_df[self.userid_col].isin(group_users)]
-            for content_id, content_df in group_df.groupby(self.content_col):
-                coin_group_distribution[content_id].append(len(content_df))
-        return {content_id: [count/sum(group_distribution) for count in group_distribution] for content_id, group_distribution in coin_group_distribution.items()}
+
+            info_id_counts = group_df.groupby(self.content_col)[self.id_col].count().reset_index()
+            info_id_counts.columns = [self.content_col,'value']
+            info_id_counts = info_id_counts.merge(content_ids,on=self.content_col,how='right').fillna(0)
+
+            info_id_counts = list(info_id_counts['value'].values)
+
+            #inequality among information IDs within the group
+            content_gini = pysal.explore.inequality.gini.Gini(info_id_counts).g
+
+            meas.append(content_gini)
+
+        return meas
 
     def internal_versus_external_interaction_rates(self):	
         '''How much do group members interact with each other versus non-group members?'''
@@ -119,23 +137,33 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             all_links_df = self.user_network_df[(self.user_network_df['uid1'].isin(group_users)) | (self.user_network_df['uid2'].isin(group_users))]  # all links made by users in that group
             internal_links += sum(internal_links_df['weight'].values)
             external_links += sum(all_links_df['weight'].values) - sum(internal_links_df['weight'].values)
-        return internal_links / external_links
+        return external_links / internal_links
 
-    def group_versus_total_volume_of_activity(self):	
-        '''How much does the most prolific group dominate the discussion of a particular coin over time?'''		
+    def group_versus_total_volume_of_activity(self,time_granularity=None):	
+        '''How much does the most prolific group dominate the discussion of a particular info ID over time?'''		
+
+        if time_granularity is None:
+            time_granularity = self.time_granularity
+
         dataset_counts_df = self.dataset_df.set_index(self.timestamp_col).\
-            groupby([pd.Grouper(freq=self.time_granularity), self.content_col]).size().reset_index(name='total_activity')
-
-        prolific_group_users = self.groups[np.argmax(np.array([len(self.dataset_df[self.dataset_df[self.userid_col].isin(group_users)]) for group_users in self.groups]))]
-        group_df = self.dataset_df[self.dataset_df[self.userid_col].isin(prolific_group_users)]
-        group_counts_df = group_df.set_index(self.timestamp_col).\
-            groupby([pd.Grouper(freq=self.time_granularity), self.content_col]).size().reset_index(name='group_activity')
-        merged_df = dataset_counts_df.merge(group_counts_df, how='outer', on=[self.content_col, self.timestamp_col])
-        merged_df.fillna(0, inplace=True)
-        merged_df['group_activity_proportion'] = merged_df['group_activity'] / merged_df['total_activity']
+            groupby([pd.Grouper(freq=time_granularity), self.content_col]).size().reset_index(name='total_activity')
+        
         group_content_timeseries = {}       
-        for content_id, content_timeseries_df in merged_df.groupby(self.content_col):
-            group_content_timeseries[content_id] = content_timeseries_df.drop(columns=[self.content_col, 'total_activity', 'group_activity'])
+        for content_id, content_df in self.dataset_df.groupby(self.content_col):
+
+            #users in the group with the most posts related to this content ID
+            prolific_group_users = self.groups[np.argmax(np.array([len(content_df[content_df[self.userid_col].isin(group_users)]) for group_users in self.groups]))]
+
+            group_df = content_df[content_df[self.userid_col].isin(prolific_group_users)]
+
+            group_counts_df = group_df.set_index(self.timestamp_col).\
+                groupby([pd.Grouper(freq=time_granularity), self.content_col]).size().reset_index(name='group_activity')
+
+            merged_df = dataset_counts_df.merge(group_counts_df, how='outer', on=[self.content_col, self.timestamp_col])
+            merged_df.fillna(0, inplace=True)
+            merged_df['value'] = merged_df['group_activity'] / merged_df['total_activity']
+
+            group_content_timeseries[content_id] = merged_df.drop(columns=[self.content_col, 'total_activity', 'group_activity'])
         return group_content_timeseries
 
     def seed_post_versus_response_actions_ratio(self):  
@@ -143,7 +171,7 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         group_seed_post_ratio = []
         for i, group_users in enumerate(self.groups):
             group_df = self.dataset_df[self.dataset_df[self.userid_col].isin(group_users)]
-            group_df[group_df[self.parentid_col].isna()]
-            group_seed_post_ratio.append(len(group_df[group_df[self.parentid_col].isna()]) / len(group_df)) 
+            idx = (group_df[self.parentid_col] == group_df[self.id_col]) | (group_df['actionType'].isin(['CreateEvent','IssuesEvent','PullRequestEvent']))
+            group_seed_post_ratio.append(len(group_df[idx]) / float(len(group_df))) 
         return group_seed_post_ratio       
         
