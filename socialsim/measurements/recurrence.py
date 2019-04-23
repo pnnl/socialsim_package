@@ -111,8 +111,10 @@ class BurstDetection():
         bursts_df = bd.enumerate_bursts(q, 'burstLabel') # returns a df with 'begin' and 'end' columns for a burst where both begin and end indices are included. 
         index_date = pd.Series(
             timeseries_df[self.timestamp_col].values, index=timeseries_df.index).to_dict()
+        time_granularity = index_date[1] - index_date[0]
         bursts_df['start_timestamp'] = bursts_df['begin'].map(index_date)
         bursts_df['end_timestamp'] = bursts_df['end'].map(index_date)
+        bursts_df['end_timestamp'] = bursts_df['end_timestamp'] + time_granularity
         if len(bursts_df) > 0:
             return bursts_df
 

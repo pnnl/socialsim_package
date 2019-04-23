@@ -459,7 +459,11 @@ class Metrics:
             ground_truth = np.array(ground_truth)
             simulation = np.array(simulation)
 
-        dist = fdtw.fastdtw(ground_truth, simulation, dist=euclidean)[0]
+        if len(simulation) > 0:
+            dist = fdtw.fastdtw(ground_truth, simulation, dist=euclidean)[0]
+        else:
+            dist = None
+
         return dist
 
 

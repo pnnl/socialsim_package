@@ -108,6 +108,34 @@
             }
           }
         },
+        "distribution_of_lifetimes": {
+          "scale": "population",
+          "measurement": "lifetime_of_info_distribution",
+          "measurement_args": {},
+          "temporal_vs_batch": "Batch",
+          "metrics": {
+            "js": {
+              "metric": "js_divergence",
+              "metric_args": {
+              }
+            },
+            "ks": {
+              "metric": "ks_test",
+              "metric_args": {
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "outer"
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {}
+            }
+          }
+        },
         "lifetime_of_threads": {
           "scale": "population",
           "measurement": "lifetime_of_threads",
@@ -428,6 +456,34 @@
               "metric": "absolute_difference",
               "metric_args": {
               }
+            }
+          }
+        },
+        "distribution_of_lifetimes": {
+          "scale": "community",
+          "measurement": "lifetime_of_info_distribution",
+          "measurement_args": {},
+          "temporal_vs_batch": "Batch",
+          "metrics": {
+            "js": {
+              "metric": "js_divergence",
+              "metric_args": {
+              }
+            },
+            "ks": {
+              "metric": "ks_test",
+              "metric_args": {
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "outer"
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {}
             }
           }
         },
