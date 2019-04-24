@@ -289,7 +289,7 @@
               }
             },
 	    "nrmse": {
-              "metric": "nrmse",
+              "metric": "rmse",
               "metric_args": {
 	        "relative": true,
                 "join": "outer"
@@ -2030,11 +2030,9 @@
           },
           "temporal_vs_batch": "Batch",
           "metrics": {
-            "spearman": {
-              "metric": "spearman",
-              "metric_args": {
-	         "join":"outer"
-	      }
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {}
             }
           }
         },
