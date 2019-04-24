@@ -1,0 +1,115 @@
+{"multi_platform": {
+    "persistent_groups": {
+        "population": {
+            "number_of_groups": {
+                "scale": "population",
+                "measurement": "number_of_groups",
+                "measurement_args": {},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "group_size_distribution": {
+                "scale": "population",
+                "measurement": "group_size_distribution",
+                "measurement_args": {},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js": {
+                        "metric": "js_divergence",
+                        "metric_args": {}
+                    },
+		    "ks": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "external_to_internal_interaction_rate_ratio": {
+                "scale": "population",
+                "measurement": "internal_versus_external_interaction_rates",
+                "measurement_args": {},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "absolute_percentage_error": {
+                        "metric": "absolute_percentage_error",
+                        "metric_args": {}
+                    },
+		    "absolute_difference": {
+                        "metric": "absolute_difference",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "seed_post_to_total_actions_ratio": {
+                "scale": "population",
+                "measurement": "seed_post_versus_response_actions_ratio",
+                "measurement_args": {},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "ks": {
+                        "metric": "ks_test",
+                        "metric_args": {}
+                    },	
+		    "js": {
+                        "metric": "js_divergence",
+                        "metric_args": {}
+                    }
+                }
+            },
+            "distribution_of_content_discussion_over_groups": {
+                "scale": "population",
+                "measurement": "distribution_of_content_discussion_over_groups",
+                "measurement_args": {},
+                "temporal_vs_batch": "Batch",
+                "metrics": {
+                    "js": {
+                        "metric": "js_divergence",
+                        "metric_args": {}
+                    },
+		    "ks": {
+		        "metric": "ks_test",
+			"metric_args": {}
+		    }
+                }
+            }
+        },
+      "node": {
+	    "group_versus_total_volume_of_activity": {
+                "scale": "node",
+                "measurement": "group_versus_total_volume_of_activity",
+                "measurement_args": {"time_granularity":"W"},
+                "temporal_vs_batch": "Temporal",
+                "metrics": {
+                    "rmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+                            "join": "outer"
+                        }
+                    },
+		    "nrmse": {
+                        "metric": "rmse",
+                        "metric_args": {
+			    "relative":true,
+                            "join": "outer"
+                        }
+                    },
+                    "dtw": {
+                        "metric": "fast_dtw",
+                        "metric_args": {
+                            "join": "outer"
+                        }
+                    }
+                }
+            }
+	}
+    }
+}}

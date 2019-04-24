@@ -666,6 +666,36 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return lifetime
 
 
+    def lifetime_of_info_distribution(self, time_unit='D',
+                                      node_level=False, community_level=False, 
+                                      nodes=[], communities=[], platform="all"):
+        """
+        Description: Calculate the lifetime of the pieces of information
+
+        Input:
+            node_level: If true, compute measurement for each node
+            community_level: If true, compute measurement for each community
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata if node_level is true
+            communities: List of specific communities, keyword "all" or empty list (default) to use communities
+                    provided from metadata if community_level is true
+            If node_level and community_level both set to False, computes population level
+
+        Output: If population level: a scalar with the mean lifetime of the info IDs
+                If community level: a dictionary mapping each community to a the mean lifetime of info IDs
+                                    in that community
+                If node level: a dictionary mapping each node to its lifetime
+        """
+        data = self.preprocess(node_level, nodes, community_level, communities, platform)
+
+        lifetime = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
+                                                 community_level=community_level,
+                                                 node_level=node_level)
+    
+        return lifetime
+
+
+
     def lifetime_of_threads(self, time_unit = 'D', node_level=False, community_level=False, 
                             nodes=[], communities=[], platform="all"):
         """

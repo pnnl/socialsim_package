@@ -15,6 +15,7 @@ from .measurements import SocialStructureMeasurements
 from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements
 from .measurements import RecurrenceMeasurements
+from .measurements import PersistentGroupsMeasurements
 
 
 from .load   import load_measurements
@@ -141,6 +142,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = MultiPlatformMeasurements
             elif measurement_type == 'recurrence':
                 Measurement = RecurrenceMeasurements
+            elif measurement_type == 'persistent_groups':
+                Measurement = PersistentGroupsMeasurements
 
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]
