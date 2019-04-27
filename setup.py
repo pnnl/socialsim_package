@@ -16,11 +16,13 @@ package_requirements = [
       'tqdm>=4.31.1',
       'burst_detection>=0.1.3',
       'tsfresh>=0.11.2',
-      'joblib>=0.13.2'
+      'joblib>=0.13.2',
+      'networkx>=2.3',
+      'python-louvain>=0.13'
 ]
 
 setup(name='socialsim',
-      version='0.1.4',
+      version='0.1.5',
       packages=package_structure,
       license='',
       url='',
