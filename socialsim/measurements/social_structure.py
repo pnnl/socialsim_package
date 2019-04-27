@@ -33,6 +33,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             build_undirected_graph = self.twitter_build_undirected_graph
         elif platform=='github':
             build_undirected_graph = self.github_build_undirected_graph
+        else:
+            # unknown platform, skip graph creation
+            return
 
         build_undirected_graph(self.main_df)
 

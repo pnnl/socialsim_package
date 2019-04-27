@@ -111,22 +111,37 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
         platform_results = {}
         platform_logs    = {}
 
-        if verbose:
-            message = 'SOCIALSIM TASKRUNNER   | Subsetting '
-            message = message + platform+' data... '
-            print(message, end='', flush=True)
+        dataset_subset = []
+        try:
+            if verbose:
+                message = 'SOCIALSIM TASKRUNNER   | Subsetting '
+                message = message + platform+' data... '
+                print(message, end='', flush=True)
 
-        if platform=='multi_platform':
-            dataset_subset = dataset
+            if platform=='multi_platform':
+                dataset_subset = dataset
 
-        else:
-            dataset_subset = dataset[dataset['platform']==platform]
+            else:
+                dataset_subset = dataset[dataset['platform']==platform]
 
-        if test:
-            dataset_subset = subset_for_test(dataset_subset)
+            if test:
+                dataset_subset = subset_for_test(dataset_subset)
 
-        if verbose:
-            print('Done.', flush=True)
+            if verbose:
+                print('Done.', flush=True)
+
+        except Exception as error:
+                measurement_logs    = {
+                    'status': 'Failed to subset ' + platform, 
+                    'error': error
+                    }
+
+                if verbose:
+                    print('')
+                    print('-'*80)
+                    trace = traceback.format_exc()
+                    print(trace)
+                    print('-'*80)
 
         # Loop over measurement types
         for measurement_type in configuration[platform].keys():
@@ -175,7 +190,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
                 except Exception as error:
                     measurement_logs    = {
-                        'status': 'Measurments object failed to run.', 
+                        'status': 'Measurements object failed to run.', 
                         'error': error
                         }
                     measurement_results = None

@@ -63,8 +63,8 @@ class MetaData:
             self.use_info_data = False
 
 
-        model_filepath = os.path.realpath(__file__)
-        model_filepath = model_filepath+'/model_parameteres/best_model.pkl'
+        model_filepath = os.path.dirname(__file__)
+        model_filepath = model_filepath+'/model_parameters/best_model.pkl'
 
         self.estimator = joblib.load(model_filepath)
 
@@ -83,7 +83,8 @@ class MetaData:
             if len(comm_members) > 0:
                 self.communities[comm_id] = comm_members
 
-            print(self.communities)
+            if verbose: 
+                print(self.communities)
 
     def build_communities(self, content_data, user_data):
         """
