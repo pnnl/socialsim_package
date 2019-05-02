@@ -58,11 +58,11 @@ task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
 results, logs = task_runner(simulation, verbose=True)
 
 # Get simulation measurements
-results["simulation_results"]
+results['simulation_results']
 # Get ground truth measurements
-results["ground_truth_results"]
+results['ground_truth_results']
 # Get metrics
-results["metrics"]
+results['metrics']
 ```
 
 ## Generating test data and example community and node files
