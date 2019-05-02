@@ -22,7 +22,7 @@ package_requirements = [
 ]
 
 setup(name='socialsim',
-      version='0.1.6',
+      version='0.1.7',
       packages=package_structure,
       package_data={'socialsim.measurements.model_parameters': ['best_model.pkl']},
       license='',
