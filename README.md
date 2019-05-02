@@ -1,5 +1,5 @@
 ## Install Instructions
-It is highly recommended that you install the SocialSim measurements package in a conda environment.
+It is highly recommended that you install the SocialSim measurements package in a conda environment. (For SocialSim TA1 performers, please see [the Wiki](https://wiki.socialsim.info/x/PADUAQ) for information on how to run evaluation as a self-contained service.)
 
 #### Step 1: Create and activate a conda environment
 ``` bash
