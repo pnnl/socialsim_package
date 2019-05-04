@@ -81,6 +81,7 @@ class BurstDetection():
                 continue
             bursts_df['platform'] = platform
             all_bursts_dfs.append(bursts_df)
+            
         if len(all_bursts_dfs) > 0:
             all_bursts_df = pd.concat(all_bursts_dfs).reset_index(drop=True)
             return merge_bursts(all_bursts_df)

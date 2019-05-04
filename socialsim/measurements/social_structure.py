@@ -31,6 +31,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             build_undirected_graph = self.reddit_build_undirected_graph
         elif platform=='twitter':
             build_undirected_graph = self.twitter_build_undirected_graph
+        elif platform=='telegram':
+            build_undirected_graph = self.telegram_build_undirected_graph
         elif platform=='github':
             build_undirected_graph = self.github_build_undirected_graph
         else:
@@ -141,6 +143,30 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             self.gUNsn.AddNode(v.index)
         for e in self.gUNig.es:
             self.gUNsn.AddEdge(e.source, e.target)
+
+
+    def telegram_build_undirected_graph(self, df):
+        """
+        Description:
+
+        Input:
+
+        Output:
+
+        """
+        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
+        edgelist = df[['nodeUserID','parentUserID']].apply(tuple,axis=1).tolist()
+
+        #iGraph graph object construction
+        self.gUNig = ig.Graph.TupleList(edgelist, directed=False)
+
+        #SNAP graph object construction
+        self.gUNsn = sn.TUNGraph.New()
+        for v in self.gUNig.vs:
+            self.gUNsn.AddNode(v.index)
+        for e in self.gUNig.es:
+            self.gUNsn.AddEdge(e.source, e.target)
+
 
 
     def reddit_build_undirected_graph(self, df):

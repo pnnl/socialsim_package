@@ -7,6 +7,7 @@ import networkx as nx
 import community
 from collections import defaultdict
 import pysal
+import warnings
 
 # community detection algorithms
 # More algorithms: https://networkx.github.io/documentation/stable/reference/algorithms/community.html
@@ -88,6 +89,8 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 user_connections.extend(get_burst_user_connections_df(content_id, content_df, burst_interval))
             
         user_network_df = pd.DataFrame(user_connections)
+        if 'uid1' not in user_network_df.columns:
+            warnings.warn("No bursts detected in any information IDs. Persistent group measurements cannot be run. They will fail with uid1 KeyError.")
         user_network_df = user_network_df.groupby(['uid1', 'uid2'])['weight'].sum().reset_index()
 
         self.user_network_df = user_network_df[user_network_df['weight']>=user_interaction_weight_threshold]
