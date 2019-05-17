@@ -46,6 +46,16 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.selected_content = selected_content if selected_content is not None else self.metadata.node_list
         if self.selected_content == 'all':
             self.selected_content = None
+
+        self.min_date = self.dataset_df[self.timestamp_col].min()
+        self.max_date = self.dataset_df[self.timestamp_col].max()
+            
+        self.gammas = {k:None for k in self.dataset_df[self.content_col].unique()}
+
+        if not self.metadata is None:
+            if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
+                self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
+
         self.time_granularity = time_granularity
         self.parentid_col = parentid_col
         self.community_detection_algorithm = community_detection_algorithm
@@ -80,9 +90,10 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 continue
             count += 1
             burstDetection = BurstDetection(dataset_df=content_df, metadata=self.metadata, id_col=self.id_col,
-                                timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
-                                time_granularity=self.time_granularity)
-            burst_intervals = burstDetection.detect_bursts()
+                                            timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
+                                            time_granularity=self.time_granularity,
+                                            min_date=self.min_date, max_date=self.max_date)
+            burst_intervals = burstDetection.detect_bursts(self.gammas[content_id])
             if len(burst_intervals) < bursts_count_threshold:
                 continue
             for burst_interval in burst_intervals:

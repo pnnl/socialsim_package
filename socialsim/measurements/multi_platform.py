@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import pprint
+import warnings
 
 from collections import Counter, OrderedDict
 from .measurements import MeasurementsBaseClass
@@ -36,10 +37,15 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'multi_platform'
 
-        if metadata is None:
+        if metadata is None or metadata.community_directory is None:
             self.community_set = self.dataset
             self.community_set[self.community_col] = "Default Community"
-
+        else:
+            community_directory = metadata.community_directory
+            self.community_set = add_communities_to_dataset(dataset,
+                                                            community_directory)
+            
+        if metadata is None or metadata.node_list is None:
             if node_list == "all":
                 self.node_list = self.dataset[self.content_col].tolist()
             elif node_list is not None:
@@ -47,9 +53,6 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             else:
                 self.node_list = []
         else:
-            community_directory = metadata.community_directory
-            self.community_set = add_communities_to_dataset(dataset,
-                                                            community_directory)
             self.node_list = metadata.node_list
 
         if self.community_set is not None:
@@ -118,7 +121,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
             communities = []
-
+            
         data = self.select_data(nodes, communities, platform=platform)
 
         return data
@@ -189,10 +192,14 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dictionary mapping between each node and a scalar value
         """
 
+        
         group_cols = [self.content_col]
         if community_level:
             group_cols += [self.community_col]
-
+            if self.community_col not in data:
+                warnings.warn("No valid communities found in data")
+                return None
+            
         result = data.groupby(group_cols)[agg_col].apply(agg_func)
         result.name = 'value'
  
@@ -235,7 +242,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         group_cols = [self.content_col] 
         if community_level:
             group_cols += [self.community_col]
-
+            if self.community_col not in data:
+                warnings.warn("No valid communities found in data")
+                return None
+            
         values = data.groupby(group_cols + extra_group_cols)[agg_col].apply(agg_func)
         values.name = 'value'
 
@@ -284,7 +294,11 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         group_cols = [self.content_col]
         if community_level:
             group_cols += [self.community_col]
+            if self.community_col not in data:
+                warnings.warn("No valid communities found in data")
+                return None
 
+            
         values = data.groupby(group_cols)[agg_col].apply(agg_func)
         values.name = 'value'
         values = values.reset_index()
@@ -326,7 +340,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         group_cols = [self.content_col]
         if community_level:
             group_cols += [self.community_col]
-
+            if self.community_col not in data:
+                warnings.warn("No valid communities found in data")
+                return None
+            
         if agg_col == self.timestamp_col:
             data.loc[:,'agg_col'] = data.loc[:,self.timestamp_col]
             agg_col = 'agg_col'
@@ -408,7 +425,6 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                       mean number of shares per unit of information in that community
                 If node level: a dictionary mapping between each node and a scalar number of shares
         """
-
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
 
         num_shares = self.scalar_measurement(data, self.id_col, self.get_shares,

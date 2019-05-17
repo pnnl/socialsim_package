@@ -14,7 +14,8 @@ import pprint
 from .model_parameters.selected_features import selected_features
 
 class BurstDetection():
-    def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime", platform_col="platform", time_granularity='D',
+    def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime",
+                 platform_col="platform", time_granularity='D',
                  min_date=None,max_date=None,content_id=''):
         self.dataset_df = dataset_df
         self.metadata = metadata
@@ -63,7 +64,7 @@ class BurstDetection():
         all_bursts_dfs = []
         for platform, platform_df in self.dataset_df.groupby(self.platform_col):
 
-            counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[[self.id_col]].nunique()#.reset_index()
+            counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[[self.id_col]].count()
             
             #make sure the time series covers the full range
             if not self.min_date is None and counts_df.index.min() > self.min_date:
@@ -124,12 +125,15 @@ class BurstDetection():
         Predict the best gamma based on time series properties
         '''
         timeseries_df['dummy_col'] = 'dummy'   # the library requires an id column, but all ids are the same for our timeseries, so adding a dummy id column
-        features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), 
-                                       column_id='dummy_col', column_sort=self.timestamp_col,
-                                       disable_progressbar=True)[selected_features].fillna(0)
-        features_df = features_df.replace(np.inf, 0)
-        features_df = features_df.replace(-np.inf, 0)
-        gamma = self.metadata.estimator.predict(features_df)[0]
+        try:
+            features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}), 
+                                           column_id='dummy_col', column_sort=self.timestamp_col,
+                                           disable_progressbar=True)[selected_features].fillna(0)
+            features_df = features_df.replace(np.inf, 0)
+            features_df = features_df.replace(-np.inf, 0)
+            gamma = self.metadata.estimator.predict(features_df)[0]
+        except:
+            gamma = 1.0
         return gamma
 
 
@@ -313,8 +317,9 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         self.min_date = self.dataset_df[self.timestamp_col].min()
         self.max_date = self.dataset_df[self.timestamp_col].max()
 
-        if not self.metadata is None and hasattr(self.metadata, 'community_directory'):
-            self.community_contentids = get_community_contentids(self.metadata.community_directory)
+        if not self.metadata is None:
+            if hasattr(self.metadata, 'community_directory'):
+                self.community_contentids = get_community_contentids(self.metadata.community_directory)
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
                 self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
 

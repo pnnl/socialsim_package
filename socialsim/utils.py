@@ -14,7 +14,10 @@ def subset_for_test(dataset, n=1000):
         subset = subset.head(n=n)
         subsets.append(subset)
 
-    subset = pd.concat(subsets, axis=0)
+    if len(subsets) > 0:
+        subset = pd.concat(subsets, axis=0)
+    else:
+        return dataset
 
     return subset
 

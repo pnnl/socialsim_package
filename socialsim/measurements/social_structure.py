@@ -2,6 +2,7 @@ import pandas as pd
 import igraph as ig
 import snap   as sn
 import numpy  as np
+import warnings
 
 from time import time
 
@@ -42,6 +43,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         build_undirected_graph(self.main_df)
 
     def mean_shortest_path_length(self):
+        if self.gUNsn.Empty():
+            warnings.warn('Empty graph')
+            return None
         return sn.GetBfsEffDiam(self.gUNsn, 500, False)
 
     def number_of_nodes(self):
@@ -63,9 +67,17 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         return sn.GetClustCf(self.gUNsn)
 
     def max_node_degree(self):
+        if self.gUNsn.Empty():
+            warnings.warn('Empty graph')
+            return 0
+
         return max(ig.Graph.degree(self.gUNig))
 
     def mean_node_degree(self):
+        if self.gUNsn.Empty():
+            warnings.warn('Empty graph')
+            return 0
+
         return 2.0*ig.Graph.ecount(self.gUNig)/ig.Graph.vcount(self.gUNig)
 
     def degree_distribution(self):
