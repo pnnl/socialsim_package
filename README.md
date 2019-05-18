@@ -52,7 +52,7 @@ metadata = ss.MetaData(community_directory='data/communities/',
                        node_file='data/node_list.txt')
 
 # Instantiate the task runner 
-task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=True)
+task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata)
 
 # Run measurements and metrics on the simulation data
 results, logs = task_runner(simulation, verbose=True)
