@@ -13,6 +13,11 @@ from .measurements import RecurrenceMeasurements
 from .measurements import PersistentGroupsMeasurements
 from .measurements import MetaData
 
+from .extract_ground_truth import extract_reddit_data
+from .extract_ground_truth import extract_github_data
+from .extract_ground_truth import extract_twitter_data
+from .extract_ground_truth import extract_telegram_data
+
 from .visualizations import generate_plot
 
 from .utils import subset_for_test

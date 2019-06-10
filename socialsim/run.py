@@ -17,13 +17,17 @@ from .measurements import MultiPlatformMeasurements
 from .measurements import RecurrenceMeasurements
 from .measurements import PersistentGroupsMeasurements
 
+from .visualizations import charts
+from .visualizations import transformer
+
+from .visualizations.visualization_config import measurement_plot_params
 
 from .load   import load_measurements
 from .record import RecordKeeper
 from .utils  import subset_for_test
 
 class TaskRunner:
-    def __init__(self, ground_truth, configuration, metadata=None, test=False):
+    def __init__(self, ground_truth, configuration, metadata=None, test=False, plot_dir="./plots"):
         """
         Description: Initializes the TaskRunner object. Stores the metadata and
             ground_truth objects and defines all measurements and metrics
@@ -42,6 +46,7 @@ class TaskRunner:
         self.metadata      = metadata
         self.configuration = configuration
         self.test          = test
+        self.plot_dir      = plot_dir
 
         if ground_truth is str:
             temp = load_measurements(ground_truth)
@@ -58,7 +63,7 @@ class TaskRunner:
         save_directory='./', save_format='json'):
         """
         Description: This function runs the measurements and metrics code at
-            accross all measurement types. It does not deal with multiple
+            across all measurement types. It does not deal with multiple
             platforms.
 
         """
@@ -74,7 +79,7 @@ class TaskRunner:
 
         # Run metrics to compare simulation and ground truth results
         metrics, metrics_logs = run_metrics(simulation_results, 
-            ground_truth_results, configuration, verbose)
+            ground_truth_results, configuration, verbose, self.plot_dir)
 
         # Log results at the task level
         results = {
@@ -90,6 +95,9 @@ class TaskRunner:
         }
 
         return results, logs
+
+    def get_results(self):
+        return self.ground_truth_results, self.ground_truth_logs
 
 
 def run_measurements(dataset, configuration, metadata, timing, verbose, save,
@@ -172,10 +180,10 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
 
                 if platform=='multi_platform':
                     measurement = Measurement(dataset_subset,
-                        configuration_subset, metadata)
+                                              configuration_subset, metadata)
                 else:
-                    measurement = Measurement(dataset_subset,
-                        configuration_subset, metadata, platform)
+                    measurement = Measurement(dataset_subset,platform,
+                                              configuration_subset, metadata)
 
                 if verbose:
                     print('Done.')
@@ -227,7 +235,7 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
     return results, logs
 
 
-def run_metrics(simulation, ground_truth, configuration, verbose):
+def run_metrics(simulation, ground_truth, configuration, verbose, plot_dir):
     """
     Description: Takes in simulation and ground truth measurement results and a
         configuration file and runs all the specified metrics on the
@@ -242,9 +250,9 @@ def run_metrics(simulation, ground_truth, configuration, verbose):
         :results:
         :logs:
     """
+    metrics_object = Metrics(simulation=simulation, ground_truth=ground_truth, configuration=configuration)
 
-    metrics_object = Metrics(simulation, ground_truth, configuration)
-
-    results, logs = metrics_object.run(verbose=verbose)
+    results, logs = metrics_object.run(verbose=verbose, plot_dir=plot_dir)
 
     return results, logs
+

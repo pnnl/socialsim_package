@@ -2,9 +2,12 @@ import pandas as pd
 import pickle as pkl
 import numpy  as np
 
+import warnings
+
 from .measurements import MeasurementsBaseClass
 from .validators   import check_empty
 from .validators   import check_root_only
+import re
 
 """
 Notes:
@@ -13,8 +16,9 @@ Notes:
 """
 
 class SocialActivityMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata, platform,
+    def __init__(self, dataset, platform, configuration = {}, metadata=None,
         content_node_ids=[], user_node_ids=[]):
+
         """
         Description:
 
@@ -30,6 +34,9 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
 
         self.measurement_type = 'social_activity'
         self.platform         = platform
+
+        content_node_ids = metadata.content_node_ids 
+        user_node_ids    = metadata.user_node_ids
 
 
         self.contribution_events = [
@@ -58,7 +65,7 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
 
         # store action and merged columns in a seperate data frame that is not 
         # used for most measurements
-        if platform=='github' and len(self.main_df.columns)==6 and 'action' in self.main_df.columns:
+        if platform=='github' and 'action' in self.main_df.columns and 'merged' in self.main_df.columns:
             self.main_df_opt = self.main_df.copy()[['action', 'merged']]
             self.main_df = self.main_df.drop(['action', 'merged'], axis=1)
         else:
@@ -88,10 +95,16 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
                 self.UserMetaData    = metadata.user_data
             else:
                 self.useUserMetaData = False
-
         else:
             self.useContentMetaData = False
             self.useUserMetaData    = False
+
+        if self.useUserMetaData:
+            self.created_at_df = self.UserMetaData[['user','created_at']] 
+            try:
+                self.locations_df = self.UserMetaData[['user','city','country']]
+            except:
+                self.locations_df = self.UserMetaData[['user','location']]
 
         # For community measurements
         # Load and preprocess metadata
@@ -107,6 +120,19 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             self.communityDF = self.getCommmunityDF('subreddit')
         elif self.platform=='twitter':
             self.communityDF = self.getCommmunityDF('')
+
+
+    def list_measurements(self):
+        count = 0
+        for f in dir(self):
+            if not f.startswith('_'):
+                func = getattr(self, f)
+                if callable(func):
+                    doc_string = func.__doc__
+                    if not doc_string is None and 'Measurement:' in doc_string:
+                        desc = re.search('Description\:([\s\S]+?)Input', doc_string).groups()[0].strip()
+                        print('{}) {}: {}'.format(count + 1, f, desc))
+                        count += 1
 
 
     def preprocess(self, dataset):
@@ -468,16 +494,12 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             merge = merge.merge(community_totals,on='community',how='left')
             merge['value'] = merge['value']/merge['total']
 
-            print('merge',merge)
-
             #set rare locations to "other"
             thresh = 0.007
             merge['country'][merge['value'] < thresh] = 'other'
 
             #sum over other countries
             grouped = merge.groupby([community_field,'country']).sum().reset_index()
-
-            print('grouped',grouped)
 
             measurement = self.getCommunityMeasurementDict(grouped)
 
@@ -487,7 +509,8 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
             return {}
 
 
-    def getUserBurstByCommunity(self,eventTypes=None,thresh=5.0,community_field="subreddit"):
+    def getUserBurstByCommunity(self, eventTypes=None, thresh=5.0,  
+        community_field="subreddit"):
         """
         Calculate the distribution of user inter-event time burstiness in the data set.
         Question #9
@@ -646,13 +669,13 @@ class SocialActivityMeasurements(MeasurementsBaseClass):
         if self.useContentMetaData:
             df = df.merge(self.contentMetaData,left_on=content_field,right_on=content_field,how='left')
             df = df[[content_field,'created_at','time']].dropna()
-            df['value'] = (df['time']-df['created_at']).apply(lambda x: int(x / np.timedelta64(1, time_bin)))
+            df['value'] = (df['time'].dt.tz_localize(None)-df['created_at'].dt.tz_localize(None)).apply(lambda x: int(x / np.timedelta64(1, time_bin)))
         #otherwise use first observed activity as a proxy
         else:
             creation_day = df.groupby(content_field)['time'].min().reset_index()
             creation_day.columns = [content_field,'creation_date']
             df = df.merge(creation_day, on=content_field, how='left')
-            df['value'] = (df['time']-df['creation_date']).apply(lambda x: int(x / np.timedelta64(1, time_bin)))
+            df['value'] = (df['time'].dt.tz_localize(None)-df['creation_date'].dt.tz_localize(None)).apply(lambda x: int(x / np.timedelta64(1, time_bin)))
             df = df[[content_field,'value']]
             df.columns = ['content','value']
             df = df.iloc[1:]

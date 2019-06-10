@@ -16,9 +16,32 @@ import traceback
 
 from .record import RecordKeeper
 
+from .visualizations import generate_plot
+
+import re
+
+
+def list_metrics():
+    empty_metrics_object = Metrics(None, None, None)
+    count = 0
+    for f in dir(empty_metrics_object):
+        if not f.startswith('_'):
+            func = getattr(empty_metrics_object, f)
+            if callable(func):
+                doc_string = func.__doc__
+                if not doc_string is None and 'Metric:' in doc_string:
+                    #print(doc_string)
+                    desc = re.search('Description\:([\s\S]+?)Input', doc_string).groups()[0].strip()
+                    desc = desc.replace('\n', ' ').replace('\t', ' ')  # remove new lines, tabs, double spaces
+                    ## remove duplicate spaces:
+                    while "  " in desc:
+                        desc = desc.replace('  ',' ')
+                    print('{}) {}: {}\n'.format(count + 1, f, desc))
+                    count += 1
+
 class Metrics:
     def __init__(self, ground_truth, simulation, configuration, 
-        log_file='metrics_log.txt'):
+        log_file='metrics_log.txt', plot=False):
         """
         Description:
 
@@ -31,6 +54,8 @@ class Metrics:
             None
 
         """
+        self.plot = plot 
+
         self.ground_truth  = ground_truth
         self.simulation    = simulation
         self.configuration = configuration
@@ -40,7 +65,7 @@ class Metrics:
         pass
 
 
-    def run(self, measurement_subset=None, verbose=False):
+    def run(self, measurement_subset=None, verbose=False, plot_dir="./new_plots"):
         """
         Description: This runs all measurement outputs through the metrics
             specified in the configuration json.
@@ -112,7 +137,7 @@ class Metrics:
 
                         result, log = self._evaluate_metrics(ground_truth, 
                                 simulation, configuration, verbose, p, 
-                                t, s, m)
+                                t, s, m, plot_dir)
 
                         s_results.update({m:result})
                         s_logs.update({m:log})
@@ -130,7 +155,7 @@ class Metrics:
 
 
     def _evaluate_metrics(self, ground_truth, simulation, configuration, 
-        verbose, p, t, s, m):
+        verbose, p, t, s, m, plot_dir):
         """
         Description: Evaluate metrics on a single measurement.
 
@@ -155,6 +180,14 @@ class Metrics:
             result = None
 
             return result, log
+
+        if self.plot:
+            generate_plot(
+                simulation=simulation, 
+                ground_truth=ground_truth, 
+                measurement_name=m,
+                plot_dir=plot_dir
+                )
 
         # Loop over metrics
         for metric in configuration['metrics'].keys():
@@ -195,9 +228,12 @@ class Metrics:
                     result = {}
                     for a in ground_truth.keys():
                         if a in simulation.keys():
-                            sub_result = metric_function(ground_truth[a], 
-                                                         simulation[a], **metric_args)
-                            result.update({a:sub_result})
+                            try:
+                                sub_result = metric_function(ground_truth[a], 
+                                                             simulation[a], **metric_args)
+                                result.update({a:sub_result})
+                            except:
+                                result.update({a:None})
                 else:
                     result = metric_function(ground_truth, simulation, 
                         **metric_args)
@@ -285,6 +321,7 @@ class Metrics:
         """
 
         on = [c for c in ground_truth.columns if c!='value']
+        
         suffixes = ('_gt', '_sim')
 
         df = ground_truth.merge(simulation, on=on, suffixes=suffixes, how=join)
@@ -318,8 +355,11 @@ class Metrics:
 
     def absolute_difference(self, ground_truth, simulation):
         """
-        Absolute difference between ground truth simulation measurement
-        Meant for scalar valued measurements
+        Metric: absolute_difference
+
+        Description: Absolute difference between ground truth simulation measurement. Meant for scalar valued measurements.
+
+        Input:
         """
         
         if not ground_truth is None and not simulation is None:
@@ -332,8 +372,13 @@ class Metrics:
 
     def absolute_percentage_error(self, ground_truth, simulation):
         """
-        Absolute percentage error between ground truth simulation measurement
+        Metric: absolute_percentage_error
+
+        Description: Absolute percentage error between ground truth simulation measurement
         Meant for scalar valued measurements
+
+        Input:
+
         """
 
         if ground_truth is None or ground_truth==0 or simulation is None:
@@ -347,7 +392,9 @@ class Metrics:
 
     def kl_divergence(self, ground_truth, simulation, discrete=False):
         """
-        KL Divergence between the ground truth and simulation data
+        Metric: kl_divergence
+
+        Description: KL Divergence between the ground truth and simulation data
         Meant for distributional measurements
 
         Inputs:
@@ -390,8 +437,12 @@ class Metrics:
     def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, 
         discrete=False):
         """
-        Smoothed version of the KL divergence which smooths the simulation output
+        Metric: kl_divergence_smoothed
+
+        Description: Smoothed version of the KL divergence which smooths the simulation output
         to prevent infinities in the KL divergence output
+
+        Input:
 
         Additional input:
         alpha - smoothing parameter
@@ -469,10 +520,14 @@ class Metrics:
 
     def js_divergence(self, ground_truth, simulation, discrete=False, base=2.0):
         """
-        Jensen-Shannon Divergence implemenation
+        Metric: js_divergence
+
+        Description:  Jensen-Shannon Divergence implemenation
         A symmetric variant on KL Divergence which also avoids infinite outputs
 
-        Inputs:
+
+        Input:
+
         ground_truth - ground truth measurement
         simulation - simulation measurement
         base - the logarithmic base to use
@@ -525,11 +580,14 @@ class Metrics:
 
     def rbo_score(self, ground_truth, simulation, p=-1):
         """
-        Rank biased overlap (RBO) implementation
-        http://codalism.com/research/papers/wmz10_tois.pdf
+        Metric: rbo_score
+
+        Description: Rank biased overlap (RBO) implementation
+        (http://codalism.com/research/papers/wmz10_tois.pdf)
         A ranked list comparison metric which allows non-overlapping lists
 
-        Inputs:
+        Input:
+
         ground_truth - ground truth data
         simulation - simulation data
         p - RBO parameter ranging from 0 to 1 that determines how much to
@@ -585,7 +643,9 @@ class Metrics:
     def rmse(self, ground_truth, simulation, join='inner', fill_value=0, 
         relative=False):
         """
-        Root mean squared error
+        Metric: rmse
+
+        Description: Root mean squared error
 
         Inputs:
         ground_truth - ground truth measurement (data frame) with measurement in
@@ -633,7 +693,9 @@ class Metrics:
 
     def r2(self, ground_truth, simulation, join='inner', fill_value=0):
         """
-        R-squared value between ground truth and simulation
+        Metric: r2
+
+        Description: R-squared value between ground truth and simulation
 
         Inputs:
         ground_truth - ground truth measurement (data frame) with measurement in
@@ -672,7 +734,9 @@ class Metrics:
 
     def pearson(self, ground_truth, simulation, join='inner', fill_value=0):
         """
-        Pearson correlation coefficient between simulation and ground truth
+        Metric: pearson
+
+        Description: Pearson correlation coefficient between simulation and ground truth
 
         Inputs:
         ground_truth - ground truth measurement (data frame) with measurement in
@@ -693,8 +757,11 @@ class Metrics:
 
     def ks_test(self, ground_truth, simulation):
         """
-        Kolmogorov-Smirnov test
-        Meant for measurements which are continous or numeric distributions
+        Metric: Kolmogorov-Smirnov test.
+
+        Description: Meant for measurements which are continuous or numeric distributions
+
+        Input:
         """
 
         if simulation is None or len(simulation) == 0:
@@ -752,6 +819,15 @@ class Metrics:
 
 
     def spearman(self, ground_truth, simulation, join="inner", fill_value=0):
+        """
+        Metric: spearman
+
+        Description: measures the strength and direction of association between two ranked variables.
+        (nonparametric version of the Pearson product-moment correlation)
+
+        Input:
+
+        """
 
         df = self.join_dfs(ground_truth, simulation, join=join, fill_value=fill_value)
         if len(df.index) > 1:

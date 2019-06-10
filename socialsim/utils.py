@@ -21,7 +21,7 @@ def subset_for_test(dataset, n=1000):
 
     return subset
 
-def add_communities_to_dataset(dataset, communities_directory):
+def add_communities_to_dataset(dataset, communities_directory, communities=None):
     """
     Description: Makes a new dataset with the community information integrated 
         into it.
@@ -37,17 +37,25 @@ def add_communities_to_dataset(dataset, communities_directory):
 
     community_dataset = []
 
-    for community in os.listdir(communities_directory):
-        community_file = communities_directory+community
+    if communities is None:
+        for community in os.listdir(communities_directory):
+            community_file = communities_directory+community
 
-        with open(community_file) as f:
-            community_data = f.readlines()
+            with open(community_file) as f:
+                community_data = [line.rstrip() for line in f]
 
-        community_data = pd.DataFrame(community_data, columns=['informationID'])
-        community_data['community'] = community[:-4]
-        community_data = community_data.drop_duplicates()
+            community_data = pd.DataFrame(community_data, columns=['informationID'])
+            community_data['community'] = community.split('.')[0].replace('community_','')
+            community_data = community_data.drop_duplicates()
         
-        community_dataset.append(community_data)
+            community_dataset.append(community_data)
+    else:
+        for key,value in communities.items():
+            community_data = pd.DataFrame(value,columns=['informationID'])
+            community_data['community'] = key
+            community_data = community_data.drop_duplicates()
+
+            community_dataset.append(community_data)
 
     community_dataset = pd.concat(community_dataset)
     community_dataset = community_dataset.replace(r'\n','', regex=True) 

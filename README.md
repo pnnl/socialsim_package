@@ -4,7 +4,7 @@ It is highly recommended that you install the SocialSim measurements package in 
 #### Step 1: Create and activate a conda environment
 ``` bash
 conda create --name myenv
-source activate myenv
+source activate myenv python=3.6
 ```
 
 #### Step 2: Install Snap and iGraph

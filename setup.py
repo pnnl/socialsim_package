@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 package_structure = [
       'socialsim',
@@ -14,17 +14,21 @@ package_requirements = [
       'fastdtw>=0.2.0',
       'pysal>=2.0.0',
       'tqdm>=4.31.1',
-      'burst_detection>=0.1.3',
+      'burst_detection>=0.1.0',
       'tsfresh>=0.11.2',
       'joblib>=0.13.2',
       'networkx>=2.3',
       'python-louvain>=0.13'
 ]
 
+package_data = {
+      'socialsim.measurements.model_parameters': ['best_model.pkl']
+      }
+
 setup(name='socialsim',
-      version='0.1.8',
+      version='0.1.9',
       packages=package_structure,
-      package_data={'socialsim.measurements.model_parameters': ['best_model.pkl']},
+      package_data=package_data,
       license='',
       url='',
       long_description='None',

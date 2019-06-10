@@ -5,14 +5,15 @@ from scipy.stats.stats import pearsonr, spearmanr
 from itertools import combinations
 import pprint
 import warnings
+import re
 
 from .measurements import MeasurementsBaseClass
 
 from ..utils import add_communities_to_dataset
-
+import re
 
 class CrossPlatformMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset, configuration, metadata=None, 
+    def __init__(self, dataset, configuration={}, metadata=None, 
         platform_col="platform", timestamp_col="nodeTime", 
         user_col="nodeUserID", content_col="informationID", 
         community_col="community", 
@@ -53,7 +54,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             community_directory = metadata.community_directory
             self.community_set = add_communities_to_dataset(dataset, 
-                community_directory)
+                                                            community_directory)
             self.node_list = metadata.node_list
 
         if self.community_set is not None:
@@ -63,6 +64,20 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 self.community_list = self.community_set[self.community_col].dropna().unique()
         else:
             self.community_list = []
+
+
+    def list_measurements(self):
+        count = 0
+        for f in dir(self):
+            if not f.startswith('_'):
+                func = getattr(self, f)
+                if callable(func):
+                    doc_string = func.__doc__
+                    if not doc_string is None and 'Measurement:' in doc_string:
+                        desc = re.search('Description\:([\s\S]+?)Input', doc_string).groups()[0].strip()
+                        print('{}) {}: {}'.format(count + 1, f, desc))
+                        count += 1
+
 
     def select_data(self,nodes=[], communities=[]):
         """
@@ -128,6 +143,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def order_of_spread(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
+        Measurement: order_of_spread (population_order_of_spread, community_order_of_spread, node_order_of_spread)
+
         Description: Determine the order of spread between platforms of content
 
         Input:
@@ -215,10 +232,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             return(None)
 
 
-    def time_delta(self, time_granularity="s", node_level = False, community_level = False, 
+    def time_delta(self, time_granularity="D", node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
-        Description: Determine the amount of time it takes for a piece of information to appear on another platform.
+        Measurement: time_delta (population_time_delta, community_time_delta, node_time_delta)
+
+        Description: Determine the amount of time (default=days) it takes for a piece of information to appear on another platform.
 
         Input:
             time_granularity: Unit of time in which to measure
@@ -258,7 +277,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         #get all pairs of timestamps in each group
         data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list)
         lengths = data_combinations.apply(len)
-        if (lengths > 1).sum() == 0:
+        if (lengths > 0).sum() == 0:
             return None
 
         data_combinations = data_combinations.apply(pd.Series).stack().apply(pd.Series)
@@ -266,7 +285,6 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         #get time differences for each pair of time stamps
         data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
         data_combinations = data_combinations.reset_index()
- 
 
         #merge to get first platform
         data_combinations = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
@@ -296,6 +314,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def overlapping_users(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
+        Measurement: overlapping_users (population_overlapping_users, community_overlapping_users, node_overlapping_users)        
+
         Description: Calculate the percentage of users common to all platforms (that share in a community/content)
 
         Input:
@@ -376,6 +396,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def size_of_audience(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
+        Measurement: size_of_audience (population_size_of_audience, community_size_of_audience, node_size_of_audience)
+        
         Description: The ranking of audience sizes on each platform
 
         Input:
@@ -434,6 +456,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def speed_of_spread(self, time_unit='h', node_level = False, community_level = False, 
                         nodes=[], communities=[],):
         """
+        Measurement: speed_of_spread (population_speed_of_spread, community_speed_of_spread, node_speed_of_spread)
         Description: Determine the speed at which the information is spreading
 
         Input:
@@ -500,6 +523,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def size_of_shares(self, node_level = False, community_level = False, 
                         nodes=[], communities=[]):
         """
+        Measurement: size_of_shares (population_size_of_shares, community_size_of_shares, community_size_of_shares, node_size_of_shares)
+
         Description: Determine the number of shares on each platform
 
         Input:
@@ -553,7 +578,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
     def temporal_correlation(self, measure="share", time_granularity="D",node_level = False, community_level = False, 
                              nodes=[], communities=[]):
         """
-        Description: Calculates the correlation between the activity over time between all pairs of platforms
+        Measurement: temporal_correlation_share (population_temporal_correlation_share, community_correlation_share, node_correlation_share), temporal_correlation_audience (population_temporal_correlation_audience, community_correlation_audience, node_correlation_audience)
+
+        Description: Calculates the correlation between the activity time series  between all pairs of platforms
 
         Input:
             measure: What to measure, number of shares ("share") or audience growth ("audience")
@@ -597,11 +624,19 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         dfs = []
         for i, p1 in enumerate(platforms):
             for j,p2 in enumerate(platforms[i+1:]):
-                df = data.groupby(group_col).apply(lambda x: pearsonr(x[p1],x[p2])[0]).reset_index()
+
+                counts = data.groupby(group_col)[self.timestamp_col].count().reset_index()
+                counts.columns = group_col + ['count']
+
+                df = data.merge(counts,on=group_col)
+                
+                df = df[df['count'] > 1]
+
+                df = df.groupby(group_col).apply(lambda x: pearsonr(x[p1],x[p2])[0]).reset_index()
                 df.columns = group_col + ['value']
                 df['platform1'] = p1
                 df['platform2'] = p2
-
+                
                 dfs.append(df)
                 
         data = pd.concat(dfs)
@@ -621,10 +656,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         
 
     def lifetime_of_spread(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[],time_unit='H'):
+                        nodes=[], communities=[],time_unit='D'):
 
         """
-        Description: Ranks the different platforms based on the lifespan of the content/community
+        Measurement: lifetime_of_spread (population_lifetime_of_spread, community_lifetime_of_spread, node_lifetime_of_spread)
+
+        Description: Ranks the different platforms based on the lifespan (default = days) of the content/community
 
         Input:
             time_unit: the unit of time to measure lifetime
@@ -686,14 +723,16 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return lifetimes
 
 
-    def correlation_of_information(self, measure="share", time_unit='H',
+    def correlation_of_information(self, measure="share", time_unit='D',
                                    community_level=False,communities=[]):
         """
+        Measurement: correlation_of_audiences, correlation_of_lifetimes, correlation_of_shares, correlation_of_speeds
+
         Description: Compute Pearson correlation
             1. Correlation between shares of information across platforms
             2. Correlation between audience sizes
-            3. Correlation between lifetimes of information across platforms
-            4. Correlation between speeds of information across platforms
+            3. Correlation between lifetimes (default = days) of information across platforms
+            4. Correlation between speeds (default = days) of information across platforms
 
         Input:
             measure: What to measure: number of shares, audience, lifetime, or speed?

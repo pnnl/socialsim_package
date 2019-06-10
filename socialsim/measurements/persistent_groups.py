@@ -1,13 +1,22 @@
 from .measurements import MeasurementsBaseClass
-from .recurrence import BurstDetection
+from .recurrence   import BurstDetection
+
 from collections import Counter
-import numpy as np
-import pandas as pd
+from matplotlib.pyplot import cm
+
+import numpy    as np
+import pandas   as pd
 import networkx as nx
+
 import community
+
 from collections import defaultdict
+
 import pysal
 import warnings
+import matplotlib.pyplot as plt
+
+import re
 
 # community detection algorithms
 # More algorithms: https://networkx.github.io/documentation/stable/reference/algorithms/community.html
@@ -25,7 +34,14 @@ def louvain_method(g):
 
 
 class PersistentGroupsMeasurements(MeasurementsBaseClass):
-    def __init__(self, dataset_df, configuration={}, metadata=None, id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform", content_col="informationID", log_file='group_formation_measurements_log.txt', selected_content=None, time_granularity='12H', parentid_col='parentID', community_detection_algorithm=louvain_method):
+    def __init__(self, dataset_df, configuration={}, metadata=None,
+                 id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID",
+                 platform_col="platform", content_col="informationID",
+                 log_file='group_formation_measurements_log.txt', selected_content=None,
+                 time_granularity='12H', parentid_col='parentID',
+                 community_detection_algorithm=louvain_method,
+                 plot=False, save_groups=False, plot_bursts=False, save_plots=False, plot_dir='./'):
+
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -42,10 +58,23 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.platform_col        = platform_col
         self.content_col = content_col
         self.measurement_type    = 'persistent_groups'
-        self.metadata            = metadata 
-        self.selected_content = selected_content if selected_content is not None else self.metadata.node_list
-        if self.selected_content == 'all':
+
+        self.metadata            = metadata
+        self.plot                = plot
+        self.plot_bursts         = plot_bursts
+        self.plot_dir            = plot_dir
+        self.save_plots          = save_plots
+
+
+        if selected_content == 'all':
             self.selected_content = None
+        elif selected_content is not None:
+            self.selected_content = selected_content
+        else:
+            try:
+                self.selected_content = self.metadata.node_list
+            except:
+                self.selected_content = None
 
         self.min_date = self.dataset_df[self.timestamp_col].min()
         self.max_date = self.dataset_df[self.timestamp_col].max()
@@ -60,8 +89,23 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.parentid_col = parentid_col
         self.community_detection_algorithm = community_detection_algorithm
         self.get_network_from_bursts()
+        if save_groups:
+            self.save_groups_to_file()
 
-    def get_network_from_bursts(self, bursts_count_threshold=1, user_interaction_weight_threshold=1):        
+    def list_measurements(self):
+        count = 0
+        for f in dir(self):
+            if not f.startswith('_'):
+                func = getattr(self, f)
+                if callable(func):
+                    doc_string = func.__doc__
+                    if not doc_string is None and 'Measurement:' in doc_string:
+                        desc = re.search('Description\:([\s\S]+?)Input', doc_string).groups()[0].strip()
+                        print('{}) {}: {}\n'.format(count + 1, f, desc))
+                        count += 1
+
+
+    def get_network_from_bursts(self, bursts_count_threshold=1, user_interaction_weight_threshold=1):
         """
         get bursts in activity for units of information, get network of connected users that parcipate in these bursts
         :param bursts_count_threshold: threshold for the number of bursts in activity for an information to be considered
@@ -83,12 +127,16 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             return content_user_connections
 
         user_connections = []
-        count = 0
         n_ids = self.dataset_df[self.content_col].nunique()
+        max_plots_to_show = 5
+        num_plots = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
+            if num_plots < max_plots_to_show:
+                show = True
+            else:
+                show = False
             if self.selected_content is not None and content_id not in self.selected_content:
                 continue
-            count += 1
             burstDetection = BurstDetection(dataset_df=content_df, metadata=self.metadata, id_col=self.id_col,
                                             timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
                                             time_granularity=self.time_granularity,
@@ -96,8 +144,26 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             burst_intervals = burstDetection.detect_bursts(self.gammas[content_id])
             if len(burst_intervals) < bursts_count_threshold:
                 continue
+
+            if self.plot_bursts:
+                plot_df = self.dataset_df.copy()
+                plot_df.set_index(self.timestamp_col, inplace=True)
+                new_df = plot_df.groupby(pd.Grouper(freq=self.time_granularity))[[self.content_col]].count()
+                new_df.reset_index(inplace=True)
+                plt.figure()
+                plt.plot(new_df[self.timestamp_col], new_df[self.content_col])
+
             for burst_interval in burst_intervals:
                 user_connections.extend(get_burst_user_connections_df(content_id, content_df, burst_interval))
+                if self.plot_bursts:
+                    plt.axvspan(xmin=burst_interval[0], xmax=burst_interval[1], color="red", alpha=0.25)
+            if show and self.plot_bursts:
+                plt.show()
+            if self.plot_bursts and self.save_plots:
+                plt.savefig(self.plot_dir + str(content_id) + "_persistent_groups_with_bursts.png", bbox_inches='tight')
+                plt.close()
+            num_plots += 1
+
             
         user_network_df = pd.DataFrame(user_connections)
         if 'uid1' not in user_network_df.columns:
@@ -111,16 +177,65 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.groups = self.community_detection_algorithm(user_interaction_nx)
         print('Number of groups: ', len(self.groups))
 
-    def number_of_groups(self):	
-        '''How many different clusters of users are there?'''
+        if self.plot:
+            figsize = (10, 10)
+            fig = plt.figure(figsize=figsize)
+            ax = fig.add_subplot(1, 1, 1)
+            ax.axis('off')
+            ax.set_frame_on(False)
+            colors = iter(cm.jet(np.linspace(0, 1, len(self.groups))))
+            node_color = {}
+            node_labels = {}
+            for g_id, g in enumerate(self.groups):
+                c = next(colors)
+                for i in g:
+                    node_color[i] = c
+                    node_labels[i] = g_id
+            # Draw graph of users by group membership
+            node_c = [node_color[n] for n in user_interaction_nx.nodes()]
+
+            nx.draw_networkx(user_interaction_nx, with_labels=False, node_color=node_c, labels=node_labels,
+                             node_size=30, edge_color='black')
+
+            plt.show()
+            if self.save_plots:
+                plt.savefig(self.plot_dir+ "network_of_users_by_groups.png",bbox_inches='tight')
+
+    def number_of_groups(self):
+        """
+        Measurement: number_of_groups
+
+        Description: How many different clusters of users are there?
+
+        Input: Network
+
+        Output: Int.
+
+        """
         return len(self.groups)
         
     def group_size_distribution(self):
-        '''How large are the groups of users?'''	
+        """
+        Measurement: group_size_distribution
+
+        Description: How large are the groups of users?  (population)
+
+        Input: Network of groups
+
+        Output: List of group sizes
+        """
         return [len(group_users) for group_users in self.groups]
         
-    def distribution_of_content_discussion_over_groups(self):	
-        '''Do groups focus on individual information IDs or a larger set of info IDs?'''	
+    def distribution_of_content_discussion_over_groups(self):
+        """
+        Measurement: distribution_of_content_discussion_over_groups
+
+        Description: Do groups focus on individual information IDs or a larger set of info IDs?
+
+        Input:
+
+        Output: List
+        """
 
         content_ids = self.dataset_df.groupby(self.content_col)[self.id_col].count().reset_index()
         content_ids.columns = [self.content_col,'total_value']
@@ -142,8 +257,16 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
 
         return meas
 
-    def internal_versus_external_interaction_rates(self):	
-        '''How much do group members interact with each other versus non-group members?'''
+    def internal_versus_external_interaction_rates(self):
+        """
+        Measurement: external_to_internal_interaction_rate_ratio
+
+        Description: How much do group members interact with each other versus non-group members?
+
+        Input:
+
+        Output: Float
+        """
         internal_links = 0
         external_links = 0
         for i, group_users in enumerate(self.groups):
@@ -153,15 +276,29 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             external_links += sum(all_links_df['weight'].values) - sum(internal_links_df['weight'].values)
         return external_links / internal_links
 
-    def group_versus_total_volume_of_activity(self,time_granularity=None):	
-        '''How much does the most prolific group dominate the discussion of a particular info ID over time?'''		
+    def group_versus_total_volume_of_activity(self,time_granularity=None):
+        """
+        Measurement: group_versus_total_volume_of_activity
+
+        Description: How much does the most prolific group dominate the discussion of a particular info ID over time?
+
+        Input:
+
+        Output: Dictionary of DataFrames
+        """
+        ''''''
 
         if time_granularity is None:
-            time_granularity = self.time_granularity
+            try:
+                time_granularity = self.configuration['node']['group_versus_total_volume_of_activity']['measurement_args']['time_granularity']
+            except:
+                time_granularity = self.time_granularity
+
 
         dataset_counts_df = self.dataset_df.set_index(self.timestamp_col).\
             groupby([pd.Grouper(freq=time_granularity), self.content_col]).size().reset_index(name='total_activity')
-        
+
+
         group_content_timeseries = {}       
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
 
@@ -173,19 +310,35 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             group_counts_df = group_df.set_index(self.timestamp_col).\
                 groupby([pd.Grouper(freq=time_granularity), self.content_col]).size().reset_index(name='group_activity')
 
-            merged_df = dataset_counts_df.merge(group_counts_df, how='outer', on=[self.content_col, self.timestamp_col])
+            merged_df = dataset_counts_df[dataset_counts_df[self.content_col]==content_id].merge(group_counts_df, how='outer', on=[self.content_col, self.timestamp_col]) #dataset_counts_df
+
             merged_df.fillna(0, inplace=True)
             merged_df['value'] = merged_df['group_activity'] / merged_df['total_activity']
 
             group_content_timeseries[content_id] = merged_df.drop(columns=[self.content_col, 'total_activity', 'group_activity'])
         return group_content_timeseries
 
-    def seed_post_versus_response_actions_ratio(self):  
-        '''How much does the group seed new content?'''
+    def seed_post_versus_response_actions_ratio(self):
+        """
+        Measurement: seed_post_to_total_actions_ratio
+
+        Description: How much does the group seed new content?
+
+        Input:
+
+        Output: List.
+        """
         group_seed_post_ratio = []
         for i, group_users in enumerate(self.groups):
             group_df = self.dataset_df[self.dataset_df[self.userid_col].isin(group_users)]
             idx = (group_df[self.parentid_col] == group_df[self.id_col]) | (group_df['actionType'].isin(['CreateEvent','IssuesEvent','PullRequestEvent']))
             group_seed_post_ratio.append(len(group_df[idx]) / float(len(group_df))) 
         return group_seed_post_ratio       
-        
+
+    def save_groups_to_file(self):
+        groups = []
+        for g_id, g in enumerate(self.groups):
+            idx = [g_id]*len(g)
+            groups.append(pd.DataFrame({"group id": idx, "group member": g}))
+        group_df = pd.concat(groups)
+        group_df.to_csv("./groups.csv")

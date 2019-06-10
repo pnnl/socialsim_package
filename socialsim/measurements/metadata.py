@@ -8,7 +8,10 @@ import datetime
 
 class MetaData:
     def __init__(self, content_data=False, user_data=False, info_data=False,
-                 community_directory=None, node_file=None, verbose=True):
+                 community_directory=None, node_file=None, verbose=True,
+                 content_node_ids='all', user_node_ids=[], do_build_communities=False,
+                 communities=None):
+
         """
         Description:
 
@@ -17,15 +20,21 @@ class MetaData:
         Output:
         
         """
+
+        self.do_build_communities = do_build_communities
+        
+        self.content_node_ids  = content_node_ids
+        self.user_node_ids     = user_node_ids
+
+        self.verbose = verbose
+
         if node_file is None:
             self.node_list = 'all'
         else:
             self.node_list = self.load_node_list(node_file)
 
-        if community_directory is None:
-            pass
-        else:
-            self.community_directory = community_directory
+        self.community_directory = community_directory
+        self.communities = communities
 
         if content_data!=False:
             self.use_content_data = True
@@ -62,7 +71,6 @@ class MetaData:
         else:
             self.use_info_data = False
 
-
         model_filepath = os.path.dirname(__file__)
         model_filepath = model_filepath+'/model_parameters/best_model.pkl'
 
@@ -83,7 +91,7 @@ class MetaData:
             if len(comm_members) > 0:
                 self.communities[comm_id] = comm_members
 
-            if verbose: 
+            if self.verbose: 
                 print(self.communities)
 
     def build_communities(self, content_data, user_data):
@@ -95,7 +103,10 @@ class MetaData:
         Output:
 
         """
-
+        
+        if not self.do_build_communities:
+        	return {}
+          
         print('Building communities... ', end='')
 
         communities = {}
@@ -133,7 +144,10 @@ class MetaData:
 
 
     def preprocessContentMeta(self, dataset):
-        dataset.columns = ['content', 'created_at', 'owner_id', 'language']
+        if len(dataset.columns) == 4:
+            dataset.columns = ['content', 'created_at', 'owner_id', 'language']
+        elif len(dataset.columns) == 3:
+            dataset.columns = ['created_at','owner_id','content']
         dataset['created_at'] = pd.to_datetime(dataset['created_at'])
         return dataset
 

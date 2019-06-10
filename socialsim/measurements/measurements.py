@@ -5,7 +5,7 @@ import traceback
 from ..record import RecordKeeper
 
 class MeasurementsBaseClass:
-    def __init__(self, dataset, configuration, log=False, 
+    def __init__(self, dataset, configuration={}, log=False, 
         log_file='measurements_log.txt'):
         """
         Description: Base class for all measurements classes. Contains methods

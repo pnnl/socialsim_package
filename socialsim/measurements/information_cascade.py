@@ -9,9 +9,13 @@ import pysal
 from .validators   import check_empty
 from .validators   import check_root_only
 from .measurements import MeasurementsBaseClass
+import re
+
+import igraph as ig
+
 
 class InformationCascadeMeasurements(MeasurementsBaseClass):
-    def __init__(self, main_df, configuration, metadata, platform,
+    def __init__(self, main_df, configuration={}, metadata=None, platform='',
         parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
         timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None,
         filter_in_list=[], log_file='cascade_measurements_log.txt'):
@@ -49,8 +53,6 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         self.main_df = self.main_df.drop(columns=columns,errors='ignore')
         self.main_df = self.main_df.drop_duplicates()
 
-        self.main_df.drop
-
         if len(self.main_df) > 0:
             # for reddit community measurements
             if self.filter_on_col is not None and len(filter_in_list) > 0:
@@ -70,6 +72,144 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         'get_cascades_distribution_measurements'
         ]
 
+
+    def list_measurements(self):
+        count = 0
+        for f in dir(self):
+            if not f.startswith('_'):
+                func = getattr(self, f)
+                if callable(func):
+                    doc_string = func.__doc__
+                    if not doc_string is None and 'Measurement:' in doc_string:
+                        desc = re.search('Description\:([\s\S]+?)Input', doc_string).groups()[0].strip()
+                        print('{}) {}: {}\n'.format(count + 1, f, desc))
+                        count += 1
+
+    def cascade_max_depth_over_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_max_depth_over_time
+
+        Description: time series of Max-Depth of cascade, i.e., the longest path from the root to a leaf node in the cascade over time
+
+        Input:
+        """
+        return self.get_node_level_measurements(single_cascade_measurement='cascade_timeseries_of',
+                                                attribute='depth', time_granularity=time_granularity)
+
+    def cascade_breadth_by_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_breadth_by_time
+
+        Description: the number of nodes created at a given time/within a given time bin
+
+        Input:
+        """
+        return self.get_node_level_measurements(single_cascade_measurement='cascade_timeseries_of',
+                                                attribute='breadth', time_granularity=time_granularity)
+
+    def cascade_structural_virality_over_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_structural_virality_over_time
+
+        Description: how ``viral'' the cascade is (average path lengths between nodes in the cascade)
+
+        Input:
+        """
+        return self.get_node_level_measurements(single_cascade_measurement='cascade_timeseries_of',
+                                                attribute='structural_virality', time_granularity=time_granularity)
+
+    def cascade_size_over_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_size_over_time
+
+        Description: size of the cascade over time (delay from timestamp of root node)
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='size', single_cascade_measurement='cascade_timeseries_of',
+                                                time_granularity=time_granularity)
+
+    def cascade_uniq_users_by_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_uniq_users_by_time
+
+        Description: the number of unique participants at a given time, i.e., the size of the audience at a given time/within a given time bin
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='unique_nodes',
+                                                single_cascade_measurement='cascade_timeseries_of',
+                                                time_granularity=time_granularity)
+
+    def cascade_new_user_ratio_by_time(self, time_granularity='H'):
+        """
+        Measurement: cascade_new_user_ratio_by_time
+
+        Description: the diversity of users who participate over the lifetime of the cascade
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='new_node_ratio',
+                                                single_cascade_measurement='cascade_timeseries_of',
+                                                time_granularity=time_granularity)
+
+
+
+    def cascade_breadth_by_depth(self):
+        """
+        Measurement: cascade_breadth_by_depth
+
+        Description: the number of nodes created at a given depth
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='breadth',
+                                                single_cascade_measurement='cascade_depth_by')
+
+
+    def cascade_new_user_ratio_by_depth(self):
+        """
+        Measurement: cascade_new_user_ratio_by_depth
+
+        Description: the diversity of users who participate at different depths of the cascade - here, "new users" are users who did not previously participate in the given cascade at an earlier depth.
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='new_node_ratio',
+                                                single_cascade_measurement='cascade_depth_by')
+
+    def cascade_uniq_users_by_depth(self):
+        """
+        Measurement: cascade_uniq_users_by_depth
+
+        Description: the number of unique participants at given depths within a cascade
+
+        Input:
+        """
+        return self.get_node_level_measurements(attribute='unique_nodes',
+                                                single_cascade_measurement='cascade_depth_by')
+
+    def cascade_participation_gini(self):
+        """
+        Measurement: cascade_participation_gini
+
+        Description: gini coefficient summarizing to what extent are the posts within an information cascade disproportionately authored by a
+        subset of the users who participate in the cascade?
+
+        Input:
+        """
+        return self.get_node_level_measurements(single_cascade_measurement='cascade_participation_gini')
+
+    def cascade_participation_palma(self):
+        """
+        Measurement: cascade_participation_palma
+
+        Description: palma ratio summarizing to what extent are posts within information cascades disproportionately
+        authored by a subset of the users who participate in the cascade?
+
+        Input:
+        """
+        return self.get_node_level_measurements(single_cascade_measurement='cascade_participation_palma')
 
     def preprocess_and_create_nx_dict(self):
         self.scms = {}
@@ -190,7 +330,7 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
             meas = {}
             for community in self.cascade_distribution_measurement_df[community_grouper].unique():
                 if community != '':
-                    df = self.cascade_distribution_measuremnt_df
+                    df = self.cascade_distribution_measurement_df
 
                     df = df[df[community_grouper] == community][["rootID", attribute]]
                     df.columns = ['content', 'value']
@@ -318,6 +458,18 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
 
     @check_empty(default=None)
     def cascade_collection_initialization_gini(self, community_grouper=None):
+        """
+
+        Measurement: cascade_collection_initialization_gini
+
+        Description: gini coefficient summarizing to what extent are posts that trigger information cascades disproportionately
+        authored by a subset of the users?
+
+        Input:
+
+        Output:
+
+        """
         if not community_grouper:
             root_node_users = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]][
                 self.user_col].values
@@ -336,7 +488,17 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
     @check_empty(default=None)
     @check_root_only(default=None)
     def cascade_collection_initialization_palma(self, community_grouper=None):
+        """
+        Measurement:
 
+        Description: palma ratio summarizing to what extent are posts that trigger information cascades disproportionately
+        authored by a subset of the users who participate in the cascade?
+
+        Input:
+
+        Output:
+
+        """
         if not community_grouper:
             root_node_users = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]][
                 self.user_col].values
@@ -354,6 +516,17 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
 
     @check_empty(default=None)
     def cascade_collection_participation_gini(self, community_grouper=None):
+        """
+        Measurement: cascade_collection_participation_gini
+
+        Description: gini coefficient summarizing to what extent are posts sets of cascades disproportionately
+        authored by a subset of the users who participate in the cascade?
+
+        Input:
+
+        Output:
+
+        """
         if not community_grouper:
             all_node_users = self.main_df[self.user_col].values
             return pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g
@@ -370,6 +543,18 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
     @check_empty(default=None)
     @check_root_only(default=None)
     def cascade_collection_participation_palma(self, community_grouper=None):
+        """
+
+        Measurement:
+
+        Description: palma ratio summarizing to what extent are posts within a collection of information cascades disproportionately
+        authored by a subset of the users who participate in the cascade?
+
+        Input:
+
+        Output:
+
+        """
         if not community_grouper:
             all_node_users = self.main_df[self.user_col].values
             return palma_ratio(list(Counter(all_node_users).values()))
@@ -411,6 +596,10 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         We might not have url information in simulations
         """
         pass
+
+
+
+
 
 
 class Cascade:

@@ -1,0 +1,1682 @@
+{
+ "github": {
+    "social_activity": {
+      "population": {
+        "user_activity_distribution": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getUserActivityDistribution",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent",
+              "WatchEvent",
+              "ForkEvent"
+            ]
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            },
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "most_active_users": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getMostActiveUsers",
+          "measurement_args": {
+            "k": 700,
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent",
+              "WatchEvent",
+              "ForkEvent"
+            ]
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "user_popularity": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getUserPopularity",
+          "measurement_args": {
+            "k": 200,
+            "eventTypes": [
+              "WatchEvent",
+              "ForkEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "user_gini_coef": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "nodeType": "user",
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "user_palma_coef": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "nodeType": "user",
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            },
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            }
+          }
+        },
+        "user_diffusion_delay": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getUserDiffusionDelay",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ]
+          },
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            }
+          }
+        },
+        "user_trustingness": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getUserPullRequestAcceptance",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ]
+          },
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            }
+          }
+        },
+        "user_unique_content": {
+          "scale": "population",
+          "node_type": "user",
+          "measurement": "getUserUniqueContent",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "repo_event_counts_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "repo_event_counts_pull_request": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "repo_event_counts_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "content_popularity_distribution": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "WatchEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "content_popularity_topk": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getTopKContent",
+          "measurement_args": {
+            "k": 125,
+            "eventTypes": [
+              "WatchEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "content_liveliness_distribution": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "content_liveliness_topk": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getTopKContent",
+          "measurement_args": {
+            "k": 50,
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "content_activity_disparity_gini_fork": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_palma_fork": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_gini_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_palma_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_gini_pullrequest": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_palma_pullrequest": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_gini_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_activity_disparity_palma_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "repo_trustingness": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getRepoPullRequestAcceptance",
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_popularity_distribution": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "WatchEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": true
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "content_popularity_topk": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getTopKContent",
+          "measurement_args": {
+            "k": 125,
+            "eventTypes": [
+              "WatchEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "content_liveliness_distribution": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": true
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "content_liveliness_topk": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getTopKContent",
+          "measurement_args": {
+            "k": 50,
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rbo": {
+              "metric": "rbo_score",
+              "metric_args": {
+                "p": 0.95
+              }
+            }
+          }
+        },
+        "content_activity_disparity_gini_fork": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_palma_fork": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "ForkEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_gini_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_palma_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_gini_pullrequest": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_palma_pullrequest": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_gini_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getGiniCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "content_activity_disparity_palma_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getPalmaCoef",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content",
+            "nodeType": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {
+                
+              }
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "repo_trustingness": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getRepoPullRequestAcceptance",
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {
+                
+              }
+            }
+          }
+        },
+        "repo_event_counts_issue": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "IssuesEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": true
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "repo_event_counts_pull_request": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": true
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        },
+        "repo_event_counts_push": {
+          "scale": "population",
+          "node_type": "content",
+          "measurement": "getDistributionOfEventsByContent",
+          "measurement_args": {
+            "eventTypes": [
+              "PushEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            },
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": true
+              }
+            },
+            "r2": {
+              "metric": "r2",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0
+              }
+            }
+          }
+        }
+      },
+      "community": {
+        "community_gini": {
+          "scale": "community",
+          "node_type": "content",
+          "measurement": "getCommunityGini",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "community_field": "community",
+            "content_field": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "community_palma": {
+          "scale": "community",
+          "node_type": "content",
+          "measurement": "getCommunityPalma",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "community_field": "community",
+            "content_field": "content"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "community_geo_locations": {
+          "scale": "community",
+          "node_type": "user",
+          "measurement": "userGeoLocation",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "community_field": "community"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "community_event_proportions": {
+          "scale": "community",
+          "node_type": "content",
+          "measurement": "getProportion",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent",
+              "WatchEvent",
+              "ForkEvent"
+            ],
+            "community_field": "community"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "community_contributing_users": {
+          "scale": "community",
+          "node_type": "user",
+          "measurement": "contributingUsers",
+          "measurement_args": {
+            "community_field": "community"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "community_num_user_actions": {
+          "scale": "community",
+          "node_type": "user",
+          "measurement": "getNumUserActions",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "community_field": "community",
+            "unit": "D"
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "dtw": {
+              "metric": "dtw",
+              "metric_args": {}
+            },
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "community_burstiness": {
+          "scale": "community",
+          "node_type": "content",
+          "measurement": "burstsInCommunityEvents",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent",
+              "WatchEvent",
+              "ForkEvent"
+            ],
+            "community_field": "community"
+          },
+          "metrics": {
+            "absolute_difference": {
+              "metric": "absolute_difference",
+              "metric_args": {}
+            },
+            "absolute_percentage_error": {
+              "metric": "absolute_percentage_error",
+              "metric_args": {}
+            }
+          }
+        },
+        "community_user_burstiness": {
+          "scale": "community",
+          "node_type": "user",
+          "measurement": "getUserBurstByCommunity",
+          "measurement_args": {
+            "community_field": "community"
+          },
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            }
+          }
+        },
+        "community_issue_types": {
+          "scale": "community",
+          "node_type": "content",
+          "measurement": "propIssueEvent",
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "community_user_account_ages": {
+          "scale": "community",
+          "node_type": "user",
+          "measurement": "ageOfAccounts",
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            }
+          }
+        }
+      },
+      "node": {
+        "content_diffusion_delay": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getContentDiffusionDelay",
+          "measurement_args": {
+            "eventTypes": [
+              "WatchEvent",
+              "ForkEvent"
+            ],
+            "content_field": "content",
+            "time_bin": "h"
+          },
+          "metrics": {
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            },
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "content_growth": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getContentGrowth",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "dtw": {
+              "metric": "dtw",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_contributors": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getContributions",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "dtw": {
+              "metric": "dtw",
+              "metric_args": {}
+            }
+          }
+        },
+        "content_event_distribution_daily": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getDistributionOfEvents",
+          "measurement_args": {
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "content_event_distribution_dayofweek": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getDistributionOfEvents",
+          "measurement_args": {
+            "weekday": true,
+            "content_field": "content"
+          },
+          "metrics": {
+            "js_divergence": {
+              "metric": "js_divergence",
+              "metric_args": {
+                "discrete": false,
+                "base": 2
+              }
+            }
+          }
+        },
+        "repo_issue_to_push": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "getEventTypeRatioTimeline",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            }
+          }
+        },
+        "repo_user_continue_prop": {
+          "scale": "node",
+          "node_type": "content",
+          "measurement": "propUserContinue",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ],
+            "content_field": "content"
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            }
+          }
+        },
+        "user_activity_timeline": {
+          "scale": "node",
+          "node_type": "user",
+          "measurement": "getUserActivityTimeline",
+          "measurement_args": {
+            "eventTypes": [
+              "PullRequestEvent",
+              "PushEvent",
+              "IssuesEvent",
+              "IssueCommentEvent",
+              "PullRequestReviewCommentEvent",
+              "CommitCommentEvent",
+              "CreateEvent"
+            ]
+          },
+          "metrics": {
+            "rmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "nrmse": {
+              "metric": "rmse",
+              "metric_args": {
+                "join": "inner",
+                "fill_value": 0,
+                "relative": false
+              }
+            },
+            "ks_test": {
+              "metric": "ks_test",
+              "metric_args": {}
+            },
+            "dtw": {
+              "metric": "dtw",
+              "metric_args": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}
