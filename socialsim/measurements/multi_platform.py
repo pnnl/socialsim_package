@@ -978,7 +978,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                 in dataframe is rank. Only differs from Population if subset of nodes is passed.
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform)
-x
+
 
         speed_topk = self.topk_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                            community_level=community_level,
