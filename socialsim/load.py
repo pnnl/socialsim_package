@@ -48,6 +48,7 @@ def load_data(filepath, ignore_first_line=True, name_mappings=None, verbose=True
         :dataset: (pandas dataframe) The loaded dataframe object.
     """
     dataset = _load_json(filepath, ignore_first_line, verbose, short)
+
     dataset = convert_datetime(dataset, verbose)
     check   = validate_dataset(dataset, verbose)
 

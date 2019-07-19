@@ -20,7 +20,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset_df, configuration={}, metadata=None,
                  id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform",
                  content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt',
-                 selected_content=None, selected_communties=None, time_granularity='12H', plot=False, save_plots=False, plot_dir='./'):
+                 selected_content=None, selected_communties=None, time_granularity='12H', 
+                 plot=False, show=False, save_plots=False, plot_dir='./'):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -49,7 +50,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         if not os.path.exists(plot_dir):
             os.makedirs(plot_dir)
 
-        self.gammas = {k: None for k in self.dataset_df[self.content_col].unique()}
+        self.gammas = {k: {p: None for p in self.dataset_df[self.platform_col].unique()} for k in self.dataset_df[self.content_col].unique()}
 
         self.min_date = self.dataset_df[self.timestamp_col].min()
         self.max_date = self.dataset_df[self.timestamp_col].max()
@@ -59,10 +60,12 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                 if not self.metadata.community_directory is None:
                     self.community_contentids = get_community_contentids(self.metadata.community_directory)
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
-                self.gammas.update(
-                    self.metadata.info_data[[self.content_col, 'gamma']].set_index(self.content_col).to_dict()['gamma'])
+                
+                for i, row in self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].iterrows():
+                    if row[self.content_col] in self.gammas.keys():
+                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma'] 
 
-        self.initialize_recurrence_measurements()
+        self.initialize_recurrence_measurements(ever_show=show)
 
     def list_measurements(self):
         count = 0
@@ -77,14 +80,14 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                         print('{}) {}\n'.format(count + 1, f))
                         count += 1
 
-    def initialize_recurrence_measurements(self):
+    def initialize_recurrence_measurements(self,ever_show=False):
         self.content_recurrence_measurements = {}
         max_plots_to_show = 5
         show = False
         n_ids = self.dataset_df[self.content_col].nunique()
         num_plots = 0
         for content_id, content_df in self.dataset_df.groupby(self.content_col):
-            if num_plots < max_plots_to_show:
+            if num_plots < max_plots_to_show and ever_show:
                 show = True
             else:
                 show = False
@@ -120,7 +123,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                 metadatanodelist = self.metadata.node_list
             selected_content = next(x for x in [selected_content, self.selected_content, metadatanodelist,
                                                 self.content_recurrence_measurements.keys()] if
-                                    x is not None and x != 'all')
+                                    x is not None)
         else:
             selected_content = self.dataset_df[self.content_col].unique()
 
@@ -446,6 +449,11 @@ class BurstDetection():
             counts_df = platform_df.set_index(self.timestamp_col).groupby(pd.Grouper(freq=self.time_granularity))[
                 [self.id_col]].count()
 
+            if type(gamma) == dict:
+                g = gamma[platform]
+            else:
+                g = gamma
+
             # make sure the time series covers the full range
             if not self.min_date is None and counts_df.index.min() > self.min_date:
                 counts_df.loc[self.min_date] = 0
@@ -457,7 +465,7 @@ class BurstDetection():
 
             counts_df = counts_df.reset_index()
 
-            bursts_df = self.detect_bursts_of_a_timeseries(counts_df, gamma=gamma)
+            bursts_df = self.detect_bursts_of_a_timeseries(counts_df, gamma=g, platform=platform)
             if bursts_df is None:
                 continue
             bursts_df['platform'] = platform
@@ -469,7 +477,7 @@ class BurstDetection():
         else:
             return []
 
-    def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None):
+    def detect_bursts_of_a_timeseries(self, timeseries_df, gamma=None, platform='all'):
         '''
         detect intervals with bursts of activity: [start_timestamp, end_timestamp)
         :param ts_df: timeseries_df for a single platform
@@ -485,8 +493,8 @@ class BurstDetection():
         if gamma is None and np.max(r) >= 5:
             gamma = self.predict_gamma_for_timeseries(timeseries_df)
             with open('predicted_gammas.csv', 'a') as f:
-                f.write(self.content_id + ',' + str(gamma) + '\n')
-        else:
+                f.write(self.content_id + ',' + platform + ',' + str(gamma) + '\n')
+        elif np.max(r) < 5:
             return None
 
         q = bd.burst_detection(r, d, n, s=2, gamma=gamma, smooth_win=1)[0]
@@ -527,7 +535,7 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
                  content_col="informationID", communities=None,
                  log_file='recurrence_measurements_log.txt', content_id=None,
                  time_granularity='D', gamma=None,
-                 min_date=None, max_date=None, plot_flag=True, show=True, plot_dir='./', save_plots=False):
+                 min_date=None, max_date=None, plot_flag=True, show=False, plot_dir='./', save_plots=False):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post

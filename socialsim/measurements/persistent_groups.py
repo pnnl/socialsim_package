@@ -6,9 +6,9 @@ from matplotlib.pyplot import cm
 
 import numpy    as np
 import pandas   as pd
-import networkx as nx
+import igraph as ig
 
-import community
+import louvain
 
 from collections import defaultdict
 
@@ -19,18 +19,20 @@ import matplotlib.pyplot as plt
 import re
 
 # community detection algorithms
-# More algorithms: https://networkx.github.io/documentation/stable/reference/algorithms/community.html
+# More algorithms: 
+# https://igraph.org/c/doc/igraph-Community.html
+# https://github.com/vtraag/leidenalg
 
-def louvain_method(g):
+
+def louvain_method(user_interaction_graph):
     '''
-    https://python-louvain.readthedocs.io/en/latest/
+    https://github.com/vtraag/louvain-igraph
     Fast unfolding of communities in large networks, Vincent D Blondel, Jean-Loup Guillaume, Renaud Lambiotte, Renaud Lefebvre, Journal of Statistical Mechanics: Theory and Experiment 2008(10), P10008 (12pp)
-    :param g: networkx Graph
+    :param user_interaction_graph: igraph Graph
     '''
-    groups = defaultdict(list)
-    for uid, group in community.best_partition(g).items():
-        groups[group].append(uid)
-    return list(groups.values())
+    louvain.set_rng_seed(43)
+    node_names = user_interaction_graph.vs
+    return[[node_names[node]['name'] for node in community] for community in louvain.find_partition(user_interaction_graph, louvain.ModularityVertexPartition)]
 
 
 class PersistentGroupsMeasurements(MeasurementsBaseClass):
@@ -75,20 +77,24 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 self.selected_content = self.metadata.node_list
             except:
                 self.selected_content = None
-
+        
         self.min_date = self.dataset_df[self.timestamp_col].min()
         self.max_date = self.dataset_df[self.timestamp_col].max()
             
-        self.gammas = {k:None for k in self.dataset_df[self.content_col].unique()}
+        self.gammas = {k: {p: None for p in self.dataset_df[self.platform_col].unique()} for k in self.dataset_df[self.content_col].unique()}
 
         if not self.metadata is None:
+
             if self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns:
-                self.gammas.update(self.metadata.info_data[[self.content_col,'gamma']].set_index(self.content_col).to_dict()['gamma'])
+                
+                for i, row in self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].iterrows():
+                    if row[self.content_col] in self.gammas.keys():
+                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma'] 
 
         self.time_granularity = time_granularity
         self.parentid_col = parentid_col
         self.community_detection_algorithm = community_detection_algorithm
-        self.get_network_from_bursts()
+        self.get_network_from_bursts(user_interaction_weight_threshold=2)
         if save_groups:
             self.save_groups_to_file()
 
@@ -164,17 +170,19 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 plt.close()
             num_plots += 1
 
-            
+
         user_network_df = pd.DataFrame(user_connections)
         if 'uid1' not in user_network_df.columns:
             warnings.warn("No bursts detected in any information IDs. Persistent group measurements cannot be run. They will fail with uid1 KeyError.")
         user_network_df = user_network_df.groupby(['uid1', 'uid2'])['weight'].sum().reset_index()
-
-        self.user_network_df = user_network_df[user_network_df['weight']>=user_interaction_weight_threshold]
-        user_interaction_nx = nx.from_pandas_edgelist(user_network_df,
-                                    'uid1', 'uid2', 'weight')
-        print('num nodes: ', user_interaction_nx.number_of_nodes(), 'num edges: ', user_interaction_nx.number_of_edges())
-        self.groups = self.community_detection_algorithm(user_interaction_nx)
+        
+        self.user_network_df = user_network_df[user_network_df['weight']>=user_interaction_weight_threshold]        
+        
+        edgelist = self.user_network_df[['uid1', 'uid2', 'weight']].apply(tuple, axis=1).tolist()
+        if len(edgelist) == 0:
+            return
+        user_interaction_graph = ig.Graph.TupleList(edgelist, directed=False)
+        self.groups = self.community_detection_algorithm(user_interaction_graph)
         print('Number of groups: ', len(self.groups))
 
         if self.plot:
@@ -192,10 +200,9 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                     node_color[i] = c
                     node_labels[i] = g_id
             # Draw graph of users by group membership
-            node_c = [node_color[n] for n in user_interaction_nx.nodes()]
+            node_c = [node_color[node['name']] for node in user_interaction_graph.vs]
 
-            nx.draw_networkx(user_interaction_nx, with_labels=False, node_color=node_c, labels=node_labels,
-                             node_size=30, edge_color='black')
+            ig.plot(user_interaction_graph, layout=user_interaction_graph.layout_fruchterman_reingold(), vertex_size=30, edge_color='black', vertex_color=node_c)
 
             plt.show()
             if self.save_plots:

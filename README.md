@@ -3,8 +3,8 @@ It is highly recommended that you install the SocialSim measurements package in 
 
 #### Step 1: Create and activate a conda environment
 ``` bash
-conda create --name myenv
-source activate myenv python=3.6
+conda create --name myenv python=3
+source activate myenv 
 ```
 
 #### Step 2: Install Snap and iGraph
@@ -52,7 +52,7 @@ metadata = ss.MetaData(community_directory='data/communities/',
                        node_file='data/node_list.txt')
 
 # Instantiate the task runner 
-task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata)
+task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata, test=False)
 
 # Run measurements and metrics on the simulation data
 results, logs = task_runner(simulation, verbose=True)

@@ -1,7 +1,6 @@
 import pandas as pd
 import igraph as ig
 import numpy  as np
-import warnings
 
 import warnings
 
@@ -19,6 +18,9 @@ import tqdm
 import os
 
 import re
+
+import random
+
 
 from .measurements import MeasurementsBaseClass
 
@@ -45,6 +47,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         # Subset data for a specific informationID
         if node != "":
             self.main_df = self.main_df.loc[self.main_df["informationID"]==node]
+
+        random.seed(37)
 
         if platform=='reddit':
             build_undirected_graph = self.reddit_build_undirected_graph
@@ -76,6 +80,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 self.graph = ig.plot(self.gUNig,layout=self.gUNig.layout('fr',weights=self.gUNig.es['weight']),inline=True,**visual_style)
             except:
                 self.graph = ig.plot(self.gUNig,layout=self.gUNig.layout('fr'),inline=True,**visual_style)
+
+        random.seed(37)
+
 
     def list_measurements(self):
         count = 0
@@ -259,6 +266,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         Output: Float
 
         """
+        random.seed(37)
+
         return ig.Graph.modularity(self.gUNig,ig.Graph.community_multilevel(self.gUNig))
 
     def get_parent_uids(self,df, parent_node_col="parentID", node_col="nodeID", root_node_col="rootID", user_col="nodeUserID"):

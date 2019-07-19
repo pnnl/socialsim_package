@@ -17,8 +17,10 @@ package_requirements = [
       'burst_detection>=0.1.0',
       'tsfresh>=0.11.2',
       'joblib>=0.13.2',
-      'networkx>=2.3',
-      'python-louvain>=0.13'
+#      'networkx>=2.3',
+#      'python-louvain>=0.13'
+      'louvain>=0.6.1',
+      'cairocffi>=1.0.2'
 ]
 
 package_data = {
@@ -26,7 +28,7 @@ package_data = {
       }
 
 setup(name='socialsim',
-      version='0.1.9',
+      version='0.2.1',
       packages=package_structure,
       package_data=package_data,
       license='',
@@ -36,3 +38,4 @@ setup(name='socialsim',
       maintainer_email='zachary.new@pnnl.gov',
       install_requires=package_requirements
       )
+

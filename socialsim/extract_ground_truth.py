@@ -4,7 +4,7 @@ import pprint
 import re
 import json
 import itertools
-import networkx as nx
+#import networkx as nx
 import numpy as np
 
 from datetime import datetime
@@ -92,7 +92,7 @@ def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
                 
     return list(set(info_ids))
 
-        
+
 def extract_telegram_data(fn='telegram_data.json',
                           info_id_fields=None,
                           keywords = [],
