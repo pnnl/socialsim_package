@@ -69,3 +69,4 @@ https://conda.anaconda.org/conda-forge/noarch/python-louvain-0.13-py_0.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/scipy-1.2.1-py36h7c811a0_0.tar.bz2
 https://conda.anaconda.org/anaconda/linux-64/pysal-1.14.4.post1-py36_1.tar.bz2
 https://repo.anaconda.com/pkgs/main/linux-64/scikit-learn-0.20.2-py36hd81dba3_0.tar.bz2
+https://conda.anaconda.org/conda-forge/linux-64/rtree-0.8.3-py36h666c49c_1002.tar.bz2
