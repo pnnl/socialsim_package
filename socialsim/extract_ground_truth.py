@@ -267,46 +267,9 @@ def extract_youtube_data(fn='youtube_data.json',
     youtube_data = youtube_data.reset_index(drop=True)
     youtube_data['threadInfoIDs'] = pd.Series(index=youtube_data.index,data=[[] for i in range(len(youtube_data))])
 
-    def get_children(nodeID):
-
-        children = youtube_data[youtube_data['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-
-        return(children)
-
-    def add_info_to_children(nodeID,list_info=[]):
-        infos = list(youtube_data[youtube_data['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-
-        if len(children) > 0:
-
-            list_info += infos
-
-            if len(list_info) > 0 and len(children) > 1:
-                #assign parents information ID list to all children
-                youtube_data.loc[children.index.values,'threadInfoIDs'] = pd.Series(index=children.index.values,data=[list_info for i in range(len(children))])
-            elif len(list_info) > 0 and len(children) == 1:
-                #assign parents information ID list to single child
-                youtube_data.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                #navigate further down the tree
-                add_info_to_children(child,list_info)
-
     if get_info_ids:
         print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = []
-        #roots = youtube_data['rootID'].unique()
-        for r,root in enumerate(roots):
-            if root in youtube_data['nodeID'].values:
-                add_info_to_children(root)
-                if r % 50 == 0:
-                    print('{}/{}'.format(r,len(roots)))
-
+        #propagate infromation IDs to children
         finished = False
         count = 0
         while not finished:
@@ -320,14 +283,14 @@ def extract_youtube_data(fn='youtube_data.json',
             youtube_data.loc[merged.index,'informationIDs'] = merged['informationIDs']
             finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
             count += 1
-            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+            print('Iteration ', count, (merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
 
-        #youtube_data['informationIDs'] = youtube_data.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
+        #remove items without informationIDs
         youtube_data = youtube_data[youtube_data['informationIDs'].str.len() > 0]
 
-    if get_info_ids:
         print('Expanding events...')
-        #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
+        # expand lists of info IDs into seperate rows
+        # (i.e. an individual event is duplicated if it pertains to multiple information IDs)
         s = youtube_data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'informationID'
         youtube_data = youtube_data.drop(['informationIDs'], axis=1).join(s).reset_index(drop=True)
@@ -430,107 +393,6 @@ def extract_telegram_data(fn='telegram_data.json',
     #remove it temporarily and add back later
     nodeTimes = data['nodeTime']
     data = data[[c for c in data.columns if c != 'nodeTime']]
-    
-    #get children of node
-    def get_children(nodeID):
-
-        children = data[data['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-
-    #all replies/fwds of a message mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(data[data['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                data.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                data.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                add_info_to_children(child,list_info)
-
-    if get_info_ids:
-        print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = data['rootID'].unique()
-        roots = []
-        for r,root in enumerate(roots):
-            add_info_to_children(root)
-            if r % 50 == 0:
-                print('{}/{}'.format(r,len(roots)))
-
-        finished = False
-        count = 0
-        while not finished:
-            orig_info_ids = data['informationIDs'].copy()
-            merged = data.reset_index().merge(data[['nodeID','informationIDs']],left_on='parentID',
-                                                right_on='nodeID',
-                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
-
-            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
-
-            data.loc[merged.index,'informationIDs'] = merged['informationIDs']
-            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
-            count += 1
-            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
-
-
-    data['nodeTime'] = nodeTimes
-
-    if get_info_ids:
-        data = data[data['informationIDs'].str.len() > 0]
-        
-        print('Expanding events...')
-        #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
-        s = data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
-        s.name = 'informationID'
-
-        data = data.drop('informationIDs', axis=1).join(s).reset_index(drop=True)
-
-    data = data.drop('threadInfoIDs',axis=1)
-    data = data.sort_values('nodeTime').reset_index(drop=True)
-    data = convert_timestamps(data)
-    data = data[~data['communityID'].isnull()]
-    
-    print('Done!')
-    return data
-   
-
-def extract_reddit_data(fn='reddit_data.json',
-                        info_id_fields=None,
-                        keywords = [],
-                        anonymized=False):
-
-    """
-    Extracts fields from Reddit JSON data
-
-    :param fn: A filename or list of filenames which contain the JSON Reddit data
-    :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
-    """
-
-    json_data = load_json(fn)
-    data = pd.DataFrame(json_data)
-
-    get_info_ids = False
-    if not info_id_fields is None or len(keywords) > 0:
-        get_info_ids = True
-    
-    if anonymized:
-        name_suffix = "_h"
-        text_suffix = "_m"
-    else:
         name_suffix = ""
         text_suffix = ""
     
@@ -552,7 +414,6 @@ def extract_reddit_data(fn='reddit_data.json',
     elif not info_id_fields is None:
         data.loc[:,'informationIDs'] = pd.Series([get_info_id_from_fields(c,info_id_fields) for i,c in data.iterrows()])
         data['n_info_ids'] = data['informationIDs'].apply(len)
-        data = data.sort_values("n_info_ids",ascending=False)
 
     data = data.drop_duplicates('id' + name_suffix)
     
@@ -597,47 +458,12 @@ def extract_reddit_data(fn='reddit_data.json',
     #remove it temporarily and add back later
     nodeTimes = data['nodeTime']
     data = data[[c for c in data.columns if c != 'nodeTime']]
-    
-    
-    #get children of node
-    def get_children(nodeID):
 
-        children = data[data['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-    # all comments on a post/comment mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(data[data['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                data.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                data.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                add_info_to_children(child,list_info)
+    data['nodeTime'] = nodeTimes
 
     if get_info_ids:
         print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = data['rootID'].unique()
-        roots = []
-        for r,root in enumerate(roots):
-            add_info_to_children(root)
-            if r % 50 == 0:
-                print('{}/{}'.format(r,len(roots)))
-
+        # propagate infromation IDs to children
         finished = False
         count = 0
         while not finished:
@@ -653,16 +479,13 @@ def extract_reddit_data(fn='reddit_data.json',
             count += 1
             print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
 
-            
-    data['nodeTime'] = nodeTimes
 
-    if get_info_ids:
-        #data['informationIDs'] = data.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
-    
+        # remove items without informationIDs
         data = data[data['informationIDs'].str.len() > 0]
     
         print('Expanding events...')
-        #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
+        # expand lists of info IDs into seperate rows
+        # (i.e. an individual event is duplicated if it pertains to multiple information IDs)
         s = data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'informationID'
     
@@ -881,52 +704,11 @@ def extract_twitter_data(fn='twitter_data.json',
     tweets['threadInfoIDs'] = [[] for i in range(len(tweets))]
     
     tweets = tweets.reset_index(drop=True)
-    
-    #get children of node
-    def get_children(nodeID):
-
-        children = tweets[tweets['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-
-    #all comments on a post/comment mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(tweets[tweets['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                #assign parents information ID list to all children
-                tweets.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                #assign parents information ID list to single child
-                tweets.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                #navigate further down the tree
-                add_info_to_children(child,list_info)
 
 
     if get_info_ids:
         print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = tweets['rootID'].unique()
-        roots = []
-        for r,root in enumerate(roots):
-            if root in tweets['nodeID'].values:
-                add_info_to_children(root)
-                if r % 50 == 0:
-                    print('{}/{}'.format(r,len(roots)))
-
+        # propagate infromation IDs to children
         finished = False
         count = 0
         while not finished:
@@ -942,12 +724,9 @@ def extract_twitter_data(fn='twitter_data.json',
             count += 1
             print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
 
-
-        #tweets['informationIDs'] = tweets.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
+        # remove tweets with no informationID
         tweets = tweets[tweets['informationIDs'].str.len() > 0]
 
-        
-    if get_info_ids:
 
         print('Expanding events...')
         #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
@@ -1024,7 +803,6 @@ def extract_github_data(fn='github_data.json',
     if get_info_ids:
         output_columns.append('informationIDs')
 
-    print(data.head())
     if 'event' in data.columns:
         data.loc[:,'nodeTime'] = data['event'].apply(lambda x: x['created_at'])
         data.loc[:,'actionType'] = data['event'].apply(lambda x: x['type'])
@@ -1064,12 +842,10 @@ def extract_github_data(fn='github_data.json',
         data.loc[:,'informationIDs'] = data['text_field'].apply(lambda x: get_info_id_from_text([x], keywords))
         data = data.drop('text_field',axis=1)
     elif not info_id_fields == None:
-        #data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
-        if True:
-            if 'socialsim_details' in data.columns:
-                data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
-            else:
-                data.loc[:, 'informationIDs'] = pd.Series([get_info_id_from_fields(t, info_id_fields) for i, t in data.iterrows()])
+        if 'socialsim_details' in data.columns:
+            data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
+        else:
+            data.loc[:, 'informationIDs'] = pd.Series([get_info_id_from_fields(t, info_id_fields) for i, t in data.iterrows()])
 
     platform = 'github'
     # has_URL, links_to_external, domain_linked
