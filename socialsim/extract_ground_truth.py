@@ -368,7 +368,7 @@ def extract_telegram_data(fn='telegram_data.json',
     data = data[data['parentID'].isin(list(set(data['nodeID'])))]
 
 
-    platform = 'twitter'
+    platform = 'telegram'
     # has_URL, links_to_external, domain_linked
     urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
     data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
@@ -393,6 +393,70 @@ def extract_telegram_data(fn='telegram_data.json',
     #remove it temporarily and add back later
     nodeTimes = data['nodeTime']
     data = data[[c for c in data.columns if c != 'nodeTime']]
+    data['nodeTime'] = nodeTimes
+
+    if get_info_ids:
+        print('Adding information IDs to children...')
+        # propagate infromation IDs to children
+        finished = False
+        count = 0
+        while not finished:
+            orig_info_ids = data['informationIDs'].copy()
+            merged = data.reset_index().merge(data[['nodeID','informationIDs']],left_on='parentID',
+                                                right_on='nodeID',
+                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
+
+            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
+
+            data.loc[merged.index,'informationIDs'] = merged['informationIDs']
+            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
+            count += 1
+            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+
+        # remove items without informationIDs
+        data = data[data['informationIDs'].str.len() > 0]
+        
+        print('Expanding events...')
+        #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
+        s = data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
+        s.name = 'informationID'
+
+        data = data.drop('informationIDs', axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        data = data[data['informationID']!=''].copy()
+
+    data = data.drop('threadInfoIDs',axis=1)
+    data = data.sort_values('nodeTime').reset_index(drop=True)
+    data = convert_timestamps(data)
+    data = data[~data['communityID'].isnull()]
+    
+    print('Done!')
+    return data
+   
+
+def extract_reddit_data(fn='reddit_data.json',
+                        info_id_fields=None,
+                        keywords = [],
+                        anonymized=False):
+
+    """
+    Extracts fields from Reddit JSON data
+
+    :param fn: A filename or list of filenames which contain the JSON Reddit data
+    :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
+    """
+
+    json_data = load_json(fn)
+    data = pd.DataFrame(json_data)
+
+    get_info_ids = False
+    if not info_id_fields is None or len(keywords) > 0:
+        get_info_ids = True
+    
+    if anonymized:
+        name_suffix = "_h"
+        text_suffix = "_m"
+    else:
         name_suffix = ""
         text_suffix = ""
     
@@ -490,6 +554,8 @@ def extract_telegram_data(fn='telegram_data.json',
         s.name = 'informationID'
     
         data = data.drop('informationIDs', axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        data = data[data['informationID']!=''].copy()
 
     data = data.drop('threadInfoIDs',axis=1)
     data = data.sort_values('nodeTime').reset_index(drop=True)
@@ -733,6 +799,8 @@ def extract_twitter_data(fn='twitter_data.json',
         s = tweets.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'informationID'
         tweets = tweets.drop(['informationIDs','partialParentID'], axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        tweets = tweets[tweets['informationID']!=''].copy()
         
     tweets = tweets.drop('threadInfoIDs',axis=1)
     tweets = convert_timestamps(tweets)
