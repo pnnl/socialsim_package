@@ -18,22 +18,21 @@ import math
 import time as tMeasures
 from collections import OrderedDict
 
-import tqdm
-import os
 
 import re
 
 from .measurements import MeasurementsBaseClass
-from ..load import convert_datetime
+
+
+from ..utils import add_communities_to_dataset
 
 
 from copy import deepcopy
-from .validators import check_empty  # [To Do] relative path
-from .validators import check_root_only  # [To Do] relative path
+from .validators import check_empty
+from .validators import check_root_only
 from collections import Counter
 import pysal
 
-from itertools import combinations
 
 
 def palma_ratio(values):
@@ -92,10 +91,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                  metadata=None, test=False, plot_graph=False,
                  parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  user_col="nodeUserID", weight_filter=1,
-                 #
                  content_col="informationID", community_col="communityID",
-                 node_list=[],
-                 communities=[]):
+                 node_list=None,
+                 community_list=None):
 
 
         self.measurement_type = 'evolution'
@@ -108,20 +106,38 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         self.community_col = community_col
         self.content_col = content_col
 
-        # if no nodes passed, default to all nodes
-        if node_list == []:
-            node_list = list(set(dataset[self.content_col]))
+        self.data = dataset.copy()
 
-        # if no communities passed, default to all communities
-        if communities == []:
-            node_list = list(set(dataset[self.community_col]))
+        if metadata is None or (metadata.community_directory is None and metadata.communities is None):
+            self.community_set = self.data.copy()
+            self.community_set[self.community_col] = "Default Community"
+        else:
+            community_directory = metadata.community_directory
+            communities = metadata.communities
+            self.community_set = add_communities_to_dataset(dataset,
+                                                            community_directory,
+                                                            communities)
 
-        self.node_list = node_list
-        self.communities = communities
+        if metadata is None or metadata.node_list is None:
+            if node_list == "all":
+                self.node_list = self.data[self.content_col].tolist()
+            elif node_list is not None:
+                self.node_list = node_list
+            else:
+                self.node_list = []
+        else:
+            self.node_list = metadata.node_list
+
+        if self.community_set is not None:
+            if community_list is not None and len(community_list) > 0:
+                self.communities = community_list
+            else:
+                self.communities = self.community_set[self.community_col].dropna().unique()
+        else:
+            self.communities = []
+
+
         self.time_granularity = time_granularity
-
-        self.data = dataset[dataset[self.content_col].isin(node_list)].copy()
-        self.data = self.data[self.data[self.community_col].isin(communities)].copy()
 
 
 
@@ -200,7 +216,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data['communityID'] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set['communityID'] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].tendency_to_include_URL(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -255,7 +273,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].tendency_to_link_external(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -308,7 +328,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -362,7 +384,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -415,7 +439,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -469,7 +495,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].fluctuability(platform=platform))
                 res[community] = comm_res
@@ -550,7 +578,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -603,7 +633,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform)[VALUE_COLUMN].mean())
                 res[community] = comm_res
@@ -655,7 +687,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].number_of_nodes(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -708,7 +742,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].number_of_edges(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -761,7 +797,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].density(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -815,7 +853,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].assortativity_coefficient(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -869,7 +909,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].number_of_connected_components(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -922,7 +964,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].average_clustering_coefficient(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -975,7 +1019,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].max_node_degree(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -1028,7 +1074,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].mean_node_degree(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -1081,7 +1129,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.data[self.data[self.community_col] == community][self.content_col]))
+
+                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].community_modularity(platform=platform))
                 comm_res = pd.concat(comm_res)
@@ -1369,16 +1419,6 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         return pd.DataFrame(res)
 
 
-
-        if not self.time_series_gUNig:
-            self.load_time_series_graphs()
-        if platform not in self.time_series_gUNig:
-            print("Time series graphs are not built for the platform '{}'".format(platform))
-            return
-        res = []
-        for ts in self.time_series_gUNig[platform]:
-            res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.vcount(self.time_series_gUNig[platform][ts])})
-        return pd.DataFrame(res)
 
     def number_of_edges(self, platform='all'):
         """
