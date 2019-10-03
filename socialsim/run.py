@@ -16,6 +16,7 @@ from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements
 from .measurements import RecurrenceMeasurements
 from .measurements import PersistentGroupsMeasurements
+from .measurements import EvolutionMeasurements
 
 from .visualizations import charts
 from .visualizations import transformer
@@ -167,6 +168,8 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                 Measurement = RecurrenceMeasurements
             elif measurement_type == 'persistent_groups':
                 Measurement = PersistentGroupsMeasurements
+            elif measurement_type == 'evolution':
+                Measurement = EvolutionMeasurements
 
             # Get data and configuration subset
             configuration_subset = configuration[platform][measurement_type]

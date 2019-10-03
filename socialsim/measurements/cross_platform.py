@@ -52,9 +52,17 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             else:
                 self.node_list = []
         else:
-            community_directory = metadata.community_directory
-            self.community_set = add_communities_to_dataset(dataset, 
-                                                            community_directory)
+
+            if (metadata.community_directory is None and metadata.communities is None):
+                self.community_set = self.dataset
+                self.community_set[self.community_col] = "Default Community"
+            else:
+                community_directory = metadata.community_directory
+                communities = metadata.communities
+                self.community_set = add_communities_to_dataset(dataset,
+                                                                community_directory,
+                                                                communities)
+            
             self.node_list = metadata.node_list
 
         if self.community_set is not None:

@@ -19,11 +19,14 @@ import time as tMeasures
 from collections import OrderedDict
 
 
+import tqdm
+import os
+
 import re
 
 from .measurements import MeasurementsBaseClass
 
-
+from ..load import convert_datetime
 from ..utils import add_communities_to_dataset
 
 
@@ -36,6 +39,9 @@ import pysal
 
 
 def palma_ratio(values):
+    if len(values) == 0:
+        warnings.warn('Cannot compute palma ratio, no values passed (empty list)')
+        return None
     sorted_values = np.sort(np.array(values))
     percent_nodes = np.arange(1, len(sorted_values) + 1) / float(len(sorted_values))
     xvals = np.linspace(0, 1, 10)
@@ -87,13 +93,17 @@ class EvolutionMeasurements(MeasurementsBaseClass):
     SNAP Python at https://snap.stanford.edu/snappy/
     """
 
-    def __init__(self, dataset, time_granularity='M', timestamp_col='nodeTime', configuration={},
-                 metadata=None, test=False, plot_graph=False,
+    def __init__(self, dataset, platform, configuration={}, metadata=None,
+                 test=False, plot_graph=False,
                  parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  user_col="nodeUserID", weight_filter=1,
+                 log_file="evolution_measurements_log.txt",
                  content_col="informationID", community_col="communityID",
-                 node_list=None,
-                 community_list=None):
+                 node_list=None, community_list=None, time_granularity='M', timestamp_col='nodeTime'):
+
+
+        super(EvolutionMeasurements, self).__init__(dataset,
+            configuration=configuration, log_file=log_file)
 
 
         self.measurement_type = 'evolution'
@@ -106,7 +116,10 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         self.community_col = community_col
         self.content_col = content_col
 
-        self.data = dataset.copy()
+        self.configuration = configuration
+        self.platform = platform
+
+        self.data = dataset[dataset['platform']==self.platform].copy()
 
         if metadata is None or (metadata.community_directory is None and metadata.communities is None):
             self.community_set = self.data.copy()
@@ -140,7 +153,6 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         self.time_granularity = time_granularity
 
 
-
         self.process_and_build_graphs(timestamp_col, configuration, metadata, test, plot_graph,
                                       parent_node_col, node_col, root_node_col, user_col, weight_filter)
 
@@ -165,7 +177,12 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         self.cascade_em = {}
 
-        for node in self.node_list:
+        if self.node_list == []:
+            nodes_for_cascade_em = self.data[self.content_col].tolist()
+        else:
+            nodes_for_cascade_em = self.node_list
+
+        for node in nodes_for_cascade_em:
             self.cascade_em[node] = CascadeEvolutionMeasurements(self.data,
                                                                  time_granularity=self.time_granularity,
                                                                  timestamp_col=timestamp_col,
@@ -183,7 +200,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
     # Information Related
     ####################################################################################################################
 
-    def tendency_to_include_URL(self, platform='all', node_level=False, community_level=False,
+    def tendency_to_include_URL(self, node_level=False, community_level=False,
                                 nodes=[], communities=[]):
         """
                 Measurement: tendency_to_include_URL
@@ -205,7 +222,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].tendency_to_include_URL(platform=platform)
+                res[node] = self.cascade_em[node].tendency_to_include_URL(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -216,11 +233,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set['communityID'] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].tendency_to_include_URL(platform=platform))
+                    comm_res.append(self.cascade_em[node].tendency_to_include_URL(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -230,7 +245,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].tendency_to_include_URL(platform=platform))
+                pop_res.append(self.cascade_em[node].tendency_to_include_URL(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -238,7 +253,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         return None
 
-    def tendency_to_link_external(self, platform='all', node_level=False, community_level=False,
+    def tendency_to_link_external(self, node_level=False, community_level=False,
                                   nodes=[], communities=[]):
         """
                 Measurement: tendency_to_link_external
@@ -262,7 +277,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].tendency_to_link_external(platform=platform)
+                res[node] = self.cascade_em[node].tendency_to_link_external(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -273,11 +288,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].tendency_to_link_external(platform=platform))
+                    comm_res.append(self.cascade_em[node].tendency_to_link_external(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -287,14 +300,14 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].tendency_to_link_external(platform=platform))
+                pop_res.append(self.cascade_em[node].tendency_to_link_external(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def number_of_domains_linked_over_time(self, platform='all', node_level=False, community_level=False,
+    def number_of_domains_linked_over_time(self, node_level=False, community_level=False,
                         nodes=[], communities=[]):
         """
                 Measurement: number_of_domains_linked_over_time
@@ -317,7 +330,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].number_of_domains_linked_over_time(platform=platform)
+                res[node] = self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -328,11 +341,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=platform))
+                    comm_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -342,7 +353,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=platform))
+                pop_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -350,7 +361,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         return None
 
 
-    def gini_coefficient_over_time(self, platform='all', node_level=False, community_level=False,
+    def gini_coefficient_over_time(self, node_level=False, community_level=False,
                                                 nodes=[], communities=[]):
         """
                 Measurement: gini_coefficient_over_time
@@ -373,7 +384,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].cascade_collection_participation_gini(platform=platform)
+                res[node] = self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -384,11 +395,10 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=platform))
+                    comm_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform))
+
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -398,14 +408,15 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=platform))
+                pop_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform))
+
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def palma_ratio_over_time(self, platform='all', node_level=False, community_level=False,
+    def palma_ratio_over_time(self, node_level=False, community_level=False,
                                            nodes=[], communities=[]):
         """
                 Measurement: palma_ratio_over_time
@@ -428,7 +439,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].cascade_collection_participation_palma(platform=platform)
+                res[node] = self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -439,11 +450,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=platform))
+                    comm_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -453,7 +462,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=platform))
+                pop_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -464,7 +473,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
     # User Connections (User-Network) Related
     ####################################################################################################################
 
-    def uniqueness_of_user_connections(self, platform='all', node_level=False, community_level=False,
+    def uniqueness_of_user_connections(self, node_level=False, community_level=False,
                                        nodes=[], communities=[]):
         """
                 Measurement: uniqueness_of_user_connections
@@ -485,7 +494,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].fluctuability(platform=platform)
+                res[node] = self.cascade_em[node].fluctuability(platform=self.platform)
             return res
 
         if community_level:
@@ -495,11 +504,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].fluctuability(platform=platform))
+                    comm_res.append(self.cascade_em[node].fluctuability(platform=self.platform))
                 res[community] = comm_res
             return res
 
@@ -507,10 +514,10 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].fluctuability(platform=platform))
+                pop_res.append(self.cascade_em[node].fluctuability(platform=self.platform))
             return pop_res
 
-    def mean_uniqueness_of_user_connections(self, platform='all', community_level=False, nodes=[], communities=[]):
+    def mean_uniqueness_of_user_connections(self, node_level=False, community_level=False, nodes=[], communities=[]):
         """
                 Measurement: mean_uniqueness_of_user_connections
 
@@ -524,27 +531,34 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         """
         mean_res = None
+        if node_level:
+            # node_level mean_uniqueness_of_user_connections is simply uniqueness_of_user_connections
+            return self.uniqueness_of_user_connections(node_level=True,
+                                                                 community_level=False,
+                                                                 nodes=nodes, communities=communities)
 
         if community_level:
 
-            community_dist = self.uniqueness_of_user_connections(platform=platform, node_level=False,
+            community_dist = self.uniqueness_of_user_connections(node_level=False,
                                                                  community_level=community_level,
                                                                  nodes=nodes, communities=communities)
             mean_res = {}
             for community in community_dist.keys():
-                mean_res[community] = np.mean(community_dist[community])
+                community_dist_vals = [x for x in community_dist[community] if x is not None]
+                mean_res[community] = np.mean(community_dist_vals)
 
         if not community_level:
             # run at a poulation level
-            population_dist = self.uniqueness_of_user_connections(platform=platform, node_level=False,
+            population_dist = self.uniqueness_of_user_connections(node_level=False,
                                                                   community_level=community_level,
                                                                   nodes=nodes, communities=communities)
+            population_dist = [x for x in population_dist if x is not None]
             mean_res = np.mean(population_dist)
 
         return mean_res
 
 
-    def persistence_of_connectivity(self, platform='all', node_level=False, community_level=False,
+    def persistence_of_connectivity(self, node_level=False, community_level=False,
                                        nodes=[], communities=[]):
         """
                 Measurement: uniqueness_of_user_connections
@@ -567,7 +581,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].persistence_of_connectivity(platform=platform)
+                res[node] = self.cascade_em[node].persistence_of_connectivity(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -578,13 +592,18 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform))
+                    comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+
+                if len(comm_res) > 0:
+                    comm_res = pd.concat(comm_res)
+                    comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+                else:
+                    comm_res = None
+
                 res[community] = comm_res
             return res
 
@@ -592,15 +611,19 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+                pop_res.append(self.cascade_em[node].persistence_of_connectivity(platform=self.platform))
+            if len(pop_res) > 0:
+                pop_res = pd.concat(pop_res)
+                pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+            else:
+                pop_res = None
+
             return pop_res
 
         return None
 
 
-    def mean_persistence_of_connectivity(self, platform='all', node_level=False, community_level=False, nodes=[], communities=[]):
+    def mean_persistence_of_connectivity(self, node_level=False, community_level=False, nodes=[], communities=[]):
         """
                 Measurement: mean_persistence_of_connectivity
 
@@ -622,7 +645,13 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].persistence_of_connectivity(platform=platform)[VALUE_COLUMN].mean()
+                persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
+                    platform=self.platform)
+                if persistence_of_connectivity_node is not None:
+                    mean_persistence_of_connectivity_node = persistence_of_connectivity_node[VALUE_COLUMN].mean()
+                else:
+                    mean_persistence_of_connectivity_node = None
+                res[node] = mean_persistence_of_connectivity_node
             return res
 
         ## distribution of mean across all timebins per node for community, population
@@ -633,11 +662,12 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform)[VALUE_COLUMN].mean())
+                    persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
+                        platform=self.platform)
+                    if persistence_of_connectivity_node is not None:
+                        comm_res.append(persistence_of_connectivity_node[VALUE_COLUMN].mean())
                 res[community] = comm_res
             return res
 
@@ -645,7 +675,10 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].persistence_of_connectivity(platform=platform)[VALUE_COLUMN].mean())
+                persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
+                    platform=self.platform)
+                if persistence_of_connectivity_node is not None:
+                    pop_res.append(persistence_of_connectivity_node[VALUE_COLUMN].mean())
 
             return pop_res
 
@@ -653,7 +686,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
 
 
-    def audience_size_over_time(self, platform='all', node_level=False, community_level=False,
+    def audience_size_over_time(self, node_level=False, community_level=False,
                                 nodes=[], communities=[]):
         """
                 Measurement: audience_size_over_time
@@ -676,7 +709,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].number_of_nodes(platform=platform)
+                res[node] = self.cascade_em[node].number_of_nodes(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -687,11 +720,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_nodes(platform=platform))
+                    comm_res.append(self.cascade_em[node].number_of_nodes(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -701,7 +732,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_nodes(platform=platform))
+                pop_res.append(self.cascade_em[node].number_of_nodes(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -709,7 +740,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         return None
 
 
-    def volume_of_user_connections_over_time(self, platform='all', node_level=False, community_level=False,
+    def volume_of_user_connections_over_time(self, node_level=False, community_level=False,
                                              nodes=[], communities=[]):
         """
                 Measurement: volume_of_user_connections_over_time
@@ -731,7 +762,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].number_of_edges(platform=platform)
+                res[node] = self.cascade_em[node].number_of_edges(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -742,11 +773,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_edges(platform=platform))
+                    comm_res.append(self.cascade_em[node].number_of_edges(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -756,7 +785,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_edges(platform=platform))
+                pop_res.append(self.cascade_em[node].number_of_edges(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -764,7 +793,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         return None
 
 
-    def density_over_time(self, platform='all', node_level=False, community_level=False,
+    def density_over_time(self, node_level=False, community_level=False,
                           nodes=[], communities=[]):
         """
                 Measurement: density_over_time
@@ -786,7 +815,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].density(platform=platform)
+                res[node] = self.cascade_em[node].density(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -797,11 +826,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].density(platform=platform))
+                    comm_res.append(self.cascade_em[node].density(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -811,7 +838,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].density(platform=platform))
+                pop_res.append(self.cascade_em[node].density(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -819,7 +846,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         return None
 
 
-    def assortativity_coefficient_over_time(self, platform='all', node_level=False, community_level=False,
+    def assortativity_coefficient_over_time(self, node_level=False, community_level=False,
                                             nodes=[], communities=[]):
         """
                 Measurement: assortativity_coefficient_over_time
@@ -842,7 +869,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].assortativity_coefficient(platform=platform)
+                res[node] = self.cascade_em[node].assortativity_coefficient(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -853,11 +880,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].assortativity_coefficient(platform=platform))
+                    comm_res.append(self.cascade_em[node].assortativity_coefficient(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -867,7 +892,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].assortativity_coefficient(platform=platform))
+                pop_res.append(self.cascade_em[node].assortativity_coefficient(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -875,7 +900,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         return None
 
 
-    def number_of_connected_components_over_time(self, platform='all', node_level=False, community_level=False,
+    def number_of_connected_components_over_time(self, node_level=False, community_level=False,
                                                  nodes=[], communities=[]):
         """
                 Measurement: number_of_connected_components_over_time
@@ -898,7 +923,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].number_of_connected_components(platform=platform)
+                res[node] = self.cascade_em[node].number_of_connected_components(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -909,11 +934,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_connected_components(platform=platform))
+                    comm_res.append(self.cascade_em[node].number_of_connected_components(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -923,14 +946,15 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_connected_components(platform=platform))
+                pop_res.append(self.cascade_em[node].number_of_connected_components(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def average_clustering_coefficient_over_time(self, platform='all', node_level=False, community_level=False,
+
+    def average_clustering_coefficient_over_time(self, node_level=False, community_level=False,
                                                  nodes=[], communities=[]):
         """
                 Measurement: average_clustering_coefficient_over_time
@@ -953,7 +977,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].average_clustering_coefficient(platform=platform)
+                res[node] = self.cascade_em[node].average_clustering_coefficient(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -964,11 +988,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].average_clustering_coefficient(platform=platform))
+                    comm_res.append(self.cascade_em[node].average_clustering_coefficient(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -978,14 +1000,14 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].average_clustering_coefficient(platform=platform))
+                pop_res.append(self.cascade_em[node].average_clustering_coefficient(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def max_node_degree_over_time(self, platform='all', node_level=False, community_level=False,
+    def max_node_degree_over_time(self, node_level=False, community_level=False,
                                   nodes=[], communities=[]):
         """
                 Measurement: max_node_degree_over_time
@@ -1008,7 +1030,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].max_node_degree(platform=platform)
+                res[node] = self.cascade_em[node].max_node_degree(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -1019,11 +1041,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].max_node_degree(platform=platform))
+                    comm_res.append(self.cascade_em[node].max_node_degree(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -1033,14 +1053,14 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].max_node_degree(platform=platform))
+                pop_res.append(self.cascade_em[node].max_node_degree(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def mean_node_degree_over_time(self, platform='all', node_level=False, community_level=False,
+    def mean_node_degree_over_time(self, node_level=False, community_level=False,
                                    nodes=[], communities=[]):
         """
                 Measurement: mean_node_degree_over_time
@@ -1063,7 +1083,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].mean_node_degree(platform=platform)
+                res[node] = self.cascade_em[node].mean_node_degree(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -1074,11 +1094,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].mean_node_degree(platform=platform))
+                    comm_res.append(self.cascade_em[node].mean_node_degree(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -1088,14 +1106,15 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].mean_node_degree(platform=platform))
+                pop_res.append(self.cascade_em[node].mean_node_degree(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
 
         return None
 
-    def community_modularity_over_time(self, platform='all', node_level=False, community_level=False,
+
+    def community_modularity_over_time(self, node_level=False, community_level=False,
                                        nodes=[], communities=[]):
         """
                 Measurement: community_modularity_over_time
@@ -1118,7 +1137,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 nodes = self.cascade_em.keys()
             res = {}
             for node in nodes:
-                res[node] = self.cascade_em[node].community_modularity(platform=platform)
+                res[node] = self.cascade_em[node].community_modularity(platform=self.platform)
             return res
 
         ## mean by timebin across all nodes for community, population
@@ -1129,11 +1148,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-
                 for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].community_modularity(platform=platform))
+                    comm_res.append(self.cascade_em[node].community_modularity(platform=self.platform))
                 comm_res = pd.concat(comm_res)
                 comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
                 res[community] = comm_res
@@ -1143,7 +1160,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             # run at a poulation level
             pop_res = []
             for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].community_modularity(platform=platform))
+                pop_res.append(self.cascade_em[node].community_modularity(platform=self.platform))
             pop_res = pd.concat(pop_res)
             pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
             return pop_res
@@ -1178,7 +1195,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
                  metadata=None, test=False,
                  log_file='evolution_measurements_log.txt', plot_graph=False,
                  node="", parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
-                 user_col="nodeUserID", weight_filter=1, verbose=False):
+                 user_col="nodeUserID", content_col='informationID', weight_filter=1, verbose=False):
 
         super(CascadeEvolutionMeasurements, self).__init__(dataset,
                                                            configuration, log_file=log_file)
@@ -1192,10 +1209,14 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         self.node_col = node_col
         self.timestamp_col = timestamp_col
         self.user_col = user_col
+        self.content_col = content_col
 
         self.main_df = dataset.copy()
         if node != "":
-            self.main_df = self.main_df.loc[self.main_df["informationID"] == node].copy()
+            self.main_df = self.main_df.loc[self.main_df[self.content_col] == node].copy()
+
+        self.informationIDs_string = ' InformationID(s): {}'.format(set(self.main_df[self.content_col].unique()))
+
         self.platforms = set(self.main_df['platform'].unique())
         self.build_undirected_graph = {'reddit': self.reddit_build_undirected_graph,
                                        'twitter': self.twitter_build_undirected_graph,
@@ -1377,7 +1398,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
 
         res = []
 
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             if SNAP_LOADED:
                 if self.time_series_gUNsn[platform][ts].Empty():
                     warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
@@ -1414,10 +1435,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             print("Time series graphs are not built for the platform '{}'".format(platform))
             return
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.vcount(self.time_series_gUNig[platform][ts])})
         return pd.DataFrame(res)
-
 
 
     def number_of_edges(self, platform='all'):
@@ -1432,7 +1452,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if not self.time_series_gUNig:
             self.load_time_series_graphs()
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.ecount(self.time_series_gUNig[platform][ts])})
         return pd.DataFrame(res)
 
@@ -1452,7 +1472,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.density(self.time_series_gUNig[platform][ts])})
         return pd.DataFrame(res)
 
@@ -1473,7 +1493,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.assortativity_degree(
                 self.time_series_gUNig[platform][ts])})
         return pd.DataFrame(res)
@@ -1495,7 +1515,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: len(
                 ig.Graph.components(self.time_series_gUNig[platform][ts], mode="WEAK"))})
         return pd.DataFrame(res)
@@ -1508,7 +1528,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.vcount(
                 ig.Graph.components(self.time_series_gUNig[platform][ts], mode="WEAK").giant())})
         return pd.DataFrame(res)
@@ -1530,7 +1550,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             if SNAP_LOADED:
                 value = sn.GetClustCf(self.time_series_gUNsn[platform][ts])
             else:
@@ -1556,7 +1576,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             if ig.Graph.vcount(self.time_series_gUNig[platform][ts]) == 0:
                 warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
                 value = 0
@@ -1583,7 +1603,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             if len(list(self.time_series_gUNig[platform][ts].vs)) == 0:
                 warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
                 value = 0
@@ -1611,7 +1631,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = {}
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             vertices = [v.attributes()['name'] for v in self.time_series_gUNig[platform][ts].vs]
             degVals = self.time_series_gUNig[platform][ts].degree(vertices)
             res[ts] = pd.DataFrame([{'node': vertices[idx], 'value': degVals[idx]} for idx in range(len(vertices))])
@@ -1634,7 +1654,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
 
         res = []
-        for ts in self.time_series_gUNig[platform]:
+        for ts in sorted(self.time_series_gUNig[platform].keys()):
             res.append({TIMESTEP_COLUMN: ts, VALUE_COLUMN: ig.Graph.modularity(self.time_series_gUNig[platform][ts],
                                                                                 ig.Graph.community_multilevel(
                                                                                     self.time_series_gUNig[platform][
@@ -1835,10 +1855,22 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         else:
             platform_df = self.main_df[self.main_df['platform'] == platform]
         df = self.get_parent_uids(platform_df).dropna(subset=['parentUserID'])
+
+        if len(platform_df) == 0:
+            warning_message = 'No data for platform \'{}\''.format(platform)
+            warnings.warn(warning_message)
+            return
+        elif len(df) == 0:
+            warning_message = 'No parentUserID data for platform \'{}\' -- missing data of parent of nodes (e.g. userIDs for parent content or all details of parent content)\n'.format(platform) + self.informationIDs_string
+            warnings.warn(warning_message)
+            return
+
+
         df = df.rename(columns={'{}_period'.format(platform): 'time'})
         df['edge'] = [get_edge_string(n, p) for n, p in zip(df['nodeUserID'], df['parentUserID'])]
         first_bin_prev_time = 'FIRST BIN'
         timeset = set(df['time'].unique().tolist())
+        timeset = [x for x in timeset if str(x) != 'nan']
         timebins = sorted(list(timeset))
         prev = {timebins[i]: timebins[i - 1] for i in range(1, len(timebins))}
         prev[timebins[0]] = first_bin_prev_time
@@ -1883,6 +1915,16 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         else:
             platform_df = self.main_df[self.main_df['platform'] == platform]
         df = self.get_parent_uids(platform_df).dropna(subset=['parentUserID'])
+
+        if len(platform_df) == 0:
+            warning_message = '\nNo data for platform \'{}\''.format(platform)
+            warnings.warn(warning_message)
+            return
+        elif len(df) == 0:
+            warning_message = '\nNo parentUserID data for platform \'{}\' -- missing data of parent of nodes (e.g. userIDs for parent content or all details of parent content)\n'.format(platform) + self.informationIDs_string
+            warnings.warn(warning_message)
+            return
+
         df = df.rename(columns={'{}_period'.format(platform): 'time'})
         df['edge'] = [get_edge_string(n, p) for n, p in zip(df['nodeUserID'], df['parentUserID'])]
         edges = df[['edge', 'time']]

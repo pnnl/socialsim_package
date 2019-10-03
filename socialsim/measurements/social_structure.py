@@ -58,6 +58,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             build_undirected_graph = self.telegram_build_undirected_graph
         elif platform=='github':
             build_undirected_graph = self.github_build_undirected_graph
+        elif platform=='youtube':
+            build_undirected_graph = self.youtube_build_undirected_graph
         else:
             # unknown platform, skip graph creation
             return
@@ -410,3 +412,27 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 self.gUNsn.AddNode(v.index)
             for e in self.gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
+
+
+    def youtube_build_undirected_graph(self, df, weight_filter=1):
+        """
+        build youtube undirected graph
+        """
+
+        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
+
+        edgelist = self.get_undirected_edgelist(df, weight_filter)
+
+        #iGraph Graph object construction
+        self.gUNig = ig.Graph.TupleList(edgelist, directed=False, weights = True)
+        self.gUNig.simplify(combine_edges='sum')
+
+
+        if SNAP_LOADED:
+            #SNAP graph object construction
+            self.gUNsn = sn.TUNGraph.New()
+            for v in self.gUNig.vs:
+                self.gUNsn.AddNode(v.index)
+            for e in self.gUNig.es:
+                self.gUNsn.AddEdge(e.source, e.target)
+
