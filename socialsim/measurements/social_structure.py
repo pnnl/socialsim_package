@@ -58,11 +58,14 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             build_undirected_graph = self.telegram_build_undirected_graph
         elif platform=='github':
             build_undirected_graph = self.github_build_undirected_graph
+        elif platform=='youtube':
+            build_undirected_graph = self.youtube_build_undirected_graph
         else:
             # unknown platform, skip graph creation
             return
 
         build_undirected_graph(self.main_df,weight_filter=weight_filter)
+
         if plot_graph:
             node = node.replace("/", "__")
             graph_file_name = str(node)+"_"+str(platform)+"_igraph_network.png"
@@ -316,6 +319,17 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             for e in self.gUNig.es:
                 self.gUNsn.AddEdge(e.source,e.target)
 
+    def get_undirected_edgelist(self, df, weight_filter):
+        edgelist_df = df[['nodeUserID','parentUserID']].copy()
+        edgelist_df['edge'] = [sorted([n,p]) for n,p in zip(df['nodeUserID'],df['parentUserID'])]
+        edgelist_df['userA'] = [x[0] for x in edgelist_df['edge']]
+        edgelist_df['userB'] = [x[1] for x in edgelist_df['edge']]
+
+        edgelist_df = edgelist_df.groupby(['userA','userB']).size().reset_index().rename(columns={0:'count'})
+        edgelist_df = edgelist_df[edgelist_df['count'] >= weight_filter]
+        edgelist = edgelist_df[['userA','userB','count']].apply(tuple,axis=1).tolist()
+
+        return edgelist
 
     def twitter_build_undirected_graph(self, df, weight_filter=1):
         """
@@ -328,16 +342,13 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
 
-        edgelist_df = df[['nodeUserID','parentUserID']].groupby(['nodeUserID','parentUserID']).size().reset_index().rename(columns={0:'count'})
-        edgelist_df = edgelist_df[edgelist_df['count'] >= weight_filter]
-        edgelist = edgelist_df[['nodeUserID','parentUserID','count']].apply(tuple,axis=1).tolist()
+
+        edgelist = self.get_undirected_edgelist(df, weight_filter)
+
 
         #iGraph graph object construction 
         self.gUNig = ig.Graph.TupleList(edgelist, directed=False, weights=True)
-        
-
-        #iGraph graph object construction 
-        self.gUNig = ig.Graph.TupleList(edgelist, directed=False, weights=True)
+        self.gUNig.simplify(combine_edges='sum')
         
 
         if SNAP_LOADED:
@@ -347,6 +358,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 self.gUNsn.AddNode(v.index)
             for e in self.gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
+
 
 
     def telegram_build_undirected_graph(self, df, weight_filter=1):
@@ -359,10 +371,12 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
         """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-        edgelist = df[['nodeUserID','parentUserID']].apply(tuple,axis=1).tolist()
+
+        edgelist = self.get_undirected_edgelist(df, weight_filter)
 
         #iGraph graph object construction
         self.gUNig = ig.Graph.TupleList(edgelist, directed=False)
+        self.gUNig.simplify(combine_edges='sum')
 
         if SNAP_LOADED:
             #SNAP graph object construction
@@ -383,12 +397,12 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
         """
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-        edgelist_df = df[['nodeUserID','parentUserID']].groupby(['nodeUserID','parentUserID']).size().reset_index().rename(columns={0:'count'})
-        edgelist_df = edgelist_df[edgelist_df['count'] >= weight_filter]
-        edgelist = edgelist_df[['nodeUserID','parentUserID','count']].apply(tuple,axis=1).tolist()
+
+        edgelist = self.get_undirected_edgelist(df, weight_filter)
 
         #iGraph Graph object construction
         self.gUNig = ig.Graph.TupleList(edgelist, directed=False, weights = True)
+        self.gUNig.simplify(combine_edges='sum')
 
 
         if SNAP_LOADED:
@@ -398,3 +412,27 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 self.gUNsn.AddNode(v.index)
             for e in self.gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
+
+
+    def youtube_build_undirected_graph(self, df, weight_filter=1):
+        """
+        build youtube undirected graph
+        """
+
+        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
+
+        edgelist = self.get_undirected_edgelist(df, weight_filter)
+
+        #iGraph Graph object construction
+        self.gUNig = ig.Graph.TupleList(edgelist, directed=False, weights = True)
+        self.gUNig.simplify(combine_edges='sum')
+
+
+        if SNAP_LOADED:
+            #SNAP graph object construction
+            self.gUNsn = sn.TUNGraph.New()
+            for v in self.gUNig.vs:
+                self.gUNsn.AddNode(v.index)
+            for e in self.gUNig.es:
+                self.gUNsn.AddEdge(e.source, e.target)
+

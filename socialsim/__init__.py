@@ -11,6 +11,7 @@ from .measurements import CrossPlatformMeasurements
 from .measurements import MultiPlatformMeasurements 
 from .measurements import RecurrenceMeasurements
 from .measurements import PersistentGroupsMeasurements
+from .measurements import EvolutionMeasurements
 from .measurements import MetaData
 
 from .extract_ground_truth import extract_reddit_data

@@ -1,3 +1,9 @@
 *.pyc
 *.vscode
 *.sh
+
+
+*__pycache__/*
+socialsim.egg-info/*
+build/*
+dist/*

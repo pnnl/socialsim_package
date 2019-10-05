@@ -20,6 +20,12 @@ python setup.py install
 # Note: The iGraph installation process may vary from system to system
 conda install -c conda-forge/label/gcc7 python-igraph 
 
+# rtree installation
+conda install rtree
+
+# pysal installation
+conda install pysal
+
 # For Mac OSX, you may to need install matplotlib with conda rather than 
 # relying on the pip install below
 conda install matplotlib
@@ -27,8 +33,24 @@ conda install matplotlib
 
 #### Step 3: Install the SocialSim package using pip
 ``` bash
-pip install socialsim.tar.gz
+python setup.py install
 ```
+
+You can ignore the following user warnings, if they appear:
+
+```
+UserWarning: You need pandana and urbanaccess to work with segregation's network module
+You can install them with  `pip install urbanaccess pandana` or `conda install -c udst pandana urbanaccess`
+  "You need pandana and urbanaccess to work with segregation's network module\n"
+
+UserWarning: The `dill` module is required to use the sqlite backend fully.
+  from .sqlite import head_to_sql, start_sql
+  
+UserWarning: SNAP import failed. Using igraph version of code instead.
+  warnings.warn('SNAP import failed. Using igraph version of code instead.')
+
+``` 
+
 ## Examples of the SocialSim Package API
 
 ```python

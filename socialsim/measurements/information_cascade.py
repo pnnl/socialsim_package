@@ -15,7 +15,7 @@ import igraph as ig
 
 
 class InformationCascadeMeasurements(MeasurementsBaseClass):
-    def __init__(self, main_df, configuration={}, metadata=None, platform='',
+    def __init__(self, main_df, platform, configuration={}, metadata=None,
         parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
         timestamp_col="nodeTime", user_col="nodeUserID", filter_on_col=None,
         filter_in_list=[], log_file='cascade_measurements_log.txt'):
@@ -404,6 +404,77 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
                     meas = {}
             return meas
 
+    @check_empty(default=None)
+    def get_cascade_collection_depth_timeseries(self, time_granularity="M",
+        community_grouper=None):
+        """
+        :param time_granularity: "Y", "M", "D", "H" [years/months/days/hours]
+         :param community_grouper: column that indicates a community, eg. communityID, keyword
+        :return: pandas dataframe with mean "size" of cascades that start in that interval
+        """
+        temporal_measurements = []
+        result_df_columns = ["timestamp", "value"]
+        grouper = [pd.Grouper(freq=time_granularity)]
+        if community_grouper and community_grouper in self.main_df.columns:
+            grouper.append(community_grouper)
+            result_df_columns = ["timestamp", community_grouper, "value"]
+        for ts, df in self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]. \
+                set_index(self.timestamp_col).groupby(grouper, sort=True):
+            if len(df.index) > 0:
+                mean_size = sum([self.scms[cascade_identifier].cascade.get_cascade_depth() for cascade_identifier in
+                                 df[self.root_node_col].values]) / len(df)
+                temporal_measurements.append(
+                    list(ts) + [mean_size] if community_grouper and community_grouper in self.main_df.columns else [ts,
+                                                                                                                    mean_size])
+            # temporal_measurements.append([*ts, mean_size] if community_grouper else [ts, mean_size])
+        meas = pd.DataFrame(temporal_measurements, columns=result_df_columns)
+
+        if len(meas.index) == 0:
+            return None
+        else:
+            if community_grouper:
+                if community_grouper in meas.columns and '' not in meas[community_grouper]:
+                    meas = self.split_communities(meas, community_grouper)
+                else:
+                    meas = {}
+            return meas
+
+    @check_empty(default=None)
+    def get_cascade_collection_breadth_timeseries(self, time_granularity="M",
+        community_grouper=None):
+        """
+        :param time_granularity: "Y", "M", "D", "H" [years/months/days/hours]
+         :param community_grouper: column that indicates a community, eg. communityID, keyword
+        :return: pandas dataframe with mean "size" of cascades that start in that interval
+        """
+        temporal_measurements = []
+        result_df_columns = ["timestamp", "value"]
+        grouper = [pd.Grouper(freq=time_granularity)]
+        if community_grouper and community_grouper in self.main_df.columns:
+            grouper.append(community_grouper)
+            result_df_columns = ["timestamp", community_grouper, "value"]
+        for ts, df in self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]]. \
+                set_index(self.timestamp_col).groupby(grouper, sort=True):
+            if len(df.index) > 0:
+                mean_size = sum([self.scms[cascade_identifier].cascade.get_cascade_breadth() for cascade_identifier in
+                                 df[self.root_node_col].values]) / len(df)
+                temporal_measurements.append(
+                    list(ts) + [mean_size] if community_grouper and community_grouper in self.main_df.columns else [ts,
+                                                                                                                    mean_size])
+            # temporal_measurements.append([*ts, mean_size] if community_grouper else [ts, mean_size])
+        meas = pd.DataFrame(temporal_measurements, columns=result_df_columns)
+
+        if len(meas.index) == 0:
+            return None
+        else:
+            if community_grouper:
+                if community_grouper in meas.columns and '' not in meas[community_grouper]:
+                    meas = self.split_communities(meas, community_grouper)
+                else:
+                    meas = {}
+            return meas
+
+        
 
     @check_empty(default=None)
     def get_community_users_count_timeseries(self, time_granularity="M",

@@ -11,6 +11,44 @@ from datetime import datetime
 
 from .twitter_cascade_reconstruction import full_reconstruction,get_reply_cascade_root_tweet
 
+URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
+
+
+def get_urls(x):
+    urls = re.findall(URL_REGEX, x)
+    return urls
+
+
+def get_domain(url):
+    domains_shortened = {'redd.it': 'reddit.com', 'youtu.be': 'youtube.com',
+                         'y2u.be': 'youtube.com', 't.co': 'twitter.com'}
+    url = url.lower()
+    if '://' in url:
+        url = url.split('://')[1]
+    domain = url.split('/')[0]
+    if 'www.' in url:
+        domain = domain.replace('www.', '')
+
+    if domain in domains_shortened.keys():
+        domain = domains_shortened[domain]
+    return domain
+
+
+def get_domains(urls):
+    domains = []
+    for url in urls:
+        domain = get_domain(url)
+        if domain not in domains:
+            domains.append(domain)
+    return domains
+
+
+def has_link_external(domains, platform):
+    for domain in domains:
+        if f'{platform}.com' not in domain:
+            return 1
+    return 0
+
 
 def load_json(fn):
 
@@ -93,6 +131,177 @@ def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
     return list(set(info_ids))
 
 
+def extract_youtube_data(fn='youtube_data.json',
+                          info_id_fields=None,
+                          keywords = [],
+                          anonymized=False):
+    json_data = load_json(fn)
+    data = pd.DataFrame(json_data)
+    
+    get_info_ids = False
+    if not info_id_fields is None or len(keywords) > 0:
+        get_info_ids = True
+
+    if anonymized:
+        name_suffix = "_h"
+        text_suffix = "_m"
+    else:
+        name_suffix = ""
+        text_sufix = ""
+
+    output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType', 'nodeTime', 'platform',
+                      'has_URL', 'domain_linked','links_to_external']
+    if get_info_ids:
+        output_columns.append('informationIDs')
+
+
+
+    print('Deduplicating...')
+    data['row_str']=['&'.join(cols) for cols in data.drop(columns=['_id']).astype(str).values]
+    data=data.drop_duplicates(subset=['row_str']).reset_index(drop=True)
+
+
+    platform = 'youtube'
+
+    print('Extracting fields...')
+
+    # Video + Caption merge and extraction
+    # info_id_fields of caption (right table: y)
+    def cap_info_id_fields(fields):
+        cap_fields=[]
+        for path in fields:
+            path = path.split('.')
+            path = '.'.join([path[0]+'_y']+path[1:])
+            cap_fields.append(path)
+        return cap_fields
+    def get_vid_keywords(row, info_id_fields, vidCaps):
+        keywords=get_info_id_from_fields(row,fields=info_id_fields)
+        for idx,vidCap in vidCaps.loc[vidCaps['nodeID']==row['nodeID']].iterrows():
+            keywords+=get_info_id_from_fields(vidCap,fields=cap_info_id_fields(info_id_fields))
+
+        keywords=list(set(keywords))
+        return keywords
+    
+    to_concat = []
+    # extraction from 'youtube#video' and 'youtube#caption'
+    videos=data[data['kind']=='youtube#video'].copy()
+    videos.rename(columns={'id' + name_suffix:'nodeID'}, inplace=True)
+    captions=data[data['kind']=='youtube#caption']
+    videos.loc[:,'nodeTime']=videos['snippet'].apply(lambda x: x['publishedAt'])
+    videos.loc[:,'parentID']=videos['nodeID']
+    videos.loc[:,'rootID']=videos['nodeID']
+    videos.loc[:,'actionType']='video'
+    videos.loc[:,'platform']=platform
+    videos.loc[:,'nodeUserID']=videos['snippet'].apply(lambda x: x['channelId'+name_suffix])
+
+    captions.loc[:,'nodeID']=captions['snippet'].apply(lambda x: x['videoId'+name_suffix])
+
+    vidCaps=pd.merge(videos,captions,on='nodeID',how='inner')
+    if len(keywords) > 0:
+        raise NotImplementedError("It is not implemented for the merged text fields of video + caption")
+    elif not info_id_fields is None:
+        videos.loc[:,'informationIDs']=pd.Series(index=videos.index,data=[get_vid_keywords(c,info_id_fields,vidCaps)
+                                                                          for i,c in videos.iterrows()])
+
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = videos['snippet'].apply(lambda x: get_urls(x['description'+text_suffix]))
+    videos.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
+    videos.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
+    videos.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in videos['domain_linked']]
+
+
+    
+    to_concat.append(videos)
+    
+    # Top-level comment extraction 
+    comments=data[data['kind']=='youtube#commentThread'].copy()
+    comments.loc[:,'nodeTime']=comments['snippet'].apply(lambda x: x['topLevelComment']['snippet']['publishedAt'])
+    comments.loc[:,'nodeID']=comments['snippet'].apply(lambda x: x['topLevelComment']['id'+name_suffix])
+    comments.loc[:,'nodeUserID']=comments['snippet'].apply(lambda x: x['topLevelComment']['snippet']['authorChannelId']['value'+name_suffix])
+    comVidIds=comments['snippet'].apply(lambda x: x['videoId'+name_suffix])
+    comments.loc[:,'parentID']=comVidIds
+    comments.loc[:,'rootID']=comVidIds
+    comments.loc[:,'actionType']='comment'
+    comments.loc[:,'platform']=platform
+    if len(keywords) > 0:
+        comments.loc[:,'informationIDs'] = comments['snippet'].apply(lambda x: get_info_id_from_text([x['topLevelComment']['snippet']['textDisplay' + text_suffix]], keywords))
+    elif not info_id_fields is None:
+        comments.loc[:,'informationIDs'] = pd.Series(index=comments.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in comments.iterrows()])
+
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = comments['snippet'].apply(lambda x: get_urls(x['topLevelComment']['snippet']['textOriginal' + text_suffix]))
+    comments.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
+    comments.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
+    comments.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in comments['domain_linked']]
+
+    to_concat.append(comments)
+    
+    # Reply extraction
+    replies=data[data['kind']=='youtube#comment'].copy()
+    replies.loc[:,'nodeTime']=replies['snippet'].apply(lambda x: x['publishedAt'])
+    replies.rename(columns={'id' + name_suffix:'nodeID'}, inplace=True)
+    replies.loc[:,'nodeUserID']=replies['snippet'].apply(lambda x: x['authorChannelId']['value'+name_suffix])
+    replies.loc[:,'parentID']=replies['snippet'].apply(lambda x: x['parentId'+name_suffix])
+    replies.loc[:,'rootID']=replies['snippet'].apply(lambda x: x['videoId'+name_suffix])
+    replies.loc[:,'actionType']='reply'
+    replies.loc[:,'platform']=platform
+    if len(keywords) > 0:
+        replies.loc[:,'informationIDs'] = replies['snippet'].apply(lambda x: get_info_id_from_text([x['textDisplay' + text_suffix]], keywords))
+    elif not info_id_fields is None:
+        replies.loc[:,'informationIDs'] = pd.Series(index=replies.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in replies.iterrows()])
+
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = replies['snippet'].apply(lambda x: get_urls(x['textOriginal' + text_suffix]))
+    replies.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
+    replies.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
+    replies.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in replies['domain_linked']]
+
+
+    to_concat.append(replies)
+
+    youtube_data = pd.concat(to_concat,ignore_index=True,sort=False)
+    youtube_data = youtube_data[output_columns]
+
+    print('Sorting...')
+    youtube_data = youtube_data.sort_values("nodeTime").reset_index(drop=True)
+    youtube_data = youtube_data.reset_index(drop=True)
+    youtube_data['threadInfoIDs'] = pd.Series(index=youtube_data.index,data=[[] for i in range(len(youtube_data))])
+
+    if get_info_ids:
+        print('Adding information IDs to children...')
+        #propagate infromation IDs to children
+        finished = False
+        count = 0
+        while not finished:
+            orig_info_ids = youtube_data['informationIDs'].copy()
+            merged = youtube_data.reset_index().merge(youtube_data[['nodeID','informationIDs']],left_on='parentID',
+                                                right_on='nodeID',
+                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
+
+            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
+
+            youtube_data.loc[merged.index,'informationIDs'] = merged['informationIDs']
+            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
+            count += 1
+            print('Iteration ', count, (merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+
+        #remove items without informationIDs
+        youtube_data = youtube_data[youtube_data['informationIDs'].str.len() > 0]
+
+        print('Expanding events...')
+        # expand lists of info IDs into seperate rows
+        # (i.e. an individual event is duplicated if it pertains to multiple information IDs)
+        s = youtube_data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
+        s.name = 'informationID'
+        youtube_data = youtube_data.drop(['informationIDs'], axis=1).join(s).reset_index(drop=True)
+
+    youtube_data = youtube_data.drop('threadInfoIDs',axis=1)
+    youtube_data = convert_timestamps(youtube_data)
+
+    print('Done!')
+    return youtube_data
+
+
 def extract_telegram_data(fn='telegram_data.json',
                           info_id_fields=None,
                           keywords = [],
@@ -120,7 +329,7 @@ def extract_telegram_data(fn='telegram_data.json',
         text_sufix = ""
         
     output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType', 'nodeTime',
-                      'platform','communityID']
+                      'platform','communityID', 'has_URL', 'domain_linked','links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
 
@@ -158,6 +367,15 @@ def extract_telegram_data(fn='telegram_data.json',
 
     data = data[data['parentID'].isin(list(set(data['nodeID'])))]
 
+
+    platform = 'telegram'
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
+
+
     data = data[output_columns]
     
     data = get_reply_cascade_root_tweet(data)
@@ -175,51 +393,27 @@ def extract_telegram_data(fn='telegram_data.json',
     #remove it temporarily and add back later
     nodeTimes = data['nodeTime']
     data = data[[c for c in data.columns if c != 'nodeTime']]
-    
-    #get children of node
-    def get_children(nodeID):
-
-        children = data[data['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-
-    #all replies/fwds of a message mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(data[data['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                data.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                data.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                add_info_to_children(child,list_info)
-
-    if get_info_ids:
-        print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = data['rootID'].unique()
-        for r,root in enumerate(roots):
-            add_info_to_children(root)
-            if r % 50 == 0:
-                print('{}/{}'.format(r,len(roots)))
-
     data['nodeTime'] = nodeTimes
 
     if get_info_ids:
-        data['informationIDs'] = data.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
-    
+        print('Adding information IDs to children...')
+        # propagate infromation IDs to children
+        finished = False
+        count = 0
+        while not finished:
+            orig_info_ids = data['informationIDs'].copy()
+            merged = data.reset_index().merge(data[['nodeID','informationIDs']],left_on='parentID',
+                                                right_on='nodeID',
+                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
+
+            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
+
+            data.loc[merged.index,'informationIDs'] = merged['informationIDs']
+            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
+            count += 1
+            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+
+        # remove items without informationIDs
         data = data[data['informationIDs'].str.len() > 0]
         
         print('Expanding events...')
@@ -228,6 +422,8 @@ def extract_telegram_data(fn='telegram_data.json',
         s.name = 'informationID'
 
         data = data.drop('informationIDs', axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        data = data[data['informationID']!=''].copy()
 
     data = data.drop('threadInfoIDs',axis=1)
     data = data.sort_values('nodeTime').reset_index(drop=True)
@@ -265,18 +461,23 @@ def extract_reddit_data(fn='reddit_data.json',
         text_suffix = ""
     
     output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType',
-                      'nodeTime','platform','communityID']
+                      'nodeTime','platform','communityID', 'has_URL', 'domain_linked', 'links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
+
+    for textcol in ['body' + text_suffix, 'selftext' + text_suffix, 'title' + text_suffix]:
+        if textcol not in data.columns:
+            data.loc[:,textcol] = np.nan
                                   
     print('Extracting fields...')
+    data['text'] = data['body' + text_suffix].replace(np.nan, '', regex=True) + data['selftext' + text_suffix].replace(
+        np.nan, '', regex=True) + data['title' + text_suffix].replace(np.nan, '', regex=True)
+
     if len(keywords) > 0:
-        data['text'] = data['body' + text_suffix].replace(np.nan, '', regex=True) + data['selftext' + text_suffix].replace(np.nan, '', regex=True) + data['title' + text_suffix].replace(np.nan, '', regex=True)
         data.loc[:,'informationIDs'] = data['text'].apply(lambda x: get_info_id_from_text([x], keywords))
     elif not info_id_fields is None:
         data.loc[:,'informationIDs'] = pd.Series([get_info_id_from_fields(c,info_id_fields) for i,c in data.iterrows()])
         data['n_info_ids'] = data['informationIDs'].apply(len)
-        data = data.sort_values("n_info_ids",ascending=False)
 
     data = data.drop_duplicates('id' + name_suffix)
     
@@ -301,7 +502,16 @@ def extract_reddit_data(fn='reddit_data.json',
     data = data[data['rootID'].isin(list(set(data['nodeID'])))]
 
     print('Sorting...')
-    data = data.sort_values('nodeTime').reset_index(drop=True)            
+    data = data.sort_values('nodeTime').reset_index(drop=True)
+
+
+    platform = 'reddit'
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = data['text'].apply(lambda x: get_urls(x))
+    data.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
+    data.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
+    data.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in data['domain_linked']]
+
 
     data = data[output_columns]
     
@@ -312,61 +522,40 @@ def extract_reddit_data(fn='reddit_data.json',
     #remove it temporarily and add back later
     nodeTimes = data['nodeTime']
     data = data[[c for c in data.columns if c != 'nodeTime']]
-    
-    
-    #get children of node
-    def get_children(nodeID):
 
-        children = data[data['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-    print(data)
-    # all comments on a post/comment mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(data[data['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                data.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                data.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                add_info_to_children(child,list_info)
-
-    if get_info_ids:
-        print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = data['rootID'].unique()
-        for r,root in enumerate(roots):
-            add_info_to_children(root)
-            if r % 50 == 0:
-                print('{}/{}'.format(r,len(roots)))
-
-            
     data['nodeTime'] = nodeTimes
 
     if get_info_ids:
-        data['informationIDs'] = data.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
-    
+        print('Adding information IDs to children...')
+        # propagate infromation IDs to children
+        finished = False
+        count = 0
+        while not finished:
+            orig_info_ids = data['informationIDs'].copy()
+            merged = data.reset_index().merge(data[['nodeID','informationIDs']],left_on='parentID',
+                                                right_on='nodeID',
+                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
+
+            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
+
+            data.loc[merged.index,'informationIDs'] = merged['informationIDs']
+            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
+            count += 1
+            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+
+
+        # remove items without informationIDs
         data = data[data['informationIDs'].str.len() > 0]
     
         print('Expanding events...')
-        #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
+        # expand lists of info IDs into seperate rows
+        # (i.e. an individual event is duplicated if it pertains to multiple information IDs)
         s = data.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'informationID'
     
         data = data.drop('informationIDs', axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        data = data[data['informationID']!=''].copy()
 
     data = data.drop('threadInfoIDs',axis=1)
     data = data.sort_values('nodeTime').reset_index(drop=True)
@@ -408,14 +597,14 @@ def extract_twitter_data(fn='twitter_data.json',
     data = data.sort_values("timestamp_ms").reset_index(drop=True)
 
     output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType', 'nodeTime',
-                      'partialParentID','platform']
+                      'partialParentID','platform', 'has_URL', 'domain_linked', 'links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
     
     print('Extracting fields...')
     tweets = data
     if len(keywords) > 0:
-        data.loc[:,'informationIDs'] = data['text' + text_suffix].apply(lambda x: get_info_id_from_text([x], keywords))
+        tweets.loc[:,'informationIDs'] = tweets['text' + text_suffix].apply(lambda x: get_info_id_from_text([x], keywords))
     elif not info_id_fields is None:
         tweets.loc[:,'informationIDs'] = pd.Series([get_info_id_from_fields(t,info_id_fields) for i,t in tweets.iterrows()])
         tweets.loc[:,'n_info_ids'] = tweets['informationIDs'].apply(len)
@@ -434,6 +623,13 @@ def extract_twitter_data(fn='twitter_data.json',
     tweets.loc[:,'nodeUserID'] = tweets['user'].apply(lambda x: x['id_str' + name_suffix])
     
     tweets.loc[:,'is_reply'] = (tweets['in_reply_to_status_id_str' + name_suffix] != '') & (~tweets['in_reply_to_status_id_str' + name_suffix].isna())
+
+    platform = 'twitter'
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = tweets['entities'].apply(lambda x: [y['expanded_url'+name_suffix] for y in x['urls']])
+    tweets.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
+    tweets.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
+    tweets.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in tweets['domain_linked']]
 
     if 'retweeted_status.in_reply_to_status_id_str' + name_suffix not in tweets:
         tweets.loc[:,'retweeted_status.in_reply_to_status_id_str' + name_suffix] = ''
@@ -574,63 +770,37 @@ def extract_twitter_data(fn='twitter_data.json',
     tweets['threadInfoIDs'] = [[] for i in range(len(tweets))]
     
     tweets = tweets.reset_index(drop=True)
-    
-    #get children of node
-    def get_children(nodeID):
-
-        children = tweets[tweets['parentID'] == nodeID]['nodeID']
-        children = children[children.values != nodeID]
-        
-        return(children)
-
-
-    #all comments on a post/comment mentioning a unit of information are also assigned that unit of information
-    def add_info_to_children(nodeID,list_info=[]):
-
-        infos = list(tweets[tweets['nodeID'] == nodeID]['informationIDs'].values[0])
-
-        list_info = list_info.copy()
-
-        children = get_children(nodeID)
-        
-        if len(children) > 0:
-
-            list_info += infos
-    
-            if len(list_info) > 0 and len(children) > 1:
-                #assign parents information ID list to all children
-                tweets.loc[children.index.values,'threadInfoIDs'] = [list_info for i in range(len(children))]
-            elif len(list_info) > 0 and len(children) == 1:
-                #assign parents information ID list to single child
-                tweets.at[children.index[0],'threadInfoIDs'] = list_info
-
-            for child in children.values:
-                #navigate further down the tree
-                add_info_to_children(child,list_info)
 
 
     if get_info_ids:
         print('Adding information IDs to children...')
-        #for each thread in data, propagate infromation IDs to children
-        roots = tweets['rootID'].unique()
-        for r,root in enumerate(roots):
-            if root in tweets['nodeID'].values:
-                add_info_to_children(root)
-                if r % 50 == 0:
-                    print('{}/{}'.format(r,len(roots)))
+        # propagate infromation IDs to children
+        finished = False
+        count = 0
+        while not finished:
+            orig_info_ids = tweets['informationIDs'].copy()
+            merged = tweets.reset_index().merge(tweets[['nodeID','informationIDs']],left_on='parentID',
+                                                right_on='nodeID',
+                                                suffixes=('','_parent')).drop('nodeID_parent',axis=1).set_index("index")
 
-        tweets['informationIDs'] = tweets.apply(lambda x: list(set(x['informationIDs'] + x['threadInfoIDs'])),axis=1)
+            merged['informationIDs'] = (merged['informationIDs'] + merged['informationIDs_parent']).apply(lambda x: sorted(list(set(x))))
+
+            tweets.loc[merged.index,'informationIDs'] = merged['informationIDs']
+            finished = (merged['informationIDs'] == orig_info_ids.loc[merged.index]).all()
+            count += 1
+            print('Iteration ',count,(merged['informationIDs'] != orig_info_ids.loc[merged.index]).sum(), ' nodes to update')
+
+        # remove tweets with no informationID
         tweets = tweets[tweets['informationIDs'].str.len() > 0]
 
-    #tweets = tweets.drop("threadIn
-        
-    if get_info_ids:
 
         print('Expanding events...')
         #expand lists of info IDs into seperate rows (i.e. an individual event is duplicated if it pertains to multiple information IDs)
         s = tweets.apply(lambda x: pd.Series(x['informationIDs']), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'informationID'
         tweets = tweets.drop(['informationIDs','partialParentID'], axis=1).join(s).reset_index(drop=True)
+        # catch any additional empty string informationIDs
+        tweets = tweets[tweets['informationID']!=''].copy()
         
     tweets = tweets.drop('threadInfoIDs',axis=1)
     tweets = convert_timestamps(tweets)
@@ -639,7 +809,32 @@ def extract_twitter_data(fn='twitter_data.json',
     return tweets
 
 
-    
+def get_github_text_field(row):
+    github_text_fields = {"PushEvent": ["commits", "message_m"],
+                          "PullRequestEvent": ["pull_request", "body_m"],
+                          "IssuesEvent": ["issue", "body_m"],
+                          "CreateEvent": ["description_m"],
+                          "PullRequestReviewCommentEvent": ["comment", "body_m"],
+                          "ForkEvent": ["forkee", "description_m"],
+                          "IssueCommentEvent": ["comment", "body_m"],
+                          "CommitCommentEvent": ["comment", "body_m"]}
+
+    if row['actionType'] not in github_text_fields.keys():
+        return ''
+
+    if row['actionType'] == 'PushEvent':
+        text = ' '.join(c['message_m'] for c in row['payload']['commits'])
+    else:
+        text = row['payload']
+
+        for f in github_text_fields[row['actionType']]:
+            if f in text:
+                text = text[f]
+            else:
+                text = ''
+
+    return text
+
 def extract_github_data(fn='github_data.json',
                         info_id_fields=None,
                         keywords = [],
@@ -671,11 +866,11 @@ def extract_github_data(fn='github_data.json',
 
         
     print('Extracting fields...')
-    output_columns = ['nodeID', 'nodeUserID', 'actionType', 'nodeTime', 'platform']
+    output_columns = ['nodeID', 'nodeUserID', 'actionType', 'nodeTime', 'platform',
+                      'has_URL', 'domain_linked','links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
 
-    
     if 'event' in data.columns:
         data.loc[:,'nodeTime'] = data['event'].apply(lambda x: x['created_at'])
         data.loc[:,'actionType'] = data['event'].apply(lambda x: x['type'])
@@ -709,19 +904,30 @@ def extract_github_data(fn='github_data.json',
             
         return text
 
-    
     if len(keywords) > 0:
         data.loc[:,'text_field'] = data.apply(get_text_field,axis=1)
         data = data.dropna(subset=['text_field'])
         data.loc[:,'informationIDs'] = data['text_field'].apply(lambda x: get_info_id_from_text([x], keywords))
         data = data.drop('text_field',axis=1)
-    elif not info_id_fields == None: 
-        data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
-    
+    elif not info_id_fields == None:
+        if 'socialsim_details' in data.columns:
+            data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
+        else:
+            data.loc[:, 'informationIDs'] = pd.Series([get_info_id_from_fields(t, info_id_fields) for i, t in data.iterrows()])
+
+    platform = 'github'
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = data.apply(get_text_field, axis=1).apply(lambda x: get_urls(x))
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
+
+
     events = data[output_columns]
     
     events = events[events.actionType.isin(['PullRequestEvent','IssuesEvent','CreateEvent','DeleteEvent','WatchEvent','ForkEvent',
                                             'PullRequestReviewCommentEvent','CommitCommentEvent','PushEvent','IssueCommentEvent'])]
+
 
     if get_info_ids:
         print('Expanding events...')    
@@ -733,24 +939,8 @@ def extract_github_data(fn='github_data.json',
         
     events = convert_timestamps(events)
 
-    events = events.drop_duplicates([c for c in events.columns if c != 'urlDomains'])
+    events = events.drop_duplicates([c for c in events.columns if c != 'domain_linked'])
     
     print('Done!')
     return events
 
-                        
-def main():
-
-    fn = 'twitter_data2.json'
-    #fn = ['reddit_posts_data.json','reddit_comments_data.json']
-    #fn = ['github_repo_data.json','github_events_data.json']
-    
-    #data = extract_reddit_data(fn, anonymized=True, keywords=['issue','recent','client','code','secure','version'])
-    data = extract_twitter_data(fn, anonymized=False, keywords=['venzuela','maduro'])
-    #data = extract_twitter_data(fn, anonymized=False, info_id_fields = ["entities.hashtags.text"])
-    #data = extract_reddit_data(fn, anonymized=True, info_id_fields = ["extension.socialsim_keywords"])
-
-    print(data)
-    
-if __name__ == "__main__":
-    main()
