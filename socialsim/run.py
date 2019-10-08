@@ -181,12 +181,15 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                     message = message+measurement_type+'... '
                     print(message, end='', flush=True)
 
-                if platform=='multi_platform':
+                if measurement_type not in ['social_structure','evolution']:
                     measurement = Measurement(dataset_subset,
-                                              configuration_subset, metadata)
+                                              configuration=configuration_subset,
+                                              metadata=metadata)
                 else:
-                    measurement = Measurement(dataset_subset,platform,
-                                              configuration_subset, metadata)
+                    measurement = Measurement(dataset_subset,
+                                              platform=platform,
+                                              configuration=configuration_subset,
+                                              metadata=metadata)
 
                 if verbose:
                     print('Done.')

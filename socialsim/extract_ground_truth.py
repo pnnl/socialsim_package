@@ -40,6 +40,7 @@ def get_domains(urls):
         domain = get_domain(url)
         if domain not in domains:
             domains.append(domain)
+    domains = list(set(domains))
     return domains
 
 
@@ -96,7 +97,7 @@ def get_info_id_from_text(text_list = [], keywords = []):
         
     return(list(set(info_ids)))
         
-def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
+def get_info_id_from_fields(row, fields=['entities.hashtags.text'], casefold_info_ids=True):
 
     """
     Extract information IDs from specified fields in the JSON
@@ -127,7 +128,10 @@ def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
                 break
             elif i == len(path) and type(val) == str:
                 info_ids.append(val)
-                
+
+    if casefold_info_ids:
+        info_ids = [x.lower() for x in info_ids]
+
     return list(set(info_ids))
 
 
@@ -243,7 +247,7 @@ def extract_youtube_data(fn='youtube_data.json',
     replies.loc[:,'nodeUserID']=replies['snippet'].apply(lambda x: x['authorChannelId']['value'+name_suffix])
     replies.loc[:,'parentID']=replies['snippet'].apply(lambda x: x['parentId'+name_suffix])
     replies.loc[:,'rootID']=replies['snippet'].apply(lambda x: x['videoId'+name_suffix])
-    replies.loc[:,'actionType']='reply'
+    replies.loc[:,'actionType']='comment'
     replies.loc[:,'platform']=platform
     if len(keywords) > 0:
         replies.loc[:,'informationIDs'] = replies['snippet'].apply(lambda x: get_info_id_from_text([x['textDisplay' + text_suffix]], keywords))

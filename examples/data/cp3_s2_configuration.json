@@ -3572,7 +3572,8 @@
           "scale": "population",
           "measurement": "mean_uniqueness_of_user_connections",
           "measurement_args": {
-            "community_level": true
+            "community_level": false,
+            "node_level":false
           },
           "temporal_vs_batch": "Batch",
           "metrics": {
@@ -5145,7 +5146,12 @@
           "scale": "population",
           "measurement": "mean_uniqueness_of_user_connections",
           "measurement_args": {
+<<<<<<< HEAD
             "community_level": true
+=======
+            "community_level": false,
+	    "node_level": false
+>>>>>>> origin/github_staging
           },
           "temporal_vs_batch": "Batch",
           "metrics": {

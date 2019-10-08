@@ -18,7 +18,6 @@ import math
 import time as tMeasures
 from collections import OrderedDict
 
-
 import tqdm
 import os
 
@@ -177,8 +176,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         self.cascade_em = {}
 
-        if self.node_list == []:
-            nodes_for_cascade_em = self.data[self.content_col].tolist()
+        if self.node_list == [] or self.node_list == 'all':
+            nodes_for_cascade_em = self.data[self.content_col].unique().tolist()
         else:
             nodes_for_cascade_em = self.node_list
 
@@ -953,7 +952,6 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         return None
 
-
     def average_clustering_coefficient_over_time(self, node_level=False, community_level=False,
                                                  nodes=[], communities=[]):
         """
@@ -1112,7 +1110,6 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             return pop_res
 
         return None
-
 
     def community_modularity_over_time(self, node_level=False, community_level=False,
                                        nodes=[], communities=[]):

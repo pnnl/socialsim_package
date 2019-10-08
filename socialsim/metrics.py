@@ -676,17 +676,23 @@ class Metrics:
         df = self.join_dfs(ground_truth, simulation, join=join, 
             fill_value=fill_value)
 
+
         if len(df.index) > 0:
             if not relative:
                 return np.sqrt(((df["value_sim"]-df["value_gt"])**2).mean())
             else:
                 iq_range = float(iqr(df['value_gt'].values))
 
+                result = df["value_sim"]-df["value_gt"]
+                result = (result ** 2).mean()
+                result = np.sqrt(result)
+
                 if iq_range > 0:
-                    result = df["value_sim"]-df["value_gt"]
-                    result = (result ** 2).mean()
-                    result = np.sqrt(result) / iq_range
-                    return result 
+                    result = result / iq_range
+                else:
+                    result = result / df['value_gt'].mean() 
+
+                return result 
         else:
             return None
 
