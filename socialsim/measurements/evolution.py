@@ -97,7 +97,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                  parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  user_col="nodeUserID", weight_filter=1,
                  log_file="evolution_measurements_log.txt",
-                 content_col="informationID", community_col="communityID",
+                 content_col="informationID", community_col="community",
                  node_list=None, community_list=None, time_granularity='M', timestamp_col='nodeTime'):
 
 
@@ -232,7 +232,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
             res = {}
             for community in communities:
                 comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set['communityID'] == community][self.content_col]))
+                community_nodes = list(set(self.community_set[self.community_set['community'] == community][self.content_col]))
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].tendency_to_include_URL(platform=self.platform))
                 comm_res = pd.concat(comm_res)
@@ -594,8 +594,6 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
                 for node in community_nodes:
                     comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
 
                 if len(comm_res) > 0:
                     comm_res = pd.concat(comm_res)
@@ -1674,11 +1672,11 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
 
         return df
 
-    def github_build_undirected_graph(self, project_on='nodeID'):
-        self.main_df = self.main_df[['nodeUserID', 'nodeID']].copy()
+    def github_build_undirected_graph(self, df, project_on='nodeID', weight_filter=1):
+        main_df = df[['nodeUserID', 'nodeID']].copy()
 
-        right_nodes = np.array(self.main_df['nodeID'].unique().tolist())
-        el = self.main_df.apply(tuple, axis=1).tolist()
+        right_nodes = np.array(main_df['nodeID'].unique().tolist())
+        el = main_df.apply(tuple, axis=1).tolist()
         edgelist = list(set(el))
         gUNsn = None
 

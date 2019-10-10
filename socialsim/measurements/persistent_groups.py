@@ -141,7 +141,8 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 show = True
             else:
                 show = False
-            if self.selected_content is not None and content_id not in self.selected_content:
+    
+            if (self.selected_content is not None and content_id not in self.selected_content) and not (isinstance(self.selected_content,str) and self.selected_content == 'all'):
                 continue
             burstDetection = BurstDetection(dataset_df=content_df, metadata=self.metadata, id_col=self.id_col,
                                             timestamp_col=self.timestamp_col, platform_col=self.platform_col, 

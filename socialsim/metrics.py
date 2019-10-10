@@ -690,7 +690,11 @@ class Metrics:
                 if iq_range > 0:
                     result = result / iq_range
                 else:
-                    result = result / df['value_gt'].mean() 
+                    mean_value = df['value_gt'].mean()
+                    if mean_value > 0:
+                        result = result / mean_value
+                    else:
+                        return None
 
                 return result 
         else:
@@ -770,7 +774,7 @@ class Metrics:
         Input:
         """
 
-        if simulation is None or len(simulation) == 0:
+        if simulation is None or len(simulation) == 0 or ground_truth is None or len(ground_truth) == 0:
             return None
 
         ground_truth, simulation = self.check_data_types(ground_truth, simulation)

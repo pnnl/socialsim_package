@@ -33,8 +33,10 @@ class MetaData:
         else:
             self.node_list = self.load_node_list(node_file)
 
-        self.community_directory = community_directory
+        self.community_directory = community_directory            
         self.communities = communities
+        if not community_directory is None:
+            self.read_communities()
 
         if content_data!=False:
             self.use_content_data = True
