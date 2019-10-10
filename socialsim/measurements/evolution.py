@@ -1696,9 +1696,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1720,9 +1720,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1742,9 +1742,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1763,9 +1763,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1784,9 +1784,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1805,9 +1805,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
