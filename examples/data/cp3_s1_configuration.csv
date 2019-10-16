@@ -1,0 +1,761 @@
+Platform,Measurement Type,Group Scale,Measurement,Measurement Function,Measurement Args,Metrics,Metric Functions,Metric Args,Temporal
+github,multi_platform,community,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['ForkEvent']}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,community,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['ForkEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['WatchEvent']}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,community,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['WatchEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_shares_ForkEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_shares_ForkEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_shares_ForkEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_shares_ForkEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_shares_WatchEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_shares_WatchEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_shares_WatchEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_shares_WatchEvent,distribution_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_speed_ForkEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_speed_ForkEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_speed_ForkEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_speed_ForkEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['ForkEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_speed_WatchEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_speed_WatchEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_speed_WatchEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_speed_WatchEvent,distribution_of_speed,"{'community_level': True, 'action_types': ['WatchEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_users_ForkEvent,distribution_of_users,"{'community_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_users_ForkEvent,distribution_of_users,"{'community_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_users_ForkEvent,distribution_of_users,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_users_ForkEvent,distribution_of_users,"{'community_level': True, 'action_types': ['ForkEvent']}",r2,r2,{},Batch
+github,multi_platform,community,distribution_of_users_WatchEvent,distribution_of_users,"{'community_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,distribution_of_users_WatchEvent,distribution_of_users,"{'community_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,distribution_of_users_WatchEvent,distribution_of_users,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,distribution_of_users_WatchEvent,distribution_of_users,"{'community_level': True, 'action_types': ['WatchEvent']}",r2,r2,{},Batch
+github,multi_platform,community,lifetime_of_info_ForkEvent,lifetime_of_info,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,lifetime_of_info_ForkEvent,lifetime_of_info,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,lifetime_of_info_WatchEvent,lifetime_of_info,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,lifetime_of_info_WatchEvent,lifetime_of_info,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,lifetime_of_threads_ForkEvent,lifetime_of_threads,"{'community_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,lifetime_of_threads_ForkEvent,lifetime_of_threads,"{'community_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,lifetime_of_threads_WatchEvent,lifetime_of_threads,"{'community_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,community,lifetime_of_threads_WatchEvent,lifetime_of_threads,"{'community_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,community,number_of_shares_ForkEvent,number_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,number_of_shares_ForkEvent,number_of_shares,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,number_of_shares_WatchEvent,number_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,number_of_shares_WatchEvent,number_of_shares,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,"{'community_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,community,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,"{'community_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,community,speed_of_info_ForkEvent,speed_of_info,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,speed_of_info_ForkEvent,speed_of_info,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,speed_of_info_WatchEvent,speed_of_info,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,speed_of_info_WatchEvent,speed_of_info,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,community,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,community,top_audience_reach_ForkEvent,top_audience_reach,"{'k': 50, 'community_level': True, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_audience_reach_WatchEvent,top_audience_reach,"{'k': 50, 'community_level': True, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_info_ForkEvent,top_info_shared,"{'k': 50, 'community_level': True, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_info_WatchEvent,top_info_shared,"{'k': 50, 'community_level': True, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_lifetimes_ForkEvent,top_lifetimes,"{'k': 50, 'community_level': True, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_lifetimes_WatchEvent,top_lifetimes,"{'k': 50, 'community_level': True, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_speeds_ForkEvent,top_speeds,"{'k': 50, 'community_level': True, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,top_speeds_WatchEvent,top_speeds,"{'k': 50, 'community_level': True, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,community,unique_users_ForkEvent,unique_users,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,unique_users_ForkEvent,unique_users,"{'community_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,unique_users_WatchEvent,unique_users,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,community,unique_users_WatchEvent,unique_users,"{'community_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,community,unique_users_over_time_ForkEvent,unique_users_over_time,"{'community_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,unique_users_over_time_ForkEvent,unique_users_over_time,"{'community_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,community,unique_users_over_time_WatchEvent,unique_users_over_time,"{'community_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,community,unique_users_over_time_WatchEvent,unique_users_over_time,"{'community_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,lifetime_of_info_ForkEvent,lifetime_of_info,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,lifetime_of_info_ForkEvent,lifetime_of_info,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,lifetime_of_info_WatchEvent,lifetime_of_info,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,lifetime_of_info_WatchEvent,lifetime_of_info,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,lifetime_of_threads_ForkEvent,lifetime_of_threads,"{'node_level': True, 'action_types': ['ForkEvent']}",ks,ks_test,{},Batch
+github,multi_platform,node,lifetime_of_threads_ForkEvent,lifetime_of_threads,"{'node_level': True, 'action_types': ['ForkEvent']}",js,js_divergence,{},Batch
+github,multi_platform,node,lifetime_of_threads_WatchEvent,lifetime_of_threads,"{'node_level': True, 'action_types': ['WatchEvent']}",ks,ks_test,{},Batch
+github,multi_platform,node,lifetime_of_threads_WatchEvent,lifetime_of_threads,"{'node_level': True, 'action_types': ['WatchEvent']}",js,js_divergence,{},Batch
+github,multi_platform,node,number_of_shares_ForkEvent,number_of_shares,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,number_of_shares_ForkEvent,number_of_shares,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,number_of_shares_WatchEvent,number_of_shares,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,number_of_shares_WatchEvent,number_of_shares,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,"{'node_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,"{'node_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,"{'node_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,"{'node_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,speed_of_info_ForkEvent,speed_of_info,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,speed_of_info_ForkEvent,speed_of_info,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,speed_of_info_WatchEvent,speed_of_info,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,speed_of_info_WatchEvent,speed_of_info,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,unique_users_ForkEvent,unique_users,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,unique_users_ForkEvent,unique_users,"{'node_level': True, 'action_types': ['ForkEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,unique_users_WatchEvent,unique_users,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,node,unique_users_WatchEvent,unique_users,"{'node_level': True, 'action_types': ['WatchEvent']}",absolute_difference,absolute_difference,{},Batch
+github,multi_platform,node,unique_users_over_time_ForkEvent,unique_users_over_time,"{'node_level': True, 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,unique_users_over_time_ForkEvent,unique_users_over_time,"{'node_level': True, 'action_types': ['ForkEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,node,unique_users_over_time_WatchEvent,unique_users_over_time,"{'node_level': True, 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,node,unique_users_over_time_WatchEvent,unique_users_over_time,"{'node_level': True, 'action_types': ['WatchEvent']}",dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,{'action_types': ['ForkEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,{'action_types': ['ForkEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,{'action_types': ['ForkEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_lifetimes_ForkEvent,lifetime_of_info_distribution,{'action_types': ['ForkEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,{'action_types': ['WatchEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,{'action_types': ['WatchEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,{'action_types': ['WatchEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_lifetimes_WatchEvent,lifetime_of_info_distribution,{'action_types': ['WatchEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_shares_ForkEvent,distribution_of_shares,{'action_types': ['ForkEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_shares_ForkEvent,distribution_of_shares,{'action_types': ['ForkEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_shares_ForkEvent,distribution_of_shares,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_shares_ForkEvent,distribution_of_shares,{'action_types': ['ForkEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_shares_ForkEvent,distribution_of_shares,{'action_types': ['ForkEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_shares_WatchEvent,distribution_of_shares,{'action_types': ['WatchEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_shares_WatchEvent,distribution_of_shares,{'action_types': ['WatchEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_shares_WatchEvent,distribution_of_shares,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_shares_WatchEvent,distribution_of_shares,{'action_types': ['WatchEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_shares_WatchEvent,distribution_of_shares,{'action_types': ['WatchEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_speed_ForkEvent,distribution_of_speed,{'action_types': ['ForkEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_speed_ForkEvent,distribution_of_speed,{'action_types': ['ForkEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_speed_ForkEvent,distribution_of_speed,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_speed_ForkEvent,distribution_of_speed,{'action_types': ['ForkEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_speed_ForkEvent,distribution_of_speed,{'action_types': ['ForkEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_speed_WatchEvent,distribution_of_speed,{'action_types': ['WatchEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_speed_WatchEvent,distribution_of_speed,{'action_types': ['WatchEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_speed_WatchEvent,distribution_of_speed,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_speed_WatchEvent,distribution_of_speed,{'action_types': ['WatchEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_speed_WatchEvent,distribution_of_speed,{'action_types': ['WatchEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_users_ForkEvent,distribution_of_users,{'action_types': ['ForkEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_users_ForkEvent,distribution_of_users,{'action_types': ['ForkEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_users_ForkEvent,distribution_of_users,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_users_ForkEvent,distribution_of_users,{'action_types': ['ForkEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_users_ForkEvent,distribution_of_users,{'action_types': ['ForkEvent']},r2,r2,{},Batch
+github,multi_platform,population,distribution_of_users_WatchEvent,distribution_of_users,{'action_types': ['WatchEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,distribution_of_users_WatchEvent,distribution_of_users,{'action_types': ['WatchEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,distribution_of_users_WatchEvent,distribution_of_users,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,distribution_of_users_WatchEvent,distribution_of_users,{'action_types': ['WatchEvent']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+github,multi_platform,population,distribution_of_users_WatchEvent,distribution_of_users,{'action_types': ['WatchEvent']},r2,r2,{},Batch
+github,multi_platform,population,lifetime_of_info_ForkEvent,lifetime_of_info,{'action_types': ['ForkEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,lifetime_of_info_ForkEvent,lifetime_of_info,{'action_types': ['ForkEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,lifetime_of_info_WatchEvent,lifetime_of_info,{'action_types': ['WatchEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,lifetime_of_info_WatchEvent,lifetime_of_info,{'action_types': ['WatchEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,lifetime_of_threads_ForkEvent,lifetime_of_threads,{'action_types': ['ForkEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,lifetime_of_threads_ForkEvent,lifetime_of_threads,{'action_types': ['ForkEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,lifetime_of_threads_WatchEvent,lifetime_of_threads,{'action_types': ['WatchEvent']},ks,ks_test,{},Batch
+github,multi_platform,population,lifetime_of_threads_WatchEvent,lifetime_of_threads,{'action_types': ['WatchEvent']},js,js_divergence,{},Batch
+github,multi_platform,population,number_of_shares_ForkEvent,number_of_shares,{'action_types': ['ForkEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,number_of_shares_ForkEvent,number_of_shares,{'action_types': ['ForkEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,number_of_shares_WatchEvent,number_of_shares,{'action_types': ['WatchEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,number_of_shares_WatchEvent,number_of_shares,{'action_types': ['WatchEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,number_of_shares_over_time_ForkEvent,number_of_shares_over_time,{'action_types': ['ForkEvent']},dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,population,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,number_of_shares_over_time_WatchEvent,number_of_shares_over_time,{'action_types': ['WatchEvent']},dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,population,speed_of_info_ForkEvent,speed_of_info,{'action_types': ['ForkEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,speed_of_info_ForkEvent,speed_of_info,{'action_types': ['ForkEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,speed_of_info_WatchEvent,speed_of_info,{'action_types': ['WatchEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,speed_of_info_WatchEvent,speed_of_info,{'action_types': ['WatchEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['ForkEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,speed_of_info_over_time_ForkEvent,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['ForkEvent']}",dtw,fast_dtw,{},Batch
+github,multi_platform,population,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['WatchEvent']}",rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,speed_of_info_over_time_WatchEvent,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['WatchEvent']}",dtw,fast_dtw,{},Batch
+github,multi_platform,population,top_audience_reach_ForkEvent,top_audience_reach,"{'k': 50, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_audience_reach_WatchEvent,top_audience_reach,"{'k': 50, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_info_ForkEvent,top_info_shared,"{'k': 50, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_info_WatchEvent,top_info_shared,"{'k': 50, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_lifetimes_ForkEvent,top_lifetimes,"{'k': 50, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_lifetimes_WatchEvent,top_lifetimes,"{'k': 50, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_speeds_ForkEvent,top_speeds,"{'k': 50, 'action_types': ['ForkEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,top_speeds_WatchEvent,top_speeds,"{'k': 50, 'action_types': ['WatchEvent']}",rbo,rbo_score,{},Batch
+github,multi_platform,population,unique_users_ForkEvent,unique_users,{'action_types': ['ForkEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,unique_users_ForkEvent,unique_users,{'action_types': ['ForkEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,unique_users_WatchEvent,unique_users,{'action_types': ['WatchEvent']},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,multi_platform,population,unique_users_WatchEvent,unique_users,{'action_types': ['WatchEvent']},absolute_difference,absolute_difference,{},Batch
+github,multi_platform,population,unique_users_over_time_ForkEvent,unique_users_over_time,{'action_types': ['ForkEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,unique_users_over_time_ForkEvent,unique_users_over_time,{'action_types': ['ForkEvent']},dtw,fast_dtw,{'join': 'outer'},Batch
+github,multi_platform,population,unique_users_over_time_WatchEvent,unique_users_over_time,{'action_types': ['WatchEvent']},rmse,rmse,{'join': 'outer'},Batch
+github,multi_platform,population,unique_users_over_time_WatchEvent,unique_users_over_time,{'action_types': ['WatchEvent']},dtw,fast_dtw,{'join': 'outer'},Batch
+github,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,community_modularity,community_modularity,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,community_modularity,community_modularity,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,degree_distribution,degree_distribution,{},js_divergence,js_divergence,{'discrete': True},Batch
+github,social_structure,population,density,density,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,density,density,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,max_node_degree,max_node_degree,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,max_node_degree,max_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,number_of_edges,number_of_edges,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,number_of_edges,number_of_edges,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+github,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_difference,absolute_difference,{},Batch
+github,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,cross_platform,community,correlation_of_audiences,correlation_of_information,"{'community_level': True, 'measure': 'audience'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,correlation_of_audiences,correlation_of_information,"{'community_level': True, 'measure': 'audience'}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,cross_platform,community,correlation_of_lifetimes,correlation_of_information,"{'community_level': True, 'measure': 'lifetime'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,correlation_of_lifetimes,correlation_of_information,"{'community_level': True, 'measure': 'lifetime'}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,cross_platform,community,correlation_of_shares,correlation_of_information,"{'community_level': True, 'measure': 'share'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,correlation_of_shares,correlation_of_information,"{'community_level': True, 'measure': 'share'}",nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,community,correlation_of_speeds,correlation_of_information,"{'community_level': True, 'measure': 'speed'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,correlation_of_speeds,correlation_of_information,"{'community_level': True, 'measure': 'speed'}",nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,community,lifetime_of_spread,lifetime_of_spread,{'community_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,order_of_spread,order_of_spread,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,order_of_spread,order_of_spread,{'community_level': True},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,community,order_of_spread,order_of_spread,{'community_level': True},r2,r2,"{'join': 'outer', 'fill_value': 0}",Batch
+multi_platform,cross_platform,community,overlapping_users,overlapping_users,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,overlapping_users,overlapping_users,{'community_level': True},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,community,overlapping_users,overlapping_users,{'community_level': True},r2,r2,"{'join': 'outer', 'fill_value': 0}",Batch
+multi_platform,cross_platform,community,size_of_audience,size_of_audience,{'community_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,size_of_shares,size_of_shares,{'community_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,speed_of_spread,speed_of_spread,{'community_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,community,temporal_correlation_audience,temporal_correlation,"{'community_level': True, 'measure': 'audience', 'time_granularity': 'D'}",js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,community,temporal_correlation_audience,temporal_correlation,"{'community_level': True, 'measure': 'audience', 'time_granularity': 'D'}",ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,cross_platform,community,temporal_correlation_share,temporal_correlation,"{'community_level': True, 'measure': 'share', 'time_granularity': 'D'}",js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,community,temporal_correlation_share,temporal_correlation,"{'community_level': True, 'measure': 'share', 'time_granularity': 'D'}",ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,cross_platform,community,time_delta,time_delta,"{'community_level': True, 'time_granularity': 's'}",js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,community,time_delta,time_delta,"{'community_level': True, 'time_granularity': 's'}",ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,cross_platform,node,lifetime_of_spread,lifetime_of_spread,{'node_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,order_of_spread,order_of_spread,{'node_level': True},rbo,rbo_score,{},Batch
+multi_platform,cross_platform,node,overlapping_users,overlapping_users,{'node_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,overlapping_users,overlapping_users,{'node_level': True},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,node,overlapping_users,overlapping_users,{'node_level': True},r2,r2,"{'join': 'outer', 'fill_value': 0}",Batch
+multi_platform,cross_platform,node,size_of_audience,size_of_audience,{'node_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,size_of_shares,size_of_shares,{'node_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,speed_of_spread,speed_of_spread,{'node_level': True},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,temporal_correlation_audience,temporal_correlation,"{'node_level': True, 'measure': 'audience', 'time_granularity': 'D'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,temporal_correlation_audience,temporal_correlation,"{'node_level': True, 'measure': 'audience', 'time_granularity': 'D'}",nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,node,temporal_correlation_share,temporal_correlation,"{'node_level': True, 'measure': 'share', 'time_granularity': 'D'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,node,temporal_correlation_share,temporal_correlation,"{'node_level': True, 'measure': 'share', 'time_granularity': 'D'}",nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,node,time_delta,time_delta,"{'node_level': True, 'time_granularity': 's'}",rmse,rmse,{'join': 'inner'},Batch
+multi_platform,cross_platform,node,time_delta,time_delta,"{'node_level': True, 'time_granularity': 's'}",nrmse,rmse,"{'relative': True, 'join': 'inner'}",Batch
+multi_platform,cross_platform,population,correlation_of_audiences,correlation_of_information,{'measure': 'audience'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,correlation_of_audiences,correlation_of_information,{'measure': 'audience'},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,correlation_of_lifetimes,correlation_of_information,{'measure': 'lifetime'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,correlation_of_lifetimes,correlation_of_information,{'measure': 'lifetime'},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,correlation_of_shares,correlation_of_information,{'measure': 'share'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,correlation_of_shares,correlation_of_information,{'measure': 'share'},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,correlation_of_speeds,correlation_of_information,{'measure': 'speed'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,correlation_of_speeds,correlation_of_information,{'measure': 'speed'},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,lifetime_of_spread,lifetime_of_spread,{},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,order_of_spread,order_of_spread,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,order_of_spread,order_of_spread,{},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,order_of_spread,order_of_spread,{},r2,r2,"{'join': 'outer', 'fill_value': 0}",Batch
+multi_platform,cross_platform,population,overlapping_users,overlapping_users,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,overlapping_users,overlapping_users,{},nrmse,rmse,"{'join': 'outer', 'relative': True}",Batch
+multi_platform,cross_platform,population,overlapping_users,overlapping_users,{},r2,r2,"{'join': 'outer', 'fill_value': 0}",Batch
+multi_platform,cross_platform,population,size_of_audience,size_of_audience,{},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,size_of_shares,size_of_shares,{},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,speed_of_spread,speed_of_spread,{},spearman,spearman,{'join': 'outer'},Batch
+multi_platform,cross_platform,population,temporal_correlation_audience,temporal_correlation,"{'measure': 'audience', 'time_granularity': 'D'}",js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,population,temporal_correlation_audience,temporal_correlation,"{'measure': 'audience', 'time_granularity': 'D'}",ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,cross_platform,population,temporal_correlation_share,temporal_correlation,"{'measure': 'share', 'time_granularity': 'D'}",js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,population,temporal_correlation_share,temporal_correlation,"{'measure': 'share', 'time_granularity': 'D'}",ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,cross_platform,population,time_delta,time_delta,{'time_granularity': 's'},js,multi_distributions,{'metric': 'js'},Batch
+multi_platform,cross_platform,population,time_delta,time_delta,{'time_granularity': 's'},ks,multi_distributions,{'metric': 'ks'},Batch
+multi_platform,multi_platform,community,distribution_of_lifetimes,lifetime_of_info_distribution,{'community_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,community,distribution_of_lifetimes,lifetime_of_info_distribution,{'community_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,community,distribution_of_lifetimes,lifetime_of_info_distribution,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,distribution_of_lifetimes,lifetime_of_info_distribution,{'community_level': True},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,multi_platform,community,distribution_of_lifetimes,lifetime_of_info_distribution,{'community_level': True},r2,r2,{},Batch
+multi_platform,multi_platform,community,distribution_of_shares,distribution_of_shares,{'community_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,community,distribution_of_shares,distribution_of_shares,{'community_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,community,distribution_of_shares,distribution_of_shares,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,distribution_of_shares,distribution_of_shares,{'community_level': True},r2,r2,{},Batch
+multi_platform,multi_platform,community,distribution_of_speed,distribution_of_speed,{'community_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,community,distribution_of_speed,distribution_of_speed,{'community_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,community,distribution_of_speed,distribution_of_speed,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,distribution_of_speed,distribution_of_speed,{'community_level': True},r2,r2,{},Batch
+multi_platform,multi_platform,community,distribution_of_users,distribution_of_users,{'community_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,community,distribution_of_users,distribution_of_users,{'community_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,community,distribution_of_users,distribution_of_users,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,distribution_of_users,distribution_of_users,{'community_level': True},r2,r2,{},Batch
+multi_platform,multi_platform,community,lifetime_of_info,lifetime_of_info,{'community_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,community,lifetime_of_info,lifetime_of_info,{'community_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,community,lifetime_of_threads,lifetime_of_threads,{'community_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,community,lifetime_of_threads,lifetime_of_threads,{'community_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,community,number_of_shares,number_of_shares,{'community_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,community,number_of_shares,number_of_shares,{'community_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,community,number_of_shares_over_time,number_of_shares_over_time,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,number_of_shares_over_time,number_of_shares_over_time,{'community_level': True},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,speed_of_info,speed_of_info,{'community_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,community,speed_of_info,speed_of_info,{'community_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,community,speed_of_info_over_time,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,speed_of_info_over_time,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True}",dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,top_audience_reach,top_audience_reach,"{'k': 50, 'community_level': True}",rbo,rbo_score,{},Batch
+multi_platform,multi_platform,community,top_info,top_info_shared,"{'k': 50, 'community_level': True}",rbo,rbo_score,{},Batch
+multi_platform,multi_platform,community,top_lifetimes,top_lifetimes,"{'k': 50, 'community_level': True}",rbo,rbo_score,{},Batch
+multi_platform,multi_platform,community,top_speeds,top_speeds,"{'k': 50, 'community_level': True}",rbo,rbo_score,{},Batch
+multi_platform,multi_platform,community,unique_users,unique_users,{'community_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,community,unique_users,unique_users,{'community_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,community,unique_users_over_time,unique_users_over_time,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,community,unique_users_over_time,unique_users_over_time,{'community_level': True},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,lifetime_of_info,lifetime_of_info,{'node_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,node,lifetime_of_info,lifetime_of_info,{'node_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,node,lifetime_of_threads,lifetime_of_threads,{'node_level': True},ks,ks_test,{},Batch
+multi_platform,multi_platform,node,lifetime_of_threads,lifetime_of_threads,{'node_level': True},js,js_divergence,{},Batch
+multi_platform,multi_platform,node,number_of_shares,number_of_shares,{'node_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,node,number_of_shares,number_of_shares,{'node_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,node,number_of_shares_over_time,number_of_shares_over_time,{'node_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,number_of_shares_over_time,number_of_shares_over_time,{'node_level': True},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,speed_of_info,speed_of_info,{'node_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,node,speed_of_info,speed_of_info,{'node_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,node,speed_of_info_over_time,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,speed_of_info_over_time,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True}",dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,unique_users,unique_users,{'node_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,node,unique_users,unique_users,{'node_level': True},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,node,unique_users_over_time,unique_users_over_time,{'node_level': True},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,node,unique_users_over_time,unique_users_over_time,{'node_level': True},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,distribution_of_lifetimes,lifetime_of_info_distribution,{},js,js_divergence,{},Batch
+multi_platform,multi_platform,population,distribution_of_lifetimes,lifetime_of_info_distribution,{},ks,ks_test,{},Batch
+multi_platform,multi_platform,population,distribution_of_lifetimes,lifetime_of_info_distribution,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,distribution_of_lifetimes,lifetime_of_info_distribution,{},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,multi_platform,population,distribution_of_lifetimes,lifetime_of_info_distribution,{},r2,r2,{},Batch
+multi_platform,multi_platform,population,distribution_of_shares,distribution_of_shares,{},js,js_divergence,{},Batch
+multi_platform,multi_platform,population,distribution_of_shares,distribution_of_shares,{},ks,ks_test,{},Batch
+multi_platform,multi_platform,population,distribution_of_shares,distribution_of_shares,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,distribution_of_shares,distribution_of_shares,{},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,multi_platform,population,distribution_of_shares,distribution_of_shares,{},r2,r2,{},Batch
+multi_platform,multi_platform,population,distribution_of_speed,distribution_of_speed,{},js,js_divergence,{},Batch
+multi_platform,multi_platform,population,distribution_of_speed,distribution_of_speed,{},ks,ks_test,{},Batch
+multi_platform,multi_platform,population,distribution_of_speed,distribution_of_speed,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,distribution_of_speed,distribution_of_speed,{},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,multi_platform,population,distribution_of_speed,distribution_of_speed,{},r2,r2,{},Batch
+multi_platform,multi_platform,population,distribution_of_users,distribution_of_users,{},js,js_divergence,{},Batch
+multi_platform,multi_platform,population,distribution_of_users,distribution_of_users,{},ks,ks_test,{},Batch
+multi_platform,multi_platform,population,distribution_of_users,distribution_of_users,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,distribution_of_users,distribution_of_users,{},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+multi_platform,multi_platform,population,distribution_of_users,distribution_of_users,{},r2,r2,{},Batch
+multi_platform,multi_platform,population,lifetime_of_info,lifetime_of_info,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,population,lifetime_of_info,lifetime_of_info,{},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,population,lifetime_of_threads,lifetime_of_threads,{},ks,ks_test,{},Batch
+multi_platform,multi_platform,population,lifetime_of_threads,lifetime_of_threads,{},js,js_divergence,{},Batch
+multi_platform,multi_platform,population,number_of_shares,number_of_shares,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,population,number_of_shares,number_of_shares,{},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,population,number_of_shares_over_time,number_of_shares_over_time,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,number_of_shares_over_time,number_of_shares_over_time,{},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,speed_of_info,speed_of_info,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,population,speed_of_info,speed_of_info,{},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,population,speed_of_info_over_time,speed_of_info_over_time,{'time_unit': 'h'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,speed_of_info_over_time,speed_of_info_over_time,{'time_unit': 'h'},dtw,fast_dtw,{},Batch
+multi_platform,multi_platform,population,top_audience_reach,top_audience_reach,{'k': 50},rbo,rbo_score,{},Batch
+multi_platform,multi_platform,population,top_info,top_info_shared,{'k': 50},rbo,rbo_score,{},Batch
+multi_platform,multi_platform,population,top_lifetimes,top_lifetimes,{'k': 50},rbo,rbo_score,{},Batch
+multi_platform,multi_platform,population,top_speeds,top_speeds,{'k': 50},rbo,rbo_score,{},Batch
+multi_platform,multi_platform,population,unique_users,unique_users,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,multi_platform,population,unique_users,unique_users,{},absolute_difference,absolute_difference,{},Batch
+multi_platform,multi_platform,population,unique_users_over_time,unique_users_over_time,{},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,multi_platform,population,unique_users_over_time,unique_users_over_time,{},dtw,fast_dtw,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_average_burst_size,run_community_level_measurement,{'measurement_name': 'average_size_of_each_burst'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_average_burst_size,run_community_level_measurement,{'measurement_name': 'average_size_of_each_burst'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_average_burst_size,run_community_level_measurement,{'measurement_name': 'average_size_of_each_burst'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_average_burst_size,run_community_level_measurement,{'measurement_name': 'average_size_of_each_burst'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_average_number_of_users_per_burst,run_community_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_average_number_of_users_per_burst,run_community_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_average_number_of_users_per_burst,run_community_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_average_number_of_users_per_burst,run_community_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_lifetime,run_community_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_lifetime,run_community_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_lifetime,run_community_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_burst_lifetime,run_community_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_platform_proportion,run_community_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_platform_proportion,run_community_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_platform_proportion,run_community_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},rmse,rmse,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_platform_proportion,run_community_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_timing_burstiness,run_community_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_timing_burstiness,run_community_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_timing_burstiness,run_community_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},rmse,rmse,{},Batch
+multi_platform,recurrence,community,distribution_of_burst_timing_burstiness,run_community_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_new_users_per_burst,run_community_level_measurement,{'measurement_name': 'new_users_per_burst'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_new_users_per_burst,run_community_level_measurement,{'measurement_name': 'new_users_per_burst'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_new_users_per_burst,run_community_level_measurement,{'measurement_name': 'new_users_per_burst'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_new_users_per_burst,run_community_level_measurement,{'measurement_name': 'new_users_per_burst'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_number_of_bursts,run_community_level_measurement,{'measurement_name': 'number_of_bursts'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_number_of_bursts,run_community_level_measurement,{'measurement_name': 'number_of_bursts'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_number_of_bursts,run_community_level_measurement,{'measurement_name': 'number_of_bursts'},rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,community,distribution_of_number_of_bursts,run_community_level_measurement,{'measurement_name': 'number_of_bursts'},r2,r2,{},Batch
+multi_platform,recurrence,community,distribution_of_time_between_bursts,run_community_level_measurement,{'measurement_name': 'time_between_bursts'},js,js_divergence,{},Batch
+multi_platform,recurrence,community,distribution_of_time_between_bursts,run_community_level_measurement,{'measurement_name': 'time_between_bursts'},ks,ks_test,{},Batch
+multi_platform,recurrence,community,distribution_of_time_between_bursts,run_community_level_measurement,{'measurement_name': 'time_between_bursts'},rmse,rmse,{},Batch
+multi_platform,recurrence,community,distribution_of_time_between_bursts,run_community_level_measurement,{'measurement_name': 'time_between_bursts'},r2,r2,{},Batch
+multi_platform,recurrence,node,average_number_of_users_per_burst,run_content_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,average_number_of_users_per_burst,run_content_level_measurement,{'measurement_name': 'average_number_of_users_per_burst'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,average_proportion_of_top_platform_per_burst,run_content_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,average_proportion_of_top_platform_per_burst,run_content_level_measurement,{'measurement_name': 'average_proportion_of_top_platform_per_burst'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,average_size_of_each_burst,run_content_level_measurement,{'measurement_name': 'average_size_of_each_burst'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,average_size_of_each_burst,run_content_level_measurement,{'measurement_name': 'average_size_of_each_burst'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,burstiness_of_burst_timing,run_content_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,burstiness_of_burst_timing,run_content_level_measurement,{'measurement_name': 'burstiness_of_burst_timing'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,lifetime_of_each_burst,run_content_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,lifetime_of_each_burst,run_content_level_measurement,{'measurement_name': 'lifetime_of_each_burst'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,new_users_per_burst,run_content_level_measurement,{'measurement_name': 'new_users_per_burst'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,new_users_per_burst,run_content_level_measurement,{'measurement_name': 'new_users_per_burst'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,number_of_bursts,run_content_level_measurement,{'measurement_name': 'number_of_bursts'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,number_of_bursts,run_content_level_measurement,{'measurement_name': 'number_of_bursts'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,node,time_between_bursts,run_content_level_measurement,{'measurement_name': 'time_between_bursts'},absolute_percentage_error,absolute_percentage_error,{},Batch
+multi_platform,recurrence,node,time_between_bursts,run_content_level_measurement,{'measurement_name': 'time_between_bursts'},absolute_difference,absolute_difference,{},Batch
+multi_platform,recurrence,population,distribution_of_average_burst_size,run_content_level_measurement,"{'measurement_name': 'average_size_of_each_burst', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_average_burst_size,run_content_level_measurement,"{'measurement_name': 'average_size_of_each_burst', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_average_burst_size,run_content_level_measurement,"{'measurement_name': 'average_size_of_each_burst', 'scale': 'population'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,population,distribution_of_average_burst_size,run_content_level_measurement,"{'measurement_name': 'average_size_of_each_burst', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_average_number_of_users_per_burst,run_content_level_measurement,"{'measurement_name': 'average_number_of_users_per_burst', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_average_number_of_users_per_burst,run_content_level_measurement,"{'measurement_name': 'average_number_of_users_per_burst', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_average_number_of_users_per_burst,run_content_level_measurement,"{'measurement_name': 'average_number_of_users_per_burst', 'scale': 'population'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,population,distribution_of_average_number_of_users_per_burst,run_content_level_measurement,"{'measurement_name': 'average_number_of_users_per_burst', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_lifetime,run_content_level_measurement,"{'measurement_name': 'lifetime_of_each_burst', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_lifetime,run_content_level_measurement,"{'measurement_name': 'lifetime_of_each_burst', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_lifetime,run_content_level_measurement,"{'measurement_name': 'lifetime_of_each_burst', 'scale': 'population'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,population,distribution_of_burst_lifetime,run_content_level_measurement,"{'measurement_name': 'lifetime_of_each_burst', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_platform_proportion,run_content_level_measurement,"{'measurement_name': 'average_proportion_of_top_platform_per_burst', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_platform_proportion,run_content_level_measurement,"{'measurement_name': 'average_proportion_of_top_platform_per_burst', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_platform_proportion,run_content_level_measurement,"{'measurement_name': 'average_proportion_of_top_platform_per_burst', 'scale': 'population'}",rmse,rmse,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_platform_proportion,run_content_level_measurement,"{'measurement_name': 'average_proportion_of_top_platform_per_burst', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_timing_burstiness,run_content_level_measurement,"{'measurement_name': 'burstiness_of_burst_timing', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_timing_burstiness,run_content_level_measurement,"{'measurement_name': 'burstiness_of_burst_timing', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_timing_burstiness,run_content_level_measurement,"{'measurement_name': 'burstiness_of_burst_timing', 'scale': 'population'}",rmse,rmse,{},Batch
+multi_platform,recurrence,population,distribution_of_burst_timing_burstiness,run_content_level_measurement,"{'measurement_name': 'burstiness_of_burst_timing', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_new_users_per_burst,run_content_level_measurement,"{'measurement_name': 'new_users_per_burst', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_new_users_per_burst,run_content_level_measurement,"{'measurement_name': 'new_users_per_burst', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_new_users_per_burst,run_content_level_measurement,"{'measurement_name': 'new_users_per_burst', 'scale': 'population'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,population,distribution_of_new_users_per_burst,run_content_level_measurement,"{'measurement_name': 'new_users_per_burst', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_number_of_bursts,run_content_level_measurement,"{'measurement_name': 'number_of_bursts', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_number_of_bursts,run_content_level_measurement,"{'measurement_name': 'number_of_bursts', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_number_of_bursts,run_content_level_measurement,"{'measurement_name': 'number_of_bursts', 'scale': 'population'}",rmse,rmse,{'join': 'outer'},Batch
+multi_platform,recurrence,population,distribution_of_number_of_bursts,run_content_level_measurement,"{'measurement_name': 'number_of_bursts', 'scale': 'population'}",r2,r2,{},Batch
+multi_platform,recurrence,population,distribution_of_time_between_bursts,run_content_level_measurement,"{'measurement_name': 'time_between_bursts', 'scale': 'population'}",js,js_divergence,{},Batch
+multi_platform,recurrence,population,distribution_of_time_between_bursts,run_content_level_measurement,"{'measurement_name': 'time_between_bursts', 'scale': 'population'}",ks,ks_test,{},Batch
+multi_platform,recurrence,population,distribution_of_time_between_bursts,run_content_level_measurement,"{'measurement_name': 'time_between_bursts', 'scale': 'population'}",rmse,rmse,{},Batch
+multi_platform,recurrence,population,distribution_of_time_between_bursts,run_content_level_measurement,"{'measurement_name': 'time_between_bursts', 'scale': 'population'}",r2,r2,{},Batch
+reddit,evolution,community,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': False, 'community_level': True}",js,js_divergence,{},Batch
+reddit,evolution,community,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': False, 'community_level': True}",ks,ks_test,{},Batch
+reddit,evolution,community,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,community,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': True}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,community,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': True}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,community,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': True}",js,js_divergence,{},Batch
+reddit,evolution,community,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': True}",ks,ks_test,{},Batch
+reddit,evolution,node,assortativity_coefficient_over_time,assortativity_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,assortativity_coefficient_over_time,assortativity_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,audience_size_over_time,audience_size_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,audience_size_over_time,audience_size_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,average_clustering_coefficient_over_time,average_clustering_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,average_clustering_coefficient_over_time,average_clustering_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,community_modularity_over_time,community_modularity_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,community_modularity_over_time,community_modularity_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,density_over_time,density_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,density_over_time,density_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,gini_coefficient_over_time,gini_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,gini_coefficient_over_time,gini_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,mean_node_degree_over_time,mean_node_degree_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,mean_node_degree_over_time,mean_node_degree_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': True, 'community_level': False}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,evolution,node,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': True, 'community_level': False}",absolute_difference,absolute_difference,{},Batch
+reddit,evolution,node,number_of_connected_components_over_time,number_of_connected_components_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,number_of_connected_components_over_time,number_of_connected_components_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,number_of_domains_linked_over_time,number_of_domains_linked_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,number_of_domains_linked_over_time,number_of_domains_linked_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,palma_ratio_over_time,palma_ratio_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,palma_ratio_over_time,palma_ratio_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,tendency_to_include_URL,tendency_to_include_URL,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,tendency_to_include_URL,tendency_to_include_URL,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,tendency_to_link_external,tendency_to_link_external,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,tendency_to_link_external,tendency_to_link_external,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,node,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': True, 'community_level': False}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,evolution,node,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': True, 'community_level': False}",absolute_difference,absolute_difference,{},Batch
+reddit,evolution,node,volume_of_user_connections_over_time,volume_of_user_connections_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,node,volume_of_user_connections_over_time,volume_of_user_connections_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,population,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,"{'community_level': False, 'node_level': False}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,evolution,population,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,"{'community_level': False, 'node_level': False}",absolute_difference,absolute_difference,{},Batch
+reddit,evolution,population,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+reddit,evolution,population,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,evolution,population,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': False}",js,js_divergence,{},Batch
+reddit,evolution,population,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': False}",ks,ks_test,{},Batch
+reddit,multi_platform,community,distribution_of_lifetimes_comment,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,community,distribution_of_lifetimes_comment,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,community,distribution_of_lifetimes_comment,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,distribution_of_lifetimes_comment,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['comment']}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+reddit,multi_platform,community,distribution_of_lifetimes_comment,lifetime_of_info_distribution,"{'community_level': True, 'action_types': ['comment']}",r2,r2,{},Batch
+reddit,multi_platform,community,distribution_of_shares_comment,distribution_of_shares,"{'community_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,community,distribution_of_shares_comment,distribution_of_shares,"{'community_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,community,distribution_of_shares_comment,distribution_of_shares,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,distribution_of_shares_comment,distribution_of_shares,"{'community_level': True, 'action_types': ['comment']}",r2,r2,{},Batch
+reddit,multi_platform,community,distribution_of_speed_comment,distribution_of_speed,"{'community_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,community,distribution_of_speed_comment,distribution_of_speed,"{'community_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,community,distribution_of_speed_comment,distribution_of_speed,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,distribution_of_speed_comment,distribution_of_speed,"{'community_level': True, 'action_types': ['comment']}",r2,r2,{},Batch
+reddit,multi_platform,community,distribution_of_users_comment,distribution_of_users,"{'community_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,community,distribution_of_users_comment,distribution_of_users,"{'community_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,community,distribution_of_users_comment,distribution_of_users,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,distribution_of_users_comment,distribution_of_users,"{'community_level': True, 'action_types': ['comment']}",r2,r2,{},Batch
+reddit,multi_platform,community,lifetime_of_info_comment,lifetime_of_info,"{'community_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,community,lifetime_of_info_comment,lifetime_of_info,"{'community_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,community,lifetime_of_threads_comment,lifetime_of_threads,"{'community_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,community,lifetime_of_threads_comment,lifetime_of_threads,"{'community_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,community,number_of_shares_comment,number_of_shares,"{'community_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,community,number_of_shares_comment,number_of_shares,"{'community_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,community,number_of_shares_over_time_comment,number_of_shares_over_time,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,number_of_shares_over_time_comment,number_of_shares_over_time,"{'community_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,community,speed_of_info_comment,speed_of_info,"{'community_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,community,speed_of_info_comment,speed_of_info,"{'community_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,community,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,community,top_audience_reach_comment,top_audience_reach,"{'k': 50, 'community_level': True, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,community,top_info_comment,top_info_shared,"{'k': 50, 'community_level': True, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,community,top_lifetimes_comment,top_lifetimes,"{'k': 50, 'community_level': True, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,community,top_speeds_comment,top_speeds,"{'k': 50, 'community_level': True, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,community,unique_users_comment,unique_users,"{'community_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,community,unique_users_comment,unique_users,"{'community_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,community,unique_users_over_time_comment,unique_users_over_time,"{'community_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,community,unique_users_over_time_comment,unique_users_over_time,"{'community_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,node,lifetime_of_info_comment,lifetime_of_info,"{'node_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,node,lifetime_of_info_comment,lifetime_of_info,"{'node_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,node,lifetime_of_threads_comment,lifetime_of_threads,"{'node_level': True, 'action_types': ['comment']}",ks,ks_test,{},Batch
+reddit,multi_platform,node,lifetime_of_threads_comment,lifetime_of_threads,"{'node_level': True, 'action_types': ['comment']}",js,js_divergence,{},Batch
+reddit,multi_platform,node,number_of_shares_comment,number_of_shares,"{'node_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,node,number_of_shares_comment,number_of_shares,"{'node_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,node,number_of_shares_over_time_comment,number_of_shares_over_time,"{'node_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,node,number_of_shares_over_time_comment,number_of_shares_over_time,"{'node_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,node,speed_of_info_comment,speed_of_info,"{'node_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,node,speed_of_info_comment,speed_of_info,"{'node_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,node,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,node,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,node,unique_users_comment,unique_users,"{'node_level': True, 'action_types': ['comment']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,node,unique_users_comment,unique_users,"{'node_level': True, 'action_types': ['comment']}",absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,node,unique_users_over_time_comment,unique_users_over_time,"{'node_level': True, 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,node,unique_users_over_time_comment,unique_users_over_time,"{'node_level': True, 'action_types': ['comment']}",dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,population,distribution_of_lifetimes_comment,lifetime_of_info_distribution,{'action_types': ['comment']},js,js_divergence,{},Batch
+reddit,multi_platform,population,distribution_of_lifetimes_comment,lifetime_of_info_distribution,{'action_types': ['comment']},ks,ks_test,{},Batch
+reddit,multi_platform,population,distribution_of_lifetimes_comment,lifetime_of_info_distribution,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,distribution_of_lifetimes_comment,lifetime_of_info_distribution,{'action_types': ['comment']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+reddit,multi_platform,population,distribution_of_lifetimes_comment,lifetime_of_info_distribution,{'action_types': ['comment']},r2,r2,{},Batch
+reddit,multi_platform,population,distribution_of_shares_comment,distribution_of_shares,{'action_types': ['comment']},js,js_divergence,{},Batch
+reddit,multi_platform,population,distribution_of_shares_comment,distribution_of_shares,{'action_types': ['comment']},ks,ks_test,{},Batch
+reddit,multi_platform,population,distribution_of_shares_comment,distribution_of_shares,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,distribution_of_shares_comment,distribution_of_shares,{'action_types': ['comment']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+reddit,multi_platform,population,distribution_of_shares_comment,distribution_of_shares,{'action_types': ['comment']},r2,r2,{},Batch
+reddit,multi_platform,population,distribution_of_speed_comment,distribution_of_speed,{'action_types': ['comment']},js,js_divergence,{},Batch
+reddit,multi_platform,population,distribution_of_speed_comment,distribution_of_speed,{'action_types': ['comment']},ks,ks_test,{},Batch
+reddit,multi_platform,population,distribution_of_speed_comment,distribution_of_speed,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,distribution_of_speed_comment,distribution_of_speed,{'action_types': ['comment']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+reddit,multi_platform,population,distribution_of_speed_comment,distribution_of_speed,{'action_types': ['comment']},r2,r2,{},Batch
+reddit,multi_platform,population,distribution_of_users_comment,distribution_of_users,{'action_types': ['comment']},js,js_divergence,{},Batch
+reddit,multi_platform,population,distribution_of_users_comment,distribution_of_users,{'action_types': ['comment']},ks,ks_test,{},Batch
+reddit,multi_platform,population,distribution_of_users_comment,distribution_of_users,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,distribution_of_users_comment,distribution_of_users,{'action_types': ['comment']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+reddit,multi_platform,population,distribution_of_users_comment,distribution_of_users,{'action_types': ['comment']},r2,r2,{},Batch
+reddit,multi_platform,population,lifetime_of_info_comment,lifetime_of_info,{'action_types': ['comment']},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,population,lifetime_of_info_comment,lifetime_of_info,{'action_types': ['comment']},absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,population,lifetime_of_threads_comment,lifetime_of_threads,{'action_types': ['comment']},ks,ks_test,{},Batch
+reddit,multi_platform,population,lifetime_of_threads_comment,lifetime_of_threads,{'action_types': ['comment']},js,js_divergence,{},Batch
+reddit,multi_platform,population,number_of_shares_comment,number_of_shares,{'action_types': ['comment']},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,population,number_of_shares_comment,number_of_shares,{'action_types': ['comment']},absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,population,number_of_shares_over_time_comment,number_of_shares_over_time,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,number_of_shares_over_time_comment,number_of_shares_over_time,{'action_types': ['comment']},dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,multi_platform,population,speed_of_info_comment,speed_of_info,{'action_types': ['comment']},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,population,speed_of_info_comment,speed_of_info,{'action_types': ['comment']},absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,population,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['comment']}",rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,speed_of_info_over_time_comment,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['comment']}",dtw,fast_dtw,{},Batch
+reddit,multi_platform,population,top_audience_reach_comment,top_audience_reach,"{'k': 50, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,population,top_info_comment,top_info_shared,"{'k': 50, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,population,top_lifetimes_comment,top_lifetimes,"{'k': 50, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,population,top_speeds_comment,top_speeds,"{'k': 50, 'action_types': ['comment']}",rbo,rbo_score,{},Batch
+reddit,multi_platform,population,unique_users_comment,unique_users,{'action_types': ['comment']},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,multi_platform,population,unique_users_comment,unique_users,{'action_types': ['comment']},absolute_difference,absolute_difference,{},Batch
+reddit,multi_platform,population,unique_users_over_time_comment,unique_users_over_time,{'action_types': ['comment']},rmse,rmse,{'join': 'outer'},Batch
+reddit,multi_platform,population,unique_users_over_time_comment,unique_users_over_time,{'action_types': ['comment']},dtw,fast_dtw,{'join': 'outer'},Batch
+reddit,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,community_modularity,community_modularity,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,community_modularity,community_modularity,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,degree_distribution,degree_distribution,{},js_divergence,js_divergence,{'discrete': True},Batch
+reddit,social_structure,population,density,density,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,density,density,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,max_node_degree,max_node_degree,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,max_node_degree,max_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,number_of_edges,number_of_edges,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,number_of_edges,number_of_edges,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+reddit,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_difference,absolute_difference,{},Batch
+reddit,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,evolution,community,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': False, 'community_level': True}",js,js_divergence,{},Batch
+twitter,evolution,community,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': False, 'community_level': True}",ks,ks_test,{},Batch
+twitter,evolution,community,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,{'community_level': True},rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,community,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': True}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,community,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': True}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,community,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': True}",js,js_divergence,{},Batch
+twitter,evolution,community,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': True}",ks,ks_test,{},Batch
+twitter,evolution,node,assortativity_coefficient_over_time,assortativity_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,assortativity_coefficient_over_time,assortativity_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,audience_size_over_time,audience_size_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,audience_size_over_time,audience_size_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,average_clustering_coefficient_over_time,average_clustering_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,average_clustering_coefficient_over_time,average_clustering_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,community_modularity_over_time,community_modularity_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,community_modularity_over_time,community_modularity_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,density_over_time,density_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,density_over_time,density_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,gini_coefficient_over_time,gini_coefficient_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,gini_coefficient_over_time,gini_coefficient_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,mean_node_degree_over_time,mean_node_degree_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,mean_node_degree_over_time,mean_node_degree_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': True, 'community_level': False}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,evolution,node,mean_persistence_of_connectivity,mean_persistence_of_connectivity,"{'node_level': True, 'community_level': False}",absolute_difference,absolute_difference,{},Batch
+twitter,evolution,node,number_of_connected_components_over_time,number_of_connected_components_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,number_of_connected_components_over_time,number_of_connected_components_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,number_of_domains_linked_over_time,number_of_domains_linked_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,number_of_domains_linked_over_time,number_of_domains_linked_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,palma_ratio_over_time,palma_ratio_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,palma_ratio_over_time,palma_ratio_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,tendency_to_include_URL,tendency_to_include_URL,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,tendency_to_include_URL,tendency_to_include_URL,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,tendency_to_link_external,tendency_to_link_external,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,tendency_to_link_external,tendency_to_link_external,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,node,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': True, 'community_level': False}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,evolution,node,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': True, 'community_level': False}",absolute_difference,absolute_difference,{},Batch
+twitter,evolution,node,volume_of_user_connections_over_time,volume_of_user_connections_over_time,"{'node_level': True, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,node,volume_of_user_connections_over_time,volume_of_user_connections_over_time,"{'node_level': True, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,population,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,{'community_level': True},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,evolution,population,mean_uniqueness_of_user_connections,mean_uniqueness_of_user_connections,{'community_level': True},absolute_difference,absolute_difference,{},Batch
+twitter,evolution,population,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': False}",rmse,rmse,{'join': 'outer'},Batch
+twitter,evolution,population,persistence_of_connectivity,persistence_of_connectivity,"{'node_level': False, 'community_level': False}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,evolution,population,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': False}",js,js_divergence,{},Batch
+twitter,evolution,population,uniqueness_of_user_connections,uniqueness_of_user_connections,"{'node_level': False, 'community_level': False}",ks,ks_test,{},Batch
+twitter,multi_platform,community,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,"{'action_types': ['retweet'], 'community_level': True}",js,js_divergence,{},Batch
+twitter,multi_platform,community,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,"{'action_types': ['retweet'], 'community_level': True}",ks,ks_test,{},Batch
+twitter,multi_platform,community,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,"{'action_types': ['retweet'], 'community_level': True}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,"{'action_types': ['retweet'], 'community_level': True}",nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+twitter,multi_platform,community,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,"{'action_types': ['retweet'], 'community_level': True}",r2,r2,{},Batch
+twitter,multi_platform,community,distribution_of_shares_retweet,distribution_of_shares,"{'community_level': True, 'action_types': ['retweet']}",js,js_divergence,{},Batch
+twitter,multi_platform,community,distribution_of_shares_retweet,distribution_of_shares,"{'community_level': True, 'action_types': ['retweet']}",ks,ks_test,{},Batch
+twitter,multi_platform,community,distribution_of_shares_retweet,distribution_of_shares,"{'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,distribution_of_shares_retweet,distribution_of_shares,"{'community_level': True, 'action_types': ['retweet']}",r2,r2,{},Batch
+twitter,multi_platform,community,distribution_of_speed_retweet,distribution_of_speed,"{'community_level': True, 'action_types': ['retweet']}",js,js_divergence,{},Batch
+twitter,multi_platform,community,distribution_of_speed_retweet,distribution_of_speed,"{'community_level': True, 'action_types': ['retweet']}",ks,ks_test,{},Batch
+twitter,multi_platform,community,distribution_of_speed_retweet,distribution_of_speed,"{'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,distribution_of_speed_retweet,distribution_of_speed,"{'community_level': True, 'action_types': ['retweet']}",r2,r2,{},Batch
+twitter,multi_platform,community,distribution_of_users_retweet,distribution_of_users,"{'community_level': True, 'action_types': ['retweet']}",js,js_divergence,{},Batch
+twitter,multi_platform,community,distribution_of_users_retweet,distribution_of_users,"{'community_level': True, 'action_types': ['retweet']}",ks,ks_test,{},Batch
+twitter,multi_platform,community,distribution_of_users_retweet,distribution_of_users,"{'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,distribution_of_users_retweet,distribution_of_users,"{'community_level': True, 'action_types': ['retweet']}",r2,r2,{},Batch
+twitter,multi_platform,community,lifetime_of_info_retweet,lifetime_of_info,"{'community_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,community,lifetime_of_info_retweet,lifetime_of_info,"{'community_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,community,lifetime_of_threads_retweet,lifetime_of_threads,"{'community_level': True, 'action_types': ['retweet']}",ks,ks_test,{},Batch
+twitter,multi_platform,community,lifetime_of_threads_retweet,lifetime_of_threads,"{'community_level': True, 'action_types': ['retweet']}",js,js_divergence,{},Batch
+twitter,multi_platform,community,number_of_shares_over_time_retweet,number_of_shares_over_time,"{'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,number_of_shares_over_time_retweet,number_of_shares_over_time,"{'community_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,community,number_of_shares_retweet,number_of_shares,"{'community_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,community,number_of_shares_retweet,number_of_shares,"{'community_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,community,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'community_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,community,speed_of_info_retweet,speed_of_info,"{'community_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,community,speed_of_info_retweet,speed_of_info,"{'community_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,community,top_audience_reach_retweet,top_audience_reach,"{'k': 50, 'community_level': True, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,community,top_info_retweet,top_info_shared,"{'k': 50, 'community_level': True, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,community,top_lifetimes_retweet,top_lifetimes,"{'k': 50, 'community_level': True, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,community,top_speeds_retweet,top_speeds,"{'k': 50, 'community_level': True, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,community,unique_users_over_time_retweet,unique_users_over_time,"{'community_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,community,unique_users_over_time_retweet,unique_users_over_time,"{'community_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,community,unique_users_retweet,unique_users,"{'community_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,community,unique_users_retweet,unique_users,"{'community_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,node,lifetime_of_info_retweet,lifetime_of_info,"{'node_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,node,lifetime_of_info_retweet,lifetime_of_info,"{'node_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,node,lifetime_of_threads_retweet,lifetime_of_threads,"{'node_level': True, 'action_types': ['retweet']}",ks,ks_test,{},Batch
+twitter,multi_platform,node,lifetime_of_threads_retweet,lifetime_of_threads,"{'node_level': True, 'action_types': ['retweet']}",js,js_divergence,{},Batch
+twitter,multi_platform,node,number_of_shares_over_time_retweet,number_of_shares_over_time,"{'node_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,node,number_of_shares_over_time_retweet,number_of_shares_over_time,"{'node_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,node,number_of_shares_retweet,number_of_shares,"{'node_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,node,number_of_shares_retweet,number_of_shares,"{'node_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,node,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,node,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'node_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,node,speed_of_info_retweet,speed_of_info,"{'node_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,node,speed_of_info_retweet,speed_of_info,"{'node_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,node,unique_users_over_time_retweet,unique_users_over_time,"{'node_level': True, 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,node,unique_users_over_time_retweet,unique_users_over_time,"{'node_level': True, 'action_types': ['retweet']}",dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,node,unique_users_retweet,unique_users,"{'node_level': True, 'action_types': ['retweet']}",absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,node,unique_users_retweet,unique_users,"{'node_level': True, 'action_types': ['retweet']}",absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,population,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,{'action_types': ['retweet']},js,js_divergence,{},Batch
+twitter,multi_platform,population,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,{'action_types': ['retweet']},ks,ks_test,{},Batch
+twitter,multi_platform,population,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,{'action_types': ['retweet']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+twitter,multi_platform,population,distribution_of_lifetimes_retweet,lifetime_of_info_distribution,{'action_types': ['retweet']},r2,r2,{},Batch
+twitter,multi_platform,population,distribution_of_shares_retweet,distribution_of_shares,{'action_types': ['retweet']},js,js_divergence,{},Batch
+twitter,multi_platform,population,distribution_of_shares_retweet,distribution_of_shares,{'action_types': ['retweet']},ks,ks_test,{},Batch
+twitter,multi_platform,population,distribution_of_shares_retweet,distribution_of_shares,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,distribution_of_shares_retweet,distribution_of_shares,{'action_types': ['retweet']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+twitter,multi_platform,population,distribution_of_shares_retweet,distribution_of_shares,{'action_types': ['retweet']},r2,r2,{},Batch
+twitter,multi_platform,population,distribution_of_speed_retweet,distribution_of_speed,{'action_types': ['retweet']},js,js_divergence,{},Batch
+twitter,multi_platform,population,distribution_of_speed_retweet,distribution_of_speed,{'action_types': ['retweet']},ks,ks_test,{},Batch
+twitter,multi_platform,population,distribution_of_speed_retweet,distribution_of_speed,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,distribution_of_speed_retweet,distribution_of_speed,{'action_types': ['retweet']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+twitter,multi_platform,population,distribution_of_speed_retweet,distribution_of_speed,{'action_types': ['retweet']},r2,r2,{},Batch
+twitter,multi_platform,population,distribution_of_users_retweet,distribution_of_users,{'action_types': ['retweet']},js,js_divergence,{},Batch
+twitter,multi_platform,population,distribution_of_users_retweet,distribution_of_users,{'action_types': ['retweet']},ks,ks_test,{},Batch
+twitter,multi_platform,population,distribution_of_users_retweet,distribution_of_users,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,distribution_of_users_retweet,distribution_of_users,{'action_types': ['retweet']},nrmse,rmse,"{'relative': True, 'join': 'outer'}",Batch
+twitter,multi_platform,population,distribution_of_users_retweet,distribution_of_users,{'action_types': ['retweet']},r2,r2,{},Batch
+twitter,multi_platform,population,lifetime_of_info_retweet,lifetime_of_info,{'action_types': ['retweet']},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,population,lifetime_of_info_retweet,lifetime_of_info,{'action_types': ['retweet']},absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,population,lifetime_of_threads_retweet,lifetime_of_threads,{'action_types': ['retweet']},ks,ks_test,{},Batch
+twitter,multi_platform,population,lifetime_of_threads_retweet,lifetime_of_threads,{'action_types': ['retweet']},js,js_divergence,{},Batch
+twitter,multi_platform,population,number_of_shares_over_time_retweet,number_of_shares_over_time,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,number_of_shares_over_time_retweet,number_of_shares_over_time,{'action_types': ['retweet']},dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,population,number_of_shares_retweet,number_of_shares,{'action_types': ['retweet']},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,population,number_of_shares_retweet,number_of_shares,{'action_types': ['retweet']},absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,population,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['retweet']}",rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,speed_of_info_over_time_retweet,speed_of_info_over_time,"{'time_unit': 'h', 'action_types': ['retweet']}",dtw,fast_dtw,{},Batch
+twitter,multi_platform,population,speed_of_info_retweet,speed_of_info,{'action_types': ['retweet']},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,population,speed_of_info_retweet,speed_of_info,{'action_types': ['retweet']},absolute_difference,absolute_difference,{},Batch
+twitter,multi_platform,population,top_audience_reach_retweet,top_audience_reach,"{'k': 50, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,population,top_info_retweet,top_info_shared,"{'k': 50, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,population,top_lifetimes_retweet,top_lifetimes,"{'k': 50, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,population,top_speeds_retweet,top_speeds,"{'k': 50, 'action_types': ['retweet']}",rbo,rbo_score,{},Batch
+twitter,multi_platform,population,unique_users_over_time_retweet,unique_users_over_time,{'action_types': ['retweet']},rmse,rmse,{'join': 'outer'},Batch
+twitter,multi_platform,population,unique_users_over_time_retweet,unique_users_over_time,{'action_types': ['retweet']},dtw,fast_dtw,{'join': 'outer'},Batch
+twitter,multi_platform,population,unique_users_retweet,unique_users,{'action_types': ['retweet']},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,multi_platform,population,unique_users_retweet,unique_users,{'action_types': ['retweet']},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,assortativity_coefficient,assortativity_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,average_clustering_coefficient,average_clustering_coefficient,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,community_modularity,community_modularity,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,community_modularity,community_modularity,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,degree_distribution,degree_distribution,{},js_divergence,js_divergence,{'discrete': True},Batch
+twitter,social_structure,population,density,density,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,density,density,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,max_node_degree,max_node_degree,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,max_node_degree,max_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,mean_node_degree,mean_node_degree,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,mean_shortest_path_length,mean_shortest_path_length,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,number_of_connected_components,number_of_connected_components,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,number_of_edges,number_of_edges,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,number_of_edges,number_of_edges,{},absolute_percentage_error,absolute_percentage_error,{},Batch
+twitter,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_difference,absolute_difference,{},Batch
+twitter,social_structure,population,number_of_nodes,number_of_nodes,{},absolute_percentage_error,absolute_percentage_error,{},Batch

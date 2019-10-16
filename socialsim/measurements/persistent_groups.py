@@ -17,6 +17,8 @@ import warnings
 import matplotlib.pyplot as plt
 
 import re
+import time
+import os
 
 # community detection algorithms
 # More algorithms: 
@@ -42,7 +44,8 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                  log_file='group_formation_measurements_log.txt', selected_content=None,
                  time_granularity='12H', parentid_col='parentID',
                  community_detection_algorithm=louvain_method,
-                 plot=False, save_groups=False, plot_bursts=False, save_plots=False, plot_dir='./'):
+                 plot=False, save_groups=False, plot_bursts=False, save_plots=False, plot_dir='./',
+                 save_predicted_gammas = False, save_predicted_gammas_to_fn='./predicted_gammas.csv'):
 
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
@@ -89,7 +92,11 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
                 
                 for i, row in self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].iterrows():
                     if row[self.content_col] in self.gammas.keys():
-                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma'] 
+                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
+
+        self.gamma_filepath  = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime()))
+        with open(self.gamma_filepath, 'w') as f:
+            f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
 
         self.time_granularity = time_granularity
         self.parentid_col = parentid_col
@@ -97,6 +104,25 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
         self.get_network_from_bursts(user_interaction_weight_threshold=2)
         if save_groups:
             self.save_groups_to_file()
+
+
+        if not (self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns):
+            # load gammas from temp file
+            temp_gammas = pd.read_csv(self.gamma_filepath)
+            for i, row in temp_gammas[[self.content_col, self.platform_col, 'gamma']].iterrows():
+                if row[self.content_col] in self.gammas.keys():
+                    self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
+            # update metadata info data with temp gammas
+            self.metadata.info_data = temp_gammas.copy()
+            # update user_info_data boolean flag
+            self.metadata.use_info_data = True
+
+        # remove temporary gammas file
+        os.remove(self.gamma_filepath)
+        # write gammas to file if specified
+        if save_predicted_gammas:
+            self.gammas[[self.content_col, self.platform_col, 'gamma']].to_csv(save_predicted_gammas_to_fn, index=False)
+
 
     def list_measurements(self):
         count = 0
@@ -147,7 +173,8 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             burstDetection = BurstDetection(dataset_df=content_df, metadata=self.metadata, id_col=self.id_col,
                                             timestamp_col=self.timestamp_col, platform_col=self.platform_col, 
                                             time_granularity=self.time_granularity,
-                                            min_date=self.min_date, max_date=self.max_date)
+                                            min_date=self.min_date, max_date=self.max_date,
+                                            gamma_filepath=self.gamma_filepath)
             burst_intervals = burstDetection.detect_bursts(self.gammas[content_id])
             if len(burst_intervals) < bursts_count_threshold:
                 continue

@@ -63,12 +63,20 @@ def df_to_config(df):
     return(output)
 
 def main():
-
+    #scenario 1
     df = pd.read_csv('cp3_s1_configuration.csv')
-    
+
     config = df_to_config(df)
-    
-    with open('cp3_s1_configuration.json','w') as f:
+
+    with open('cp3_s1_configuration.json', 'w') as f:
+        json.dump(config, f, indent=4)
+
+    #scenario 2
+    df = pd.read_csv('cp3_s2_configuration.csv')
+
+    config = df_to_config(df)
+
+    with open('cp3_s2_configuration.json', 'w') as f:
         json.dump(config, f, indent=4)
 
 

@@ -71,13 +71,22 @@ def main():
 
     fn = 'cp3_s1_configuration.json'
 
+    with open(fn, 'r') as f:
+        config = json.load(f)
+
+    df = config_to_df(config)
+
+    df.to_csv('cp3_s1_configuration.csv', index=False)
+
+    fn = 'cp3_s2_configuration.json'
+
+
     with open(fn,'r') as f:
         config = json.load(f)
 
-        
     df = config_to_df(config)
-    
-    df.to_csv('cp3_s1_configuration.csv',index=False)
+
+    df.to_csv('cp3_s2_configuration.csv',index=False)
 
 
 if __name__ == "__main__":

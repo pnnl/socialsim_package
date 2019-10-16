@@ -4301,13 +4301,11 @@
                     "scale": "community",
                     "temporal_or_batch": "Batch",
                     "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
+                        "rmse": {
+                            "metric": "rmse",
+                            "metric_args": {
+                                "join": "outer"
+                            }
                         }
                     }
                 },
@@ -4318,7 +4316,7 @@
                         "community_level": true
                     },
                     "scale": "community",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4362,7 +4360,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4385,7 +4383,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4408,7 +4406,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4431,7 +4429,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4454,7 +4452,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4477,7 +4475,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4500,7 +4498,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4542,7 +4540,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4565,7 +4563,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4588,7 +4586,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4611,7 +4609,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4634,7 +4632,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4657,7 +4655,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4699,7 +4697,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -4743,7 +4741,7 @@
                         "community_level": false
                     },
                     "scale": "population",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -5949,13 +5947,11 @@
                     "scale": "community",
                     "temporal_or_batch": "Batch",
                     "metrics": {
-                        "absolute_percentage_error": {
-                            "metric": "absolute_percentage_error",
-                            "metric_args": {}
-                        },
-                        "absolute_difference": {
-                            "metric": "absolute_difference",
-                            "metric_args": {}
+                        "rmse": {
+                            "metric": "rmse",
+                            "metric_args": {
+                                "join": "outer"
+                            }
                         }
                     }
                 },
@@ -5966,7 +5962,7 @@
                         "community_level": true
                     },
                     "scale": "community",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6010,7 +6006,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6033,7 +6029,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6056,7 +6052,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6079,7 +6075,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6102,7 +6098,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6125,7 +6121,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6148,7 +6144,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6190,7 +6186,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6213,7 +6209,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6236,7 +6232,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6259,7 +6255,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6282,7 +6278,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6305,7 +6301,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6347,7 +6343,7 @@
                         "community_level": false
                     },
                     "scale": "node",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",
@@ -6390,7 +6386,7 @@
                         "community_level": false
                     },
                     "scale": "population",
-                    "temporal_or_batch": "Temporal",
+                    "temporal_or_batch": "Batch",
                     "metrics": {
                         "rmse": {
                             "metric": "rmse",

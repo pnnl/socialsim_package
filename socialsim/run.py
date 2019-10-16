@@ -202,6 +202,12 @@ def run_measurements(dataset, configuration, metadata, timing, verbose, save,
                     # Run the specified measurements
                     measurement_results, measurement_logs = measurement.run(**kwargs)
 
+                    if measurement_type in ['recurrence','persistent_groups']:
+                        # if you run persistent groups or recurrence, update metadata object
+                        # to capture any updates during measurement run (i.e. update the
+                        # metadata object to contain the gammas if gammas predicted)
+                        metadata = measurement.metadata
+
                 except Exception as error:
                     measurement_logs    = {
                         'status': 'Measurements object failed to run.', 
