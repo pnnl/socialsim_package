@@ -13,7 +13,7 @@ from ..utils import get_community_contentids
 import pprint
 from .model_parameters.selected_features import selected_features
 
-import re
+import re, time
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
@@ -21,7 +21,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                  id_col='nodeID', timestamp_col="nodeTime", userid_col="nodeUserID", platform_col="platform",
                  content_col="informationID", communities=None, log_file='recurrence_measurements_log.txt',
                  selected_content=None, selected_communties=None, time_granularity='12H', 
-                 plot=False, show=False, save_plots=False, plot_dir='./'):
+                 plot=False, show=False, save_plots=False, plot_dir='./',
+                 save_predicted_gammas = False, save_predicted_gammas_to_fn='./predicted_gammas.csv'):
         """
         :param dataset_df: dataframe containing all posts for all communities (Eg. coins for scenario 2) in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -63,9 +64,31 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                 
                 for i, row in self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].iterrows():
                     if row[self.content_col] in self.gammas.keys():
-                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma'] 
+                        self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
 
+        self.gamma_filepath = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime())).replace(' ','_')
+        with open(self.gamma_filepath, 'w') as f:
+            f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
+        # initialize recurrence measurements
         self.initialize_recurrence_measurements(ever_show=show)
+
+        if not (self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns):
+            # load gammas from temp file
+            temp_gammas = pd.read_csv(self.gamma_filepath)
+            for i, row in temp_gammas[[self.content_col, self.platform_col, 'gamma']].iterrows():
+                if row[self.content_col] in self.gammas.keys():
+                    self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
+            # update metadata info data with temp gammas
+            self.metadata.info_data = temp_gammas.copy()
+            # update user_info_data boolean flag
+            self.metadata.use_info_data = True
+
+        # remove temporary gammas file
+        os.remove(self.gamma_filepath)
+        # write gammas to file if specified
+        if save_predicted_gammas:
+            self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].to_csv(save_predicted_gammas_to_fn, index=False)
+
 
     def list_measurements(self):
         count = 0
@@ -110,7 +133,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                                                                                              plot_flag=self.plot,
                                                                                              show=show,
                                                                                              plot_dir=self.plot_dir,
-                                                                                             save_plots = self.save_plots)
+                                                                                             save_plots = self.save_plots,
+                                                                                             gamma_filepath=self.gamma_filepath)
             num_plots += 1
 
     def run_content_level_measurement(self, measurement_name, scale='node',
@@ -398,7 +422,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 class BurstDetection():
     def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime",
                  platform_col="platform", time_granularity='D',
-                 min_date=None, max_date=None, content_id=''):
+                 min_date=None, max_date=None, content_id='', gamma_filepath='./temporary_predicted_gammas_file.csv'):
         self.dataset_df = dataset_df
         self.metadata = metadata
         self.timestamp_col = timestamp_col
@@ -412,6 +436,7 @@ class BurstDetection():
         if not max_date is None:
             self.max_date = pd.Timestamp(max_date)
         self.content_id = content_id
+        self.gamma_filepath = gamma_filepath
 
     def detect_bursts(self, gamma=None):
         '''
@@ -492,7 +517,7 @@ class BurstDetection():
         d = np.array([sum(r)] * n, dtype=float)
         if gamma is None and np.max(r) >= 5:
             gamma = self.predict_gamma_for_timeseries(timeseries_df)
-            with open('predicted_gammas.csv', 'a') as f:
+            with open(self.gamma_filepath, 'a') as f:
                 f.write(self.content_id + ',' + platform + ',' + str(gamma) + '\n')
         elif np.max(r) < 5:
             return None
@@ -518,7 +543,7 @@ class BurstDetection():
         try:
             features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}),
                                            column_id='dummy_col', column_sort=self.timestamp_col,
-                                           disable_progressbar=True)[selected_features].fillna(0)
+                                           disable_progressbar=True, n_jobs=0)[selected_features].fillna(0)
             features_df = features_df.replace(np.inf, 0)
             features_df = features_df.replace(-np.inf, 0)
             gamma = self.metadata.estimator.predict(features_df)[0]
@@ -535,7 +560,8 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
                  content_col="informationID", communities=None,
                  log_file='recurrence_measurements_log.txt', content_id=None,
                  time_granularity='D', gamma=None,
-                 min_date=None, max_date=None, plot_flag=True, show=False, plot_dir='./', save_plots=False):
+                 min_date=None, max_date=None, plot_flag=True, show=False, plot_dir='./', save_plots=False,
+                 gamma_filepath='./temporary_gammas_predicted.csv'):
         """
         :param dataset_df: dataframe containing all posts for a single coin in all platforms
         :param timestamp_col: name of the column containing the time of the post
@@ -562,13 +588,15 @@ class ContentRecurrenceMeasurements(MeasurementsBaseClass):
             os.makedirs(plot_dir)
 
         self.save_plots = save_plots
+        self.gamma_filepath = gamma_filepath
 
         burstDetection = BurstDetection(dataset_df=self.dataset_df, metadata=self.metadata, id_col=self.id_col,
                                         timestamp_col=self.timestamp_col, platform_col=self.platform_col,
                                         time_granularity=self.time_granularity,
                                         min_date=min_date,
                                         max_date=max_date,
-                                        content_id=content_id)
+                                        content_id=content_id,
+                                        gamma_filepath=self.gamma_filepath)
         self.burst_intervals = burstDetection.detect_bursts(gamma)
         self.update_with_burst()
         if plot_flag:

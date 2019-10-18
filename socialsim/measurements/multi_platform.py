@@ -49,6 +49,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                                             community_directory,
                                                             communities)
             
+            
         if metadata is None or metadata.node_list is None:
             if node_list == "all":
                 self.node_list = self.dataset[self.content_col].tolist()
@@ -88,7 +89,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         :param platform: Name of platform to include or "all" for all platforms
         :return: New DataFrame with the select communities/content only
         """
-
+        
         if nodes is None:
             nodes = []
         if communities is None:
@@ -111,8 +112,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             data = self.dataset.loc[self.dataset[self.platform_col].isin(platform_list)]
 
         if len(action_types) > 0:
-            data = self.dataset[self.dataset[self.event_col].isin(action_types)]
-            
+            data = data[data[self.event_col].isin(action_types)]            
+
         return data
 
 
@@ -141,7 +142,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
             communities = []
-            
+        
+    
         data = self.select_data(nodes, communities, platform=platform, action_types=action_types)
 
         return data
@@ -185,6 +187,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
         time = self.get_lifetime(x, time_unit)
+
 
         if time == 0:
             speed = np.nan
@@ -748,7 +751,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         lifetime = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                  community_level=community_level,
                                                  node_level=node_level)
-    
+
         return lifetime
 
 
@@ -813,11 +816,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
 
-
         speed_distribution = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                            community_level=community_level,
                                                            node_level=node_level)
-        
         return speed_distribution
 
 

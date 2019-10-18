@@ -33,7 +33,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
     iGraph-Python at http://igraph.org/python/
     SNAP Python at https://snap.stanford.edu/snappy/
     """
-    def __init__(self, dataset, platform, configuration = {}, 
+    def __init__(self, dataset, platform='', configuration = {}, 
                  metadata = None, test=False, 
                  log_file='network_measurements_log.txt', plot_graph=False, 
                  node="", weight_filter=1):

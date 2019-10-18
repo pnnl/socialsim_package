@@ -108,14 +108,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
     def get_time_diff_granularity(self,time_diff,granularity):
 
-        if granularity.lower() == 's':
-            return time_diff.seconds
-        elif granularity.lower() == 'm':
-            return time_diff.minutes
-        elif granularity.lower() == 'h':
-            return time_diff.hours
-        elif granularity.lower() == 'd':
-            return time_diff.days
+        return time_diff / np.timedelta64(1,granularity)
 
     def get_time_granularity(self,time,time_unit):
 
@@ -276,8 +269,9 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             group_col = [self.content_col, self.community_col, self.platform_col]
 
 
-        data.drop_duplicates(subset=group_col, inplace=True)
         data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
+
+        data.drop_duplicates(subset=group_col, inplace=True)
                 
         group_col = [c for c in group_col if c != self.platform_col]
         
@@ -494,7 +488,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             group_col = [self.content_col,self.community_col]
 
         def get_speed(grp):
-            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).total_seconds()
             time = self.get_time_granularity(time,time_unit)
             if time == 0:
                 speed = -1
@@ -699,7 +693,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             group_col = [self.content_col,self.community_col]
 
         def get_lifetime(grp):
-            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).total_seconds()
             time = self.get_time_granularity(time,time_unit)
             return time
 
@@ -774,7 +768,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
        
 
         def get_speed(grp):
-            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).total_seconds()
             time = self.get_time_granularity(time,time_unit)
             if time == 0:
                 speed = -1
@@ -783,7 +777,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             return speed
 
         def get_lifetime(grp):
-            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).seconds
+            time = (grp[self.timestamp_col].max() - grp[self.timestamp_col].min()).total_seconds()
             time = self.get_time_granularity(time,time_unit)
             return time
 

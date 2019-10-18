@@ -6,6 +6,8 @@ import json
 import itertools
 #import networkx as nx
 import numpy as np
+import glob
+import networkx as nx
 
 from datetime import datetime
 
@@ -40,6 +42,7 @@ def get_domains(urls):
         domain = get_domain(url)
         if domain not in domains:
             domains.append(domain)
+    domains = list(set(domains))
     return domains
 
 
@@ -96,11 +99,10 @@ def get_info_id_from_text(text_list = [], keywords = []):
         
     return(list(set(info_ids)))
         
-def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
+def get_info_id_from_fields(row, fields=['entities.hashtags.text'], casefold_info_ids=True):
 
     """
     Extract information IDs from specified fields in the JSON
-
     :param row: A DataFrame row containing the JSON fields
     :param fields: A list of field paths from which to extract the info IDs, e.g. entities.hashtags.text, entities.user_mentions.screen_name
     :returns: a list of information IDs that are in the specified fields
@@ -127,14 +129,73 @@ def get_info_id_from_fields(row, fields=['entities.hashtags.text']):
                 break
             elif i == len(path) and type(val) == str:
                 info_ids.append(val)
-                
+
+    if casefold_info_ids:
+        info_ids = [x.lower() for x in info_ids]
+
     return list(set(info_ids))
 
 
+
+def user_alignment(alignment_file_path,
+                   thresh=0.9):
+
+    """
+    Standardize user IDs across platforms based on released user alignment data.
+    """
+    
+    alignment_files = glob.glob(alignment_file_path + '/Tng_an_userAlignment_*.json')
+
+    alignment_data = []
+    for fn in alignment_files:
+        with open(fn,'r') as f:
+            for line in f:
+                alignment_data.append(json.loads(line))
+
+    df = pd.DataFrame(alignment_data)
+    df = df[df['score'] > thresh]
+
+    platforms = [c for c in df.columns if c != 'score']
+
+    dfs = []
+    for i,p1 in enumerate(platforms):
+        for j,p2 in enumerate(platforms[i:]):
+            if p2 != p1:
+                df_map = df[[p1,p2,'score']].dropna()
+                df_map.columns = ['username1','username2','score']
+
+                #if username has multiple matches keep the highest score
+                df_map = df_map.sort_values('score',ascending=False)
+                df_map = df_map.drop_duplicates(subset=['username2'])
+                df_map = df_map.drop_duplicates(subset=['username1'])
+                
+                df_map = df_map.drop('score',axis=1)
+                df_map = df_map[df_map['username1'] != df_map['username2']]
+
+                dfs.append(df_map)
+
+       
+    edge_df = pd.concat(dfs,axis=0)
+    edge_df = edge_df.drop_duplicates()
+
+    G = nx.from_pandas_edgelist(edge_df,source='username1',target='username2')
+
+    components = nx.connected_components(G)
+    username_map = {}
+    for comp in components:
+        comp = list(comp)
+        for i in range(len(comp) - 1):
+            username_map[comp[i+1]] = comp[0]
+
+    return(username_map)
+
+
 def extract_youtube_data(fn='youtube_data.json',
-                          info_id_fields=None,
-                          keywords = [],
-                          anonymized=False):
+                         info_id_fields=None,
+                         keywords = [],
+                         anonymized=False,
+                         username_map = {}):
+
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
     
@@ -243,7 +304,7 @@ def extract_youtube_data(fn='youtube_data.json',
     replies.loc[:,'nodeUserID']=replies['snippet'].apply(lambda x: x['authorChannelId']['value'+name_suffix])
     replies.loc[:,'parentID']=replies['snippet'].apply(lambda x: x['parentId'+name_suffix])
     replies.loc[:,'rootID']=replies['snippet'].apply(lambda x: x['videoId'+name_suffix])
-    replies.loc[:,'actionType']='reply'
+    replies.loc[:,'actionType']='comment'
     replies.loc[:,'platform']=platform
     if len(keywords) > 0:
         replies.loc[:,'informationIDs'] = replies['snippet'].apply(lambda x: get_info_id_from_text([x['textDisplay' + text_suffix]], keywords))
@@ -298,6 +359,8 @@ def extract_youtube_data(fn='youtube_data.json',
     youtube_data = youtube_data.drop('threadInfoIDs',axis=1)
     youtube_data = convert_timestamps(youtube_data)
 
+    youtube_data['nodeUserID'] = youtube_data['nodeUserID'].replace(username_map)
+
     print('Done!')
     return youtube_data
 
@@ -305,11 +368,11 @@ def extract_youtube_data(fn='youtube_data.json',
 def extract_telegram_data(fn='telegram_data.json',
                           info_id_fields=None,
                           keywords = [],
-                          anonymized=False):
+                          anonymized=False,
+                          username_map = {}):
 
     """
     Extracts fields from Telegram JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Telegram data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
@@ -430,6 +493,8 @@ def extract_telegram_data(fn='telegram_data.json',
     data = convert_timestamps(data)
     data = data[~data['communityID'].isnull()]
     
+    data['nodeUserID'] = data['nodeUserID'].replace(username_map)
+
     print('Done!')
     return data
    
@@ -437,11 +502,11 @@ def extract_telegram_data(fn='telegram_data.json',
 def extract_reddit_data(fn='reddit_data.json',
                         info_id_fields=None,
                         keywords = [],
-                        anonymized=False):
+                        anonymized=False,
+                        username_map = {}):
 
     """
     Extracts fields from Reddit JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Reddit data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
@@ -561,6 +626,8 @@ def extract_reddit_data(fn='reddit_data.json',
     data = data.sort_values('nodeTime').reset_index(drop=True)
     data = convert_timestamps(data)
 
+    data['nodeUserID'] = data['nodeUserID'].replace(username_map)
+
     print('Done!')
     return data
     
@@ -568,11 +635,11 @@ def extract_reddit_data(fn='reddit_data.json',
 def extract_twitter_data(fn='twitter_data.json',
                          info_id_fields=None,
                          keywords = [],
-                         anonymized=False):
+                         anonymized=False,
+                         username_map = {}):
 
     """
     Extracts fields from Twitter JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Twitter data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     :param keywords:
@@ -805,6 +872,8 @@ def extract_twitter_data(fn='twitter_data.json',
     tweets = tweets.drop('threadInfoIDs',axis=1)
     tweets = convert_timestamps(tweets)
 
+    tweets['nodeUserID'] = tweets['nodeUserID'].replace(username_map)
+
     print('Done!')
     return tweets
 
@@ -838,7 +907,8 @@ def get_github_text_field(row):
 def extract_github_data(fn='github_data.json',
                         info_id_fields=None,
                         keywords = [],
-                        anonymized=False):
+                        anonymized=False,
+                        username_map = {}):
 
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
@@ -942,5 +1012,6 @@ def extract_github_data(fn='github_data.json',
     events = events.drop_duplicates([c for c in events.columns if c != 'domain_linked'])
     
     print('Done!')
+    events['nodeUserID'] = events['nodeUserID'].replace(username_map)
     return events
 

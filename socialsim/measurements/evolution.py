@@ -18,7 +18,6 @@ import math
 import time as tMeasures
 from collections import OrderedDict
 
-
 import tqdm
 import os
 
@@ -98,7 +97,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                  parent_node_col="parentID", node_col="nodeID", root_node_col="rootID",
                  user_col="nodeUserID", weight_filter=1,
                  log_file="evolution_measurements_log.txt",
-                 content_col="informationID", community_col="communityID",
+                 content_col="informationID", community_col="community",
                  node_list=None, community_list=None, time_granularity='M', timestamp_col='nodeTime'):
 
 
@@ -177,24 +176,191 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
         self.cascade_em = {}
 
-        if self.node_list == []:
-            nodes_for_cascade_em = self.data[self.content_col].tolist()
+        if self.node_list == [] or self.node_list == 'all':
+            nodes_for_cascade_em = self.data[self.content_col].unique().tolist()
         else:
             nodes_for_cascade_em = self.node_list
 
         for node in nodes_for_cascade_em:
-            self.cascade_em[node] = CascadeEvolutionMeasurements(self.data,
-                                                                 time_granularity=self.time_granularity,
-                                                                 timestamp_col=timestamp_col,
-                                                                 configuration=configuration,
-                                                                 metadata=metadata,
-                                                                 test=test,
-                                                                 log_file=f'evolution_measurements_log_{node}.txt',
-                                                                 plot_graph=plot_graph, node=node,
-                                                                 parent_node_col=parent_node_col, node_col=node_col,
-                                                                 root_node_col=root_node_col, user_col=user_col,
-                                                                 weight_filter=weight_filter)
-            self.cascade_em[node].load_time_series_graphs()
+            # check that the node is present in the data, will skip nodes that have no data
+            if node in self.data[self.content_col].unique().tolist():
+                self.cascade_em[node] = CascadeEvolutionMeasurements(self.data,
+                                                                     time_granularity=self.time_granularity,
+                                                                     timestamp_col=timestamp_col,
+                                                                     configuration=configuration,
+                                                                     metadata=metadata,
+                                                                     test=test,
+                                                                     log_file=f'evolution_measurements_log_{node}.txt',
+                                                                     plot_graph=plot_graph, node=node,
+                                                                     parent_node_col=parent_node_col, node_col=node_col,
+                                                                     root_node_col=root_node_col, user_col=user_col,
+                                                                     weight_filter=weight_filter)
+                self.cascade_em[node].load_time_series_graphs()
+
+
+
+    # Timeseries Measurements Helper functions
+
+    def _timeseries_per_node(self, nodes, meas_func):
+        if nodes == []:
+            # if not passed, set nodes to all nodes with cascade_evolution_measurement objects
+            nodes = self.cascade_em.keys()
+        res = {}
+        for node in nodes:
+            if node in self.cascade_em.keys():
+                node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+            else:
+                node_res = None
+            res[node] = node_res
+        return res
+
+    def _mean_across_nodes_by_timebin_community_timeseries_dict(self, communities, meas_func):
+        ## mean by timebin across all nodes for community, population
+        if communities == []:
+            # if not passed, set communities to all communities specified at instantiation
+            communities = self.communities
+        res = {}
+        for community in communities:
+            comm_res = []
+            community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+            for node in community_nodes:
+                if node in self.cascade_em.keys():
+                    node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+                    if node_res is not None:
+                        comm_res.append(node_res)
+            if len(comm_res) > 0:
+                comm_res = pd.concat(comm_res)
+                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+            else:
+                comm_res = None
+            res[community] = comm_res
+        return res
+
+    def _mean_across_nodes_by_timebin_population_timeseries(self, meas_func):
+        # run at a poulation level
+        pop_res = []
+        for node in self.cascade_em.keys():
+            node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+            if node_res is not None:
+                pop_res.append(node_res)
+        if len(pop_res) > 0:
+            pop_res = pd.concat(pop_res)
+            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
+        else:
+            pop_res = None
+        return pop_res
+
+
+    def _timeseries_measurement(self, meas_func, node_level, community_level, nodes, communities):
+        ## timeseries per node
+        if node_level:
+            res = self._timeseries_per_node(nodes, meas_func)
+            return res
+
+        ## mean by timebin across all nodes for community, population
+        if community_level:
+            res = self._mean_across_nodes_by_timebin_community_timeseries_dict(communities, meas_func)
+            return res
+
+        if not node_level and not community_level:
+            # run at a poulation level
+            pop_res = self._mean_across_nodes_by_timebin_population_timeseries(meas_func)
+            return pop_res
+
+        return None
+
+    # scalar measurements
+    def _scalar_per_node(self, nodes, meas_func):
+        if nodes == []:
+            # if not passed, set nodes to all nodes with cascade_evolution_measurement objects
+            nodes = self.cascade_em.keys()
+        res = {}
+        for node in nodes:
+            if node in self.cascade_em.keys():
+                node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+            else:
+                node_res = None
+            res[node] = node_res
+        return res
+
+    def _scalar_per_node_community_distribution_dict(self, communities, meas_func):
+        ## mean by timebin across all nodes for community, population
+        if communities == []:
+            # if not passed, set communities to all communities specified at instantiation
+            communities = self.communities
+        res = {}
+        for community in communities:
+            comm_res = []
+            community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+            for node in community_nodes:
+                if node in self.cascade_em.keys():
+                    node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+                    if node_res is not None:
+                        comm_res.append(node_res)
+            if len(comm_res) == 0:
+                comm_res = None
+            res[community] = comm_res
+        return res
+
+    def _mean_of_timeseries_per_node_community_distribution_dict(self, communities, meas_func):
+        ## mean by timebin across all nodes for community, population
+        if communities == []:
+            # if not passed, set communities to all communities specified at instantiation
+            communities = self.communities
+        res = {}
+        for community in communities:
+            comm_res = []
+            community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
+            for node in community_nodes:
+                if node in self.cascade_em.keys():
+                    node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+                    if node_res is not None:
+                        comm_res.append(node_res[VALUE_COLUMN].mean())
+            if len(comm_res) == 0:
+                comm_res = None
+            res[community] = comm_res
+        return res
+
+    def _mean_of_timeseries_per_node_population_distribution_dict(self, meas_func):
+        res = []
+        nodes = self.cascade_em.keys()
+        for node in nodes:
+            node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+            if node_res is not None:
+                res.append(node_res[VALUE_COLUMN].mean())
+        if len(res) == 0:
+            res = None
+        return res
+
+    def _scalar_per_node_population_distribution(self, meas_func):
+        # run at a poulation level
+        pop_res = []
+        for node in self.cascade_em.keys():
+            node_res = getattr(self.cascade_em[node], meas_func)(platform=self.platform)
+            if node_res is not None:
+                pop_res.append(node_res)
+        if len(pop_res) == 0:
+            pop_res = None
+        return pop_res
+
+    def _scalar_measurement(self, meas_func, node_level, community_level, nodes, communities):
+        ## timeseries per node
+        if node_level:
+            res = self._scalar_per_node(nodes, meas_func)
+            return res
+
+        ## mean by timebin across all nodes for community, population
+        if community_level:
+            res = self._scalar_per_node_community_distribution_dict(communities, meas_func)
+            return res
+
+        if not node_level and not community_level:
+            # run at a poulation level
+            pop_res = self._scalar_per_node_population_distribution(meas_func)
+            return pop_res
+
+        return None
+
 
     ####################################################################################################################
     # Information Related
@@ -215,43 +381,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs per communityID (community_level),
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with CascadeEvolutionMeasurements objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].tendency_to_include_URL(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set['communityID'] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].tendency_to_include_URL(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].tendency_to_include_URL(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-
-        return None
+        meas_func = 'tendency_to_include_URL'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
     def tendency_to_link_external(self, node_level=False, community_level=False,
                                   nodes=[], communities=[]):
@@ -270,42 +401,10 @@ class EvolutionMeasurements(MeasurementsBaseClass):
 
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].tendency_to_link_external(platform=self.platform)
-            return res
+        meas_func = 'tendency_to_link_external'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].tendency_to_link_external(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
 
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].tendency_to_link_external(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
 
     def number_of_domains_linked_over_time(self, node_level=False, community_level=False,
                         nodes=[], communities=[]):
@@ -323,42 +422,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_domains_linked_over_time(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'number_of_domains_linked_over_time'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def gini_coefficient_over_time(self, node_level=False, community_level=False,
@@ -377,44 +442,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform))
-
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].cascade_collection_participation_gini(platform=self.platform))
-
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'cascade_collection_participation_gini'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
     def palma_ratio_over_time(self, node_level=False, community_level=False,
                                            nodes=[], communities=[]):
@@ -432,42 +461,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].cascade_collection_participation_palma(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'cascade_collection_participation_palma'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
     ####################################################################################################################
     # User Connections (User-Network) Related
@@ -488,34 +483,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                         distribution over all informationIDs in population (population_level)
 
         """
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].fluctuability(platform=self.platform)
-            return res
+        meas_func = 'fluctuability'
+        return self._scalar_measurement(meas_func, node_level, community_level, nodes, communities)
 
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].fluctuability(platform=self.platform))
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].fluctuability(platform=self.platform))
-            return pop_res
 
     def mean_uniqueness_of_user_connections(self, node_level=False, community_level=False, nodes=[], communities=[]):
         """
@@ -530,32 +500,25 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 Output: scalar per communityID (community_level) or scalar for population (population_level)
 
         """
-        mean_res = None
         if node_level:
             # node_level mean_uniqueness_of_user_connections is simply uniqueness_of_user_connections
-            return self.uniqueness_of_user_connections(node_level=True,
-                                                                 community_level=False,
-                                                                 nodes=nodes, communities=communities)
-
-        if community_level:
-
-            community_dist = self.uniqueness_of_user_connections(node_level=False,
+            return self.uniqueness_of_user_connections(node_level=node_level,
                                                                  community_level=community_level,
                                                                  nodes=nodes, communities=communities)
-            mean_res = {}
-            for community in community_dist.keys():
-                community_dist_vals = [x for x in community_dist[community] if x is not None]
-                mean_res[community] = np.mean(community_dist_vals)
+        else:
+            dist_res = self.uniqueness_of_user_connections(node_level=node_level,
+                                                                 community_level=community_level,
+                                                                 nodes=nodes, communities=communities)
+            if community_level:
+                # return mean per community
+                for k in dist_res.keys():
+                    if not dist_res[k] is None:
+                        dist_res[k] = np.mean(dist_res[k])
+                return dist_res
+            else:
+                # return mean over all nodes in population
+                return np.mean([x for x in dist_res if x is not None])
 
-        if not community_level:
-            # run at a poulation level
-            population_dist = self.uniqueness_of_user_connections(node_level=False,
-                                                                  community_level=community_level,
-                                                                  nodes=nodes, communities=communities)
-            population_dist = [x for x in population_dist if x is not None]
-            mean_res = np.mean(population_dist)
-
-        return mean_res
 
 
     def persistence_of_connectivity(self, node_level=False, community_level=False,
@@ -574,54 +537,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].persistence_of_connectivity(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].persistence_of_connectivity(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-
-                if len(comm_res) > 0:
-                    comm_res = pd.concat(comm_res)
-                    comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                else:
-                    comm_res = None
-
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].persistence_of_connectivity(platform=self.platform))
-            if len(pop_res) > 0:
-                pop_res = pd.concat(pop_res)
-                pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            else:
-                pop_res = None
-
-            return pop_res
-
-        return None
-
+        meas_func = 'persistence_of_connectivity'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
     def mean_persistence_of_connectivity(self, node_level=False, community_level=False, nodes=[], communities=[]):
         """
@@ -637,52 +554,23 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 (community_level) or all informationIDs in the population (population_level)
 
         """
-
-        ## mean across all timebins per node
+        meas_func = 'persistence_of_connectivity'
         if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
-                    platform=self.platform)
-                if persistence_of_connectivity_node is not None:
-                    mean_persistence_of_connectivity_node = persistence_of_connectivity_node[VALUE_COLUMN].mean()
-                else:
-                    mean_persistence_of_connectivity_node = None
-                res[node] = mean_persistence_of_connectivity_node
-            return res
-
-        ## distribution of mean across all timebins per node for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
-                        platform=self.platform)
-                    if persistence_of_connectivity_node is not None:
-                        comm_res.append(persistence_of_connectivity_node[VALUE_COLUMN].mean())
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                persistence_of_connectivity_node = self.cascade_em[node].persistence_of_connectivity(
-                    platform=self.platform)
-                if persistence_of_connectivity_node is not None:
-                    pop_res.append(persistence_of_connectivity_node[VALUE_COLUMN].mean())
-
-            return pop_res
-
-        return None
+            # node_level mean_uniqueness_of_user_connections is simply uniqueness_of_user_connections
+            node_res = self.persistence_of_connectivity(node_level=node_level,
+                                                                 community_level=community_level,
+                                                                 nodes=nodes, communities=communities)
+            for node in node_res.keys():
+                if node_res[node] is not None:
+                    node_res[node] = node_res[node][VALUE_COLUMN].mean()
+            return node_res
+        else:
+            if community_level:
+                # return per community distributions of mean per node for all nodes in community
+                return self._mean_of_timeseries_per_node_community_distribution_dict(communities, meas_func)
+            else:
+                # return distribution of mean per node for all nodes in population
+                return self._mean_of_timeseries_per_node_population_distribution_dict(meas_func)
 
 
 
@@ -702,42 +590,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].number_of_nodes(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_nodes(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_nodes(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'number_of_nodes'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def volume_of_user_connections_over_time(self, node_level=False, community_level=False,
@@ -755,42 +609,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].number_of_edges(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_edges(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_edges(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'number_of_edges'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def density_over_time(self, node_level=False, community_level=False,
@@ -808,42 +628,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].density(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].density(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].density(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'density'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def assortativity_coefficient_over_time(self, node_level=False, community_level=False,
@@ -862,42 +648,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].assortativity_coefficient(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].assortativity_coefficient(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].assortativity_coefficient(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'assortativity_coefficient'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def number_of_connected_components_over_time(self, node_level=False, community_level=False,
@@ -916,42 +668,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].number_of_connected_components(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].number_of_connected_components(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].number_of_connected_components(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'number_of_connected_components'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def average_clustering_coefficient_over_time(self, node_level=False, community_level=False,
@@ -970,42 +688,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].average_clustering_coefficient(platform=self.platform)
-            return res
+        meas_func = 'average_clustering_coefficient'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].average_clustering_coefficient(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].average_clustering_coefficient(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
 
     def max_node_degree_over_time(self, node_level=False, community_level=False,
                                   nodes=[], communities=[]):
@@ -1023,42 +708,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].max_node_degree(platform=self.platform)
-            return res
+        meas_func = 'max_node_degree'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].max_node_degree(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].max_node_degree(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
 
     def mean_node_degree_over_time(self, node_level=False, community_level=False,
                                    nodes=[], communities=[]):
@@ -1076,42 +728,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].mean_node_degree(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].mean_node_degree(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].mean_node_degree(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
+        meas_func = 'mean_node_degree'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
     def community_modularity_over_time(self, node_level=False, community_level=False,
@@ -1130,50 +748,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-        ## timeseries per node
-        if node_level:
-            if nodes == []:
-                # if not passed, set nodes to all nodes with cascade_evolutionmeasurement objects
-                nodes = self.cascade_em.keys()
-            res = {}
-            for node in nodes:
-                res[node] = self.cascade_em[node].community_modularity(platform=self.platform)
-            return res
-
-        ## mean by timebin across all nodes for community, population
-        if community_level:
-            if communities == []:
-                # if not passed, set communities to all communities specified at instantiation
-                communities = self.communities
-            res = {}
-            for community in communities:
-                comm_res = []
-                community_nodes = list(set(self.community_set[self.community_set[self.community_col] == community][self.content_col]))
-                for node in community_nodes:
-                    comm_res.append(self.cascade_em[node].community_modularity(platform=self.platform))
-                comm_res = pd.concat(comm_res)
-                comm_res = comm_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-                res[community] = comm_res
-            return res
-
-        if not node_level and not community_level:
-            # run at a poulation level
-            pop_res = []
-            for node in self.cascade_em.keys():
-                pop_res.append(self.cascade_em[node].community_modularity(platform=self.platform))
-            pop_res = pd.concat(pop_res)
-            pop_res = pop_res.groupby(TIMESTEP_COLUMN, as_index=False)[[VALUE_COLUMN]].mean()
-            return pop_res
-
-        return None
-
-
-
-
-
-
-
-
+        meas_func = 'community_modularity'
+        return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
 
 
@@ -1211,11 +787,13 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         self.user_col = user_col
         self.content_col = content_col
 
-        self.main_df = dataset.copy()
-        if node != "":
-            self.main_df = self.main_df.loc[self.main_df[self.content_col] == node].copy()
+        self.infoID = node
 
-        self.informationIDs_string = ' InformationID(s): {}'.format(set(self.main_df[self.content_col].unique()))
+        self.main_df = dataset.copy()
+        if self.infoID != "":
+            self.main_df = self.main_df.loc[self.main_df[self.content_col] == self.infoID].copy()
+        else:
+            self.infoID = 'All'
 
         self.platforms = set(self.main_df['platform'].unique())
         self.build_undirected_graph = {'reddit': self.reddit_build_undirected_graph,
@@ -1401,14 +979,16 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         for ts in sorted(self.time_series_gUNig[platform].keys()):
             if SNAP_LOADED:
                 if self.time_series_gUNsn[platform][ts].Empty():
-                    warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
+                    warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\' for informationID:{}'.format(ts, platform,
+                                                                                                                          self.infoID))
                     value = 0
                 else:
                     value = sn.GetBfsEffDiam(self.time_series_gUNsn[platform][ts],
                                              self.time_series_gUNsn[platform][ts].GetNodes(), False)
             else:
                 if ig.Graph.vcount(self.time_series_gUNig[platform][ts]) == 0:
-                    warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
+                    warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\' for informationID:{}'.format(ts, platform,
+                                                                                                                          self.infoID))
                     value = 0
                 else:
                     shortest_paths = self.time_series_gUNig[platform][ts].shortest_paths_dijkstra(mode='ALL')
@@ -1572,13 +1152,14 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if not self.time_series_gUNig:
             self.load_time_series_graphs()
         if platform not in self.time_series_gUNig:
-            print("Time series graphs are not built for the platform '{}'".format(platform))
+            print("Time series graphs are not built for the platform '{}' for informationID: {}".format(platform,self.infoID))
             return
 
         res = []
         for ts in sorted(self.time_series_gUNig[platform].keys()):
             if ig.Graph.vcount(self.time_series_gUNig[platform][ts]) == 0:
-                warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
+                warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\' for informationID: {}'.format(ts, platform,
+                                                                                                                    self.infoID))
                 value = 0
             else:
                 value = max(ig.Graph.degree(self.time_series_gUNig[platform][ts]))
@@ -1605,7 +1186,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         res = []
         for ts in sorted(self.time_series_gUNig[platform].keys()):
             if len(list(self.time_series_gUNig[platform][ts].vs)) == 0:
-                warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\''.format(ts, platform))
+                warnings.warn('Empty graph at time step \'{}\' on the platform \'{}\' for informationID: {}'.format(ts, platform, self.infoID))
                 value = 0
             else:
                 value = 2.0 * ig.Graph.ecount(self.time_series_gUNig[platform][ts]) / ig.Graph.vcount(
@@ -1677,11 +1258,11 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
 
         return df
 
-    def github_build_undirected_graph(self, project_on='nodeID'):
-        self.main_df = self.main_df[['nodeUserID', 'nodeID']].copy()
+    def github_build_undirected_graph(self, df, project_on='nodeID', weight_filter=1):
+        main_df = df[['nodeUserID', 'nodeID']].copy()
 
-        right_nodes = np.array(self.main_df['nodeID'].unique().tolist())
-        el = self.main_df.apply(tuple, axis=1).tolist()
+        right_nodes = np.array(main_df['nodeID'].unique().tolist())
+        el = main_df.apply(tuple, axis=1).tolist()
         edgelist = list(set(el))
         gUNsn = None
 
@@ -1701,9 +1282,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1725,9 +1306,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1747,9 +1328,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1768,9 +1349,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1789,9 +1370,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1810,9 +1391,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             # SNAP graph object construction
             gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 gUNsn.AddEdge(e.source, e.target)
 
         return gUNig, gUNsn
@@ -1857,11 +1438,11 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         df = self.get_parent_uids(platform_df).dropna(subset=['parentUserID'])
 
         if len(platform_df) == 0:
-            warning_message = 'No data for platform \'{}\''.format(platform)
+            warning_message = 'No data for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = 'No parentUserID data for platform \'{}\' -- missing data of parent of nodes (e.g. userIDs for parent content or all details of parent content)\n'.format(platform) + self.informationIDs_string
+            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
@@ -1921,7 +1502,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = '\nNo parentUserID data for platform \'{}\' -- missing data of parent of nodes (e.g. userIDs for parent content or all details of parent content)\n'.format(platform) + self.informationIDs_string
+            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
