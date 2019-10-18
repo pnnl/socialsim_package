@@ -481,9 +481,9 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                         distribution over all informationIDs in population (population_level)
 
         """
-
         meas_func = 'fluctuability'
         return self._scalar_measurement(meas_func, node_level, community_level, nodes, communities)
+
 
     def mean_uniqueness_of_user_connections(self, node_level=False, community_level=False, nodes=[], communities=[]):
         """
@@ -746,7 +746,6 @@ class EvolutionMeasurements(MeasurementsBaseClass):
                 timeseries averaged at each timebin across all informationIDs in population (population_level)
 
         """
-
         meas_func = 'community_modularity'
         return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 

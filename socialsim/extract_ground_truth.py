@@ -103,7 +103,6 @@ def get_info_id_from_fields(row, fields=['entities.hashtags.text'], casefold_inf
 
     """
     Extract information IDs from specified fields in the JSON
-
     :param row: A DataFrame row containing the JSON fields
     :param fields: A list of field paths from which to extract the info IDs, e.g. entities.hashtags.text, entities.user_mentions.screen_name
     :returns: a list of information IDs that are in the specified fields
@@ -360,7 +359,7 @@ def extract_youtube_data(fn='youtube_data.json',
     youtube_data = youtube_data.drop('threadInfoIDs',axis=1)
     youtube_data = convert_timestamps(youtube_data)
 
-    youtube_data = youtube_data['nodeUserID'].replace(username_map)
+    youtube_data['nodeUserID'] = youtube_data['nodeUserID'].replace(username_map)
 
     print('Done!')
     return youtube_data
@@ -374,7 +373,6 @@ def extract_telegram_data(fn='telegram_data.json',
 
     """
     Extracts fields from Telegram JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Telegram data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
@@ -494,8 +492,8 @@ def extract_telegram_data(fn='telegram_data.json',
     data = data.sort_values('nodeTime').reset_index(drop=True)
     data = convert_timestamps(data)
     data = data[~data['communityID'].isnull()]
-    
-    data = data['nodeUserID'].replace(username_map)
+
+    data['nodeUserID'] = data['nodeUserID'].replace(username_map)
 
     print('Done!')
     return data
@@ -509,7 +507,6 @@ def extract_reddit_data(fn='reddit_data.json',
 
     """
     Extracts fields from Reddit JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Reddit data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
@@ -629,7 +626,7 @@ def extract_reddit_data(fn='reddit_data.json',
     data = data.sort_values('nodeTime').reset_index(drop=True)
     data = convert_timestamps(data)
 
-    data = data['nodeUserID'].replace(username_map)
+    data['nodeUserID'] = data['nodeUserID'].replace(username_map)
 
     print('Done!')
     return data
@@ -643,7 +640,6 @@ def extract_twitter_data(fn='twitter_data.json',
 
     """
     Extracts fields from Twitter JSON data
-
     :param fn: A filename or list of filenames which contain the JSON Twitter data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     :param keywords:
@@ -876,7 +872,7 @@ def extract_twitter_data(fn='twitter_data.json',
     tweets = tweets.drop('threadInfoIDs',axis=1)
     tweets = convert_timestamps(tweets)
 
-    tweets = tweets['nodeUserID'].replace(username_map)
+    tweets['nodeUserID'] = tweets['nodeUserID'].replace(username_map)
 
     print('Done!')
     return tweets
@@ -1016,5 +1012,5 @@ def extract_github_data(fn='github_data.json',
     events = events.drop_duplicates([c for c in events.columns if c != 'domain_linked'])
     
     print('Done!')
+    events['nodeUserID'] = events['nodeUserID'].replace(username_map)
     return events
-

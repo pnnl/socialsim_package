@@ -68,7 +68,6 @@ def config_to_df(config):
 
 
 def main():
-
     fn = 'cp3_s1_configuration.json'
 
     with open(fn, 'r') as f:

@@ -66,7 +66,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                     if row[self.content_col] in self.gammas.keys():
                         self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
 
-        self.gamma_filepath = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime()))
+        self.gamma_filepath = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime())).replace(' ','_')
+
         with open(self.gamma_filepath, 'w') as f:
             f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
         # initialize recurrence measurements
@@ -87,7 +88,8 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         os.remove(self.gamma_filepath)
         # write gammas to file if specified
         if save_predicted_gammas:
-            self.gammas[[self.content_col, self.platform_col, 'gamma']].to_csv(save_predicted_gammas_to_fn, index=False)
+            self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].to_csv(save_predicted_gammas_to_fn, index=False)
+
 
 
     def list_measurements(self):
