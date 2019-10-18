@@ -492,7 +492,7 @@ def extract_telegram_data(fn='telegram_data.json',
     data = data.sort_values('nodeTime').reset_index(drop=True)
     data = convert_timestamps(data)
     data = data[~data['communityID'].isnull()]
-
+    
     data['nodeUserID'] = data['nodeUserID'].replace(username_map)
 
     print('Done!')
@@ -1014,3 +1014,4 @@ def extract_github_data(fn='github_data.json',
     print('Done!')
     events['nodeUserID'] = events['nodeUserID'].replace(username_map)
     return events
+

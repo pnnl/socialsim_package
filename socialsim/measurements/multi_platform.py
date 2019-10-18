@@ -142,6 +142,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
             communities = []
+        
+    
         data = self.select_data(nodes, communities, platform=platform, action_types=action_types)
 
         return data

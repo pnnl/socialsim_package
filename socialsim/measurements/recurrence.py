@@ -67,7 +67,6 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                         self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
 
         self.gamma_filepath = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime())).replace(' ','_')
-
         with open(self.gamma_filepath, 'w') as f:
             f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
         # initialize recurrence measurements
@@ -89,7 +88,6 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
         # write gammas to file if specified
         if save_predicted_gammas:
             self.metadata.info_data[[self.content_col, self.platform_col, 'gamma']].to_csv(save_predicted_gammas_to_fn, index=False)
-
 
 
     def list_measurements(self):
@@ -545,7 +543,7 @@ class BurstDetection():
         try:
             features_df = extract_features(timeseries_df.rename(columns={self.id_col: 'value'}),
                                            column_id='dummy_col', column_sort=self.timestamp_col,
-                                           disable_progressbar=True)[selected_features].fillna(0)
+                                           disable_progressbar=True, n_jobs=0)[selected_features].fillna(0)
             features_df = features_df.replace(np.inf, 0)
             features_df = features_df.replace(-np.inf, 0)
             gamma = self.metadata.estimator.predict(features_df)[0]

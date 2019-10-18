@@ -8,7 +8,8 @@ package_structure = [
 ]
 
 package_requirements = [
-    'pandas==0.23.4',#'pandas',
+    #'pandas==0.23.4',
+    'pandas',
     'matplotlib',
     'scipy>=1.2.1',
     'numpy',
@@ -45,15 +46,15 @@ package_data = {
 
 setup(
     name='socialsim',
-    version='0.2.2',
+    version='0.2.3',
     requirements=package_requirements, 
     packages=package_structure,
     package_data=package_data,
     license='',
     url='',
     long_description='None',
-    maintainer='Zachary New',
-    maintainer_email='zachary.new@pnnl.gov',
+    maintainer='SocialSim Team',
+    maintainer_email='SocialSim.Admin@pnnl.gov',
     install_requires=package_requirements
     )
 

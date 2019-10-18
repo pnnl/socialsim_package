@@ -404,6 +404,8 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         meas_func = 'tendency_to_link_external'
         return self._timeseries_measurement(meas_func, node_level, community_level, nodes, communities)
 
+
+
     def number_of_domains_linked_over_time(self, node_level=False, community_level=False,
                         nodes=[], communities=[]):
         """
