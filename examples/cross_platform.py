@@ -5,14 +5,14 @@ dataset = 'data/test_dataset.txt'
 dataset = ss.load_data(dataset)
 
 # Load the configuration file
-config = 'data/cp1_configuration.json'
+config = 'data/cp3_s1_configuration.json'
 config = ss.load_config(config)
 
 # Subset the configuration for the given task 
-config = config['cross_platform']['cross_platform']
+config = config['multi_platform']['cross_platform']
 
 # Get metadata
-metadata = ss.MetaData(community_directory='data/communities/')
+metadata = ss.MetaData()
 
 # Define the measurement object
 cross_platform_measurements = ss.CrossPlatformMeasurements(dataset, config, 
@@ -20,6 +20,3 @@ cross_platform_measurements = ss.CrossPlatformMeasurements(dataset, config,
 
 # Run all measurements in the config file
 results = cross_platform_measurements.run(verbose=True)
-
-
-print(results[0]['community']['size_of_audience'])

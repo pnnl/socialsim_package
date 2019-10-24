@@ -126,7 +126,7 @@ class EvolutionMeasurements(MeasurementsBaseClass):
         else:
             community_directory = metadata.community_directory
             communities = metadata.communities
-            self.community_set = add_communities_to_dataset(dataset,
+            self.community_set = add_communities_to_dataset(self.data,
                                                             community_directory,
                                                             communities)
 

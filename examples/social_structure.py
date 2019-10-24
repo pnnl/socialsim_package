@@ -8,15 +8,15 @@ dataset = ss.load_data(dataset)
 dataset = dataset[dataset['platform']=='twitter']
 
 # Load the configuration file
-config = './data/cp1_configuration.json'
+config = 'data/cp3_s1_configuration.json'
 config = ss.load_config(config)
 
 # Subset the configuration for the given task 
 config = config['twitter']['social_structure']
 
 # Define the measurement object
-social_structure_measurements = ss.SocialStructureMeasurements(dataset, config, None, 'twitter', plot=True,
-                                                               node='CVE-2017-0199')
+social_structure_measurements = ss.SocialStructureMeasurements(dataset, 
+    configuration=config, platform='twitter', node='CVE-2017-0199')
 
 # Run all measurements in the config file
 results = social_structure_measurements.run(verbose=True)

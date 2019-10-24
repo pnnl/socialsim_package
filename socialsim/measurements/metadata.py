@@ -8,7 +8,7 @@ import datetime
 
 class MetaData:
     def __init__(self, content_data=False, user_data=False, info_data=False,
-                 community_directory=None, node_file=None, verbose=True,
+                 community_directory=None, node_file=None, verbose=False,
                  content_node_ids='all', user_node_ids=[], do_build_communities=False,
                  communities=None):
 
