@@ -1014,4 +1014,3 @@ def extract_github_data(fn='github_data.json',
     print('Done!')
     events['nodeUserID'] = events['nodeUserID'].replace(username_map)
     return events
-
