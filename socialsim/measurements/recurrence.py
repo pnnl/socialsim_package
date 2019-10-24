@@ -14,6 +14,7 @@ import pprint
 from .model_parameters.selected_features import selected_features
 
 import re, time
+import uuid
 
 
 class RecurrenceMeasurements(MeasurementsBaseClass):
@@ -66,7 +67,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                     if row[self.content_col] in self.gammas.keys():
                         self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
 
-        self.gamma_filepath = 'temporary_predicted_gammas_file_{}.csv'.format(str(time.ctime())).replace(' ','_')
+        self.gamma_filepath = 'temporary_predicted_gammas_file_{}_{}.csv'.format(str(time.ctime()), uuid.uuid4()).replace(' ','_')
         with open(self.gamma_filepath, 'w') as f:
             f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
         # initialize recurrence measurements
