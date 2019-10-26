@@ -10,7 +10,7 @@ ground_truth = 'data/test_dataset.json'
 ground_truth = ss.load_data(ground_truth, ignore_first_line=True, verbose=False)
 
 # Load the configuration file 
-config = 'examples/data/cp3_s1_configuration.json'
+config = 'data/cp3_s1_configuration.json'
 config = ss.load_config(config)
 
 # Get metadata
@@ -21,7 +21,3 @@ task_runner = ss.TaskRunner(ground_truth, config, metadata=metadata)
 
 # Run measurements and metrics on the simulation data
 results, logs = task_runner(simulation, verbose=True)
-
-# Print metrics
-pprint(results['metrics'])
-

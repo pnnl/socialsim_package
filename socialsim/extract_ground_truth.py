@@ -360,6 +360,7 @@ def extract_youtube_data(fn='youtube_data.json',
     youtube_data = convert_timestamps(youtube_data)
 
     youtube_data['nodeUserID'] = youtube_data['nodeUserID'].replace(username_map)
+    youtube_data = youtube_data[youtube_data['informationID']!=''].copy()
 
     print('Done!')
     return youtube_data

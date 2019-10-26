@@ -68,19 +68,25 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
                         self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
 
         self.gamma_filepath = 'temporary_predicted_gammas_file_{}_{}.csv'.format(str(time.ctime()), uuid.uuid4()).replace(' ','_')
+
         with open(self.gamma_filepath, 'w') as f:
             f.write( '{},{},{}\n'.format(self.content_col, self.platform_col, 'gamma'))
+        
         # initialize recurrence measurements
         self.initialize_recurrence_measurements(ever_show=show)
 
         if not (self.metadata.use_info_data and 'gamma' in self.metadata.info_data.columns):
             # load gammas from temp file
             temp_gammas = pd.read_csv(self.gamma_filepath)
+
             for i, row in temp_gammas[[self.content_col, self.platform_col, 'gamma']].iterrows():
+
                 if row[self.content_col] in self.gammas.keys():
                     self.gammas[row[self.content_col]][row[self.platform_col]] = row['gamma']
+            
             # update metadata info data with temp gammas
             self.metadata.info_data = temp_gammas.copy()
+
             # update user_info_data boolean flag
             self.metadata.use_info_data = True
 
