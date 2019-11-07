@@ -8,7 +8,6 @@ package_structure = [
 ]
 
 package_requirements = [
-    #'pandas==0.23.4',
     'pandas',
     'matplotlib',
     'scipy>=1.2.1',
@@ -32,12 +31,8 @@ package_requirements = [
     'seaborn',
     'python-igraph',
     'deprecated',
-    #'rtree',
-    #'geopandas',
     'mpmath',
-    'future'#,
-    #'urbanaccess',
-    #'pandana'
+    'future'
 ]
 
 package_data = {
