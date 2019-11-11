@@ -169,6 +169,9 @@ def get_reply_cascade_root_tweet(df, parent_node_col="parentID", node_col="nodeI
 
     df.loc[df['rootID'] == '?','rootID'] = df.loc[df['rootID'] == '?','rootID_new']
     df = df.drop('rootID_new',axis=1)
+
+    df.loc[~df['rootID'].isin(df[node_col]),'rootID'] = '?'
+
     if json:
         return df.to_json(orient='records')
     else:

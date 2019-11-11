@@ -33,12 +33,12 @@ conda install matplotlib
 
 #### Step 3: Install the SocialSim package using pip
 ``` bash
-python setup.py install
+python setup.py install 
 ```
 
 You can ignore the following user warnings, if they appear:
 
-```
+``` 
 UserWarning: You need pandana and urbanaccess to work with segregation's network module
 You can install them with  `pip install urbanaccess pandana` or `conda install -c udst pandana urbanaccess`
   "You need pandana and urbanaccess to work with segregation's network module\n"

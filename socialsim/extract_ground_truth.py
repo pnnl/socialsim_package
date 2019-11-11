@@ -429,7 +429,12 @@ def extract_telegram_data(fn='telegram_data.json',
 
     data.loc[data['parentID'].isna(),'parentID'] = data.loc[data['parentID'].isna(),'nodeID']
 
-    data = data[data['parentID'].isin(list(set(data['nodeID'])))]
+    platform = 'telegram'
+    # has_URL, links_to_external, domain_linked
+    urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
 
 
     platform = 'telegram'
@@ -444,9 +449,6 @@ def extract_telegram_data(fn='telegram_data.json',
     
     data = get_reply_cascade_root_tweet(data)
         
-    #remove broken portions
-    data = data[data['rootID'].isin(list(set(data['nodeID'])))]
-
     print('Sorting...')
     data = data.sort_values('nodeTime').reset_index(drop=True)            
 
@@ -563,13 +565,8 @@ def extract_reddit_data(fn='reddit_data.json',
 
     data.loc[:,'platform'] = 'reddit'
     
-    #remove broken portions
-    data = data[data['parentID'].isin(list(set(data['nodeID'])))]
-    data = data[data['rootID'].isin(list(set(data['nodeID'])))]
-
     print('Sorting...')
     data = data.sort_values('nodeTime').reset_index(drop=True)
-
 
     platform = 'reddit'
     # has_URL, links_to_external, domain_linked

@@ -8,16 +8,12 @@ package_structure = [
 ]
 
 package_requirements = [
-    'pandas',
+    'pandas>=0.24.2',
     'matplotlib',
     'scipy>=1.2.1',
     'numpy',
-    'pytz',
-    'dateutils',
-    'python-dateutil',
     'scikit-learn>=0.20.2',
     'fastdtw>=0.2.0',
-    'pysal>=2.0.0',
     'tqdm>=4.31.1',
     'burst_detection>=0.1.0',
     'tsfresh>=0.11.2',
@@ -27,12 +23,9 @@ package_requirements = [
     'cairocffi>=1.0.2',
     'kiwisolver',
     'cycler',
-    'pyparser',
     'seaborn',
     'python-igraph',
-    'deprecated',
-    'mpmath',
-    'future'
+    'future',
 ]
 
 package_data = {
@@ -52,4 +45,3 @@ setup(
     maintainer_email='SocialSim.Admin@pnnl.gov',
     install_requires=package_requirements
     )
-

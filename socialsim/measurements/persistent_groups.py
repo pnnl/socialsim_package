@@ -1,6 +1,8 @@
 from .measurements import MeasurementsBaseClass
 from .recurrence   import BurstDetection
 
+from socialsim.utils import gini
+
 from collections import Counter
 from matplotlib.pyplot import cm
 
@@ -12,7 +14,6 @@ import louvain
 
 from collections import defaultdict
 
-import pysal
 import warnings
 import matplotlib.pyplot as plt
 
@@ -286,7 +287,7 @@ class PersistentGroupsMeasurements(MeasurementsBaseClass):
             info_id_counts = list(info_id_counts['value'].values)
 
             #inequality among information IDs within the group
-            content_gini = pysal.explore.inequality.gini.Gini(info_id_counts).g
+            content_gini = gini(info_id_counts)
 
             meas.append(content_gini)
 
