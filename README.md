@@ -1,9 +1,9 @@
 ## Install Instructions
 It is highly recommended that you install the SocialSim measurements package in a conda environment. SocialSim TA1 performers, please see the Wiki for information on how to [run evaluation as a self-contained service](https://wiki.socialsim.info/x/PADUAQ).
 
-#### Step 1: Create and activate a conda environment
+#### Step 1: Create and activate a conda environment 
 ``` bash
-conda create --name myenv python=3
+conda create --name myenv python=3.7
 source activate myenv 
 ```
 
@@ -32,8 +32,8 @@ conda install matplotlib
 ```
 
 #### Step 3: Install the SocialSim package using pip
-``` bash
-python setup.py install 
+``` bash 
+python setup.py install
 ```
 
 You can ignore the following user warnings, if they appear:

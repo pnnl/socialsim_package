@@ -60,8 +60,12 @@ def add_communities_to_dataset(dataset, communities_directory, communities=None)
             community_dataset.append(community_data)
 
     community_dataset = pd.concat(community_dataset)
-    community_dataset = community_dataset.replace(r'\n','', regex=True) 
-    
+    community_dataset = community_dataset.replace(r'\n','', regex=True)
+
+    # casefold informationID columns
+    dataset['informationID'] = dataset['informationID'].str.lower()
+    community_dataset['informationID'] = community_dataset['informationID'].str.lower()
+
     dataset = dataset.merge(community_dataset, how='outer', on='informationID')
     dataset = dataset.dropna(subset=['actionType'])
 

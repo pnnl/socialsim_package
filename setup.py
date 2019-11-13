@@ -28,6 +28,7 @@ package_requirements = [
     'future',
 ]
 
+
 package_data = {
       'socialsim.measurements.model_parameters': ['best_model.pkl']
       }
