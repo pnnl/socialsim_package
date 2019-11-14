@@ -341,13 +341,8 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         if len(platforms) <= 1:
             warnings.warn("Not enough platforms for cross-platform measurements")
             return(None)
-       
- 
-        data.loc[:,'values'] = 1
-        data = data.drop_duplicates(subset=[self.user_col, self.platform_col])
-        cols = [self.user_col, self.platform_col, 'values']
-        index_cols = [self.user_col]
 
+        data.loc[:,'values'] = 1
 
         if community_level:
             cols = [self.user_col, self.platform_col, self.community_col, 'values']
@@ -358,8 +353,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             index_cols = [self.user_col, self.content_col]
             group_col = self.content_col
         else:
+            cols = [self.user_col, self.platform_col, 'values']
+            index_cols = [self.user_col]
             group_col = []
 
+        # drop duplicates of users at the given resolution (indicated by columns listed in cols variable)
+        data = data.drop_duplicates(subset=cols)
 
         user_platform = data[cols].pivot_table(index=index_cols,
                                                columns=self.platform_col,

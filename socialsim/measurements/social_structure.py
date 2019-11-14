@@ -46,7 +46,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
         # Subset data for a specific informationID
         if node != "":
-            self.main_df = self.main_df.loc[self.main_df["informationID"]==node]
+            self.main_df = self.main_df.loc[self.main_df["informationID"]==node].copy()
 
         random.seed(37)
 

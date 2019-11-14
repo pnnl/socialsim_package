@@ -17,9 +17,61 @@ URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|
 
 
 def get_urls(x):
+    """
+    Get list of URLS present in string passed
+    :param x: string of text to extract URLs from
+    :return:
+    """
     urls = re.findall(URL_REGEX, x)
+    # remove false positives
+    urls = [x for x in urls if '/' in x and ',,' not in x]
+    # remove any possible empty strings
+    urls = [x for x in urls if x != '']
     return urls
 
+def get_twitter_api_url_rep(x, name_suffix):
+    if 'unwound' in x.keys():
+        url = x['unwound']['url'+name_suffix]
+    elif 'expanded_url'+name_suffix in x.keys():
+        url = x['expanded_url'+name_suffix]
+    else:
+        return ''
+    return url
+
+def get_twitter_urls(df, name_suffix):
+    twitter_urls = []
+    for row in df.iterrows():
+        rowdata = row[1]
+        api_urls = [get_twitter_api_url_rep(x, name_suffix) for x in rowdata['entities']['urls'] if x != '']
+        if 'socialsim_resolved_urls' in rowdata['extension'].keys():
+            resolved_urls = rowdata['extension']['socialsim_resolved_urls']
+            internal_urls = [x for x in api_urls if 'twitter.com' in x]
+            urls = list(set(resolved_urls + internal_urls))
+        else:
+            urls = api_urls
+        twitter_urls.append(urls)
+    return twitter_urls
+
+
+def get_youtube_urls(df, text_suffix):
+    youtube_urls = []
+    for i, row in enumerate(df.iterrows()):
+        rowdata = row[1]
+        row_data_type = rowdata['kind']
+
+        if 'socialsim_resolved_urls' in rowdata['extension'].keys():
+            urls = list(rowdata['extension']['socialsim_resolved_urls'])
+        else:
+            if row_data_type == 'youtube#video':
+                urls = get_urls(rowdata['snippet']['description' + text_suffix])
+            elif row_data_type == 'youtube#commentThread':
+                urls = get_urls(rowdata['snippet']['topLevelComment']['snippet']['textOriginal' + text_suffix])
+            elif row_data_type == 'youtube#comment':
+                urls = get_urls(rowdata['snippet']['textOriginal' + text_suffix])
+            else:
+                urls = []
+        youtube_urls.append(urls)
+    return youtube_urls
 
 def get_domain(url):
     domains_shortened = {'redd.it': 'reddit.com', 'youtu.be': 'youtube.com',
@@ -218,7 +270,9 @@ def extract_youtube_data(fn='youtube_data.json',
 
 
     print('Deduplicating...')
-    data['row_str']=['&'.join(cols) for cols in data.drop(columns=['_id']).astype(str).values]
+    if '_id' in data.columns:
+        del data['_id']
+    data['row_str']=['&'.join(cols) for cols in data.astype(str).values]
     data=data.drop_duplicates(subset=['row_str']).reset_index(drop=True)
 
 
@@ -265,7 +319,7 @@ def extract_youtube_data(fn='youtube_data.json',
                                                                           for i,c in videos.iterrows()])
 
     # has_URL, links_to_external, domain_linked
-    urls_in_text = videos['snippet'].apply(lambda x: get_urls(x['description'+text_suffix]))
+    urls_in_text = get_youtube_urls(videos, text_suffix)
     videos.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
     videos.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
     videos.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in videos['domain_linked']]
@@ -290,7 +344,7 @@ def extract_youtube_data(fn='youtube_data.json',
         comments.loc[:,'informationIDs'] = pd.Series(index=comments.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in comments.iterrows()])
 
     # has_URL, links_to_external, domain_linked
-    urls_in_text = comments['snippet'].apply(lambda x: get_urls(x['topLevelComment']['snippet']['textOriginal' + text_suffix]))
+    urls_in_text = get_youtube_urls(comments, text_suffix)
     comments.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
     comments.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
     comments.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in comments['domain_linked']]
@@ -312,7 +366,7 @@ def extract_youtube_data(fn='youtube_data.json',
         replies.loc[:,'informationIDs'] = pd.Series(index=replies.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in replies.iterrows()])
 
     # has_URL, links_to_external, domain_linked
-    urls_in_text = replies['snippet'].apply(lambda x: get_urls(x['textOriginal' + text_suffix]))
+    urls_in_text = get_youtube_urls(replies, text_suffix)
     replies.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
     replies.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
     replies.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in replies['domain_linked']]
@@ -393,7 +447,7 @@ def extract_telegram_data(fn='telegram_data.json',
         text_sufix = ""
         
     output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType', 'nodeTime',
-                      'platform','communityID', 'has_URL', 'domain_linked','links_to_external']
+                      'platform', 'has_URL', 'domain_linked','links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
 
@@ -429,9 +483,6 @@ def extract_telegram_data(fn='telegram_data.json',
 
     data.loc[data['parentID'].isna(),'parentID'] = data.loc[data['parentID'].isna(),'nodeID']
 
-    data = data[data['parentID'].isin(list(set(data['nodeID'])))]
-
-
     platform = 'telegram'
     # has_URL, links_to_external, domain_linked
     urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
@@ -439,14 +490,10 @@ def extract_telegram_data(fn='telegram_data.json',
     data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
     data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
 
-
     data = data[output_columns]
     
     data = get_reply_cascade_root_tweet(data)
         
-    #remove broken portions
-    data = data[data['rootID'].isin(list(set(data['nodeID'])))]
-
     print('Sorting...')
     data = data.sort_values('nodeTime').reset_index(drop=True)            
 
@@ -527,7 +574,7 @@ def extract_reddit_data(fn='reddit_data.json',
         text_suffix = ""
     
     output_columns = ['nodeID', 'nodeUserID', 'parentID', 'rootID', 'actionType',
-                      'nodeTime','platform','communityID', 'has_URL', 'domain_linked', 'links_to_external']
+                      'nodeTime','platform', 'has_URL', 'domain_linked', 'links_to_external']
     if get_info_ids:
         output_columns.append('informationIDs')
 
@@ -563,13 +610,8 @@ def extract_reddit_data(fn='reddit_data.json',
 
     data.loc[:,'platform'] = 'reddit'
     
-    #remove broken portions
-    data = data[data['parentID'].isin(list(set(data['nodeID'])))]
-    data = data[data['rootID'].isin(list(set(data['nodeID'])))]
-
     print('Sorting...')
     data = data.sort_values('nodeTime').reset_index(drop=True)
-
 
     platform = 'reddit'
     # has_URL, links_to_external, domain_linked
@@ -694,7 +736,7 @@ def extract_twitter_data(fn='twitter_data.json',
 
     platform = 'twitter'
     # has_URL, links_to_external, domain_linked
-    urls_in_text = tweets['entities'].apply(lambda x: [y['expanded_url'+name_suffix] for y in x['urls']])
+    urls_in_text = get_twitter_urls(tweets, name_suffix)
     tweets.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
     tweets.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
     tweets.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in tweets['domain_linked']]
@@ -721,7 +763,7 @@ def extract_twitter_data(fn='twitter_data.json',
 
     tweets.loc[:,'is_orig'] = (~tweets['is_reply']) & (~tweets['is_retweet']) & (~tweets['is_quote']) & (~tweets['is_quote_of_reply']) & (~tweets['is_quote_of_quote']) & (~tweets['is_retweet_of_reply']) & (~tweets['is_retweet_of_quote_of_reply']) & (~tweets['is_retweet_of_quote'])
 
-    
+
     tweet_types = ['is_reply','is_retweet','is_quote','is_orig','is_retweet_of_reply','is_retweet_of_quote','is_retweet_of_quote_of_reply','is_quote_of_reply','is_quote_of_quote']
    
     to_concat = []

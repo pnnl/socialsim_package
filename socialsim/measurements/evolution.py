@@ -28,30 +28,12 @@ from .measurements import MeasurementsBaseClass
 from ..load import convert_datetime
 from ..utils import add_communities_to_dataset
 
-
 from copy import deepcopy
 from .validators import check_empty
 from .validators import check_root_only
 from collections import Counter
-import pysal
 
-
-
-def palma_ratio(values):
-    if len(values) == 0:
-        warnings.warn('Cannot compute palma ratio, no values passed (empty list)')
-        return None
-    sorted_values = np.sort(np.array(values))
-    percent_nodes = np.arange(1, len(sorted_values) + 1) / float(len(sorted_values))
-    xvals = np.linspace(0, 1, 10)
-    percent_nodes_interp = np.interp(xvals, percent_nodes, sorted_values)
-    top_10_pct = float(percent_nodes_interp[-1])
-    bottom_40_pct = float(np.sum(percent_nodes_interp[0:4]))
-    try:
-        palma_ratio = top_10_pct / bottom_40_pct
-    except ZeroDivisionError:
-        return None
-    return palma_ratio
+from socialsim.utils import gini, palma_ratio
 
 
 def get_edge_string(x, y):
@@ -1410,7 +1392,15 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         for ts in self.time_series_dfs[platform]:
             all_node_users = self.time_series_dfs[platform][ts][self.user_col].values
             res.append(
-                {TIMESTEP_COLUMN: ts, VALUE_COLUMN: pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g})
+                {
+                    TIMESTEP_COLUMN: ts, VALUE_COLUMN: gini(
+                        list(
+                            Counter(all_node_users).values()
+                            )
+                        )
+                }
+            )
+
         return pd.DataFrame(res)
 
 

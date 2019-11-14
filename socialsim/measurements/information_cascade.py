@@ -4,14 +4,14 @@ from igraph      import Graph
 import numpy  as np
 import pandas as pd
 
-import pysal
-
 from .validators   import check_empty
 from .validators   import check_root_only
 from .measurements import MeasurementsBaseClass
 import re
 
 import igraph as ig
+
+from socialsim.utils import gini, palma_ratio
 
 
 class InformationCascadeMeasurements(MeasurementsBaseClass):
@@ -544,13 +544,13 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         if not community_grouper:
             root_node_users = self.main_df[self.main_df[self.node_col] == self.main_df[self.root_node_col]][
                 self.user_col].values
-            return pysal.explore.inequality.gini.Gini(list(Counter(root_node_users).values())).g
+            return gini(list(Counter(root_node_users).values()))
         elif community_grouper in self.main_df.columns:
             meas = {}
             for community in self.main_df[community_grouper].unique():
                 root_node_users = self.main_df[(self.main_df[self.node_col] == self.main_df[self.root_node_col]) & (
                             self.main_df[community_grouper] == community)][self.user_col].values
-                meas[community] = pysal.explore.inequality.gini.Gini(list(Counter(root_node_users).values())).g
+                meas[community] = gini(list(Counter(root_node_users).values()))
             return meas
         else:
             return None
@@ -600,12 +600,12 @@ class InformationCascadeMeasurements(MeasurementsBaseClass):
         """
         if not community_grouper:
             all_node_users = self.main_df[self.user_col].values
-            return pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g
+            return gini(list(Counter(all_node_users).values()))
         elif community_grouper in self.main_df.columns:
             meas = {}
             for community in self.main_df[community_grouper].unique():
                 all_node_users = self.main_df[self.main_df[community_grouper] == community][self.user_col].values
-                meas[community] = pysal.explore.inequality.gini.Gini(list(Counter(all_node_users).values())).g
+                meas[community] = gini(list(Counter(all_node_users).values()))
             return meas
         else:
             return None
@@ -1026,7 +1026,7 @@ class SingleCascadeMeasurements:
     @check_empty(default=None)
     @check_root_only(default=0)
     def cascade_participation_gini(self):
-        return pysal.explore.inequality.gini.Gini(self.node_participation()).g
+        return gini(self.node_participation())
 
     @check_empty(default=None)
     @check_root_only(default=None)
@@ -1037,18 +1037,6 @@ class SingleCascadeMeasurements:
         return self.main_df.groupby(self.main_df[self.user_col]).size().reset_index(name='counts')['counts'].values
 
 
-def palma_ratio(values):
-    values = np.sort(np.array(values))
-    percent_nodes = np.arange(1, len(values) + 1) / float(len(values))
-    # percent of events taken by top 10% of nodes
-    p10 = np.sum(values[percent_nodes >= 0.9])
-    # percent of events taken by bottom 40% of nodes
-    p40 = np.sum(values[percent_nodes <= 0.4])
-    try:
-        p = float(p10) / float(p40)
-    except ZeroDivisionError:
-        return None
-    return p
 
 
 def igraph_from_pandas_edgelist(df, source, target, directed):
