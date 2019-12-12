@@ -6,3 +6,4 @@
 socialsim.egg-info/*
 build/*
 dist/*
+*.egg
