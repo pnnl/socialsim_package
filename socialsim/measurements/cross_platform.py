@@ -87,7 +87,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                         count += 1
 
 
-    def select_data(self,nodes=[], communities=[]):
+    def select_data(self,nodes=[], communities=[], date_range=[]):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
@@ -104,6 +104,10 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
             data = self.community_set.loc[self.community_set[self.community_col].isin(communities)]
         else:
             data = self.dataset.copy()
+
+        if len(date_range) == 2:
+            data = data[ (data[self.timestamp_col] >= date_range[0] ) & (data[self.timestamp_col] < date_range[1]) ]
+
         return data
 
     def get_time_diff_granularity(self,time_diff,granularity):
@@ -121,7 +125,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
         return(time)
 
-    def preprocess(self, node_level, nodes, community_level, communities):
+    def preprocess(self, node_level, nodes, community_level, communities, date_range=[]):
 
         if node_level and len(nodes) == 0:
            nodes = self.node_list
@@ -137,12 +141,12 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         elif not community_level:
            communities = []
 
-        data = self.select_data(nodes, communities)
+        data = self.select_data(nodes, communities, date_range)
 
         return(data)
 
     def order_of_spread(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[]):
+                        nodes=[], communities=[], date_range=[]):
         """
         Measurement: order_of_spread (population_order_of_spread, community_order_of_spread, node_order_of_spread)
 
@@ -164,7 +168,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         """
 
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
         
         platforms = sorted(data[self.platform_col].unique())
 
@@ -234,7 +238,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
     def time_delta(self, time_granularity="D", node_level = False, community_level = False, 
-                        nodes=[], communities=[]):
+                        nodes=[], communities=[], date_range=[]):
         """
         Measurement: time_delta (population_time_delta, community_time_delta, node_time_delta)
 
@@ -255,7 +259,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to the time differences between platforms
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -268,40 +272,39 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         else:
             group_col = [self.content_col, self.community_col, self.platform_col]
 
-
         data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
 
         data.drop_duplicates(subset=group_col, inplace=True)
-                
+
         group_col = [c for c in group_col if c != self.platform_col]
-        
+
+        data['platform_timestamp'] = data[self.platform_col] + '_' + data[self.timestamp_col].astype(str)
 
         #get all pairs of timestamps in each group
-        data_combinations = data.groupby(group_col)[self.timestamp_col].apply(combinations,2).apply(list)
+        data_combinations = data.groupby(group_col)['platform_timestamp'].apply(combinations,2).apply(list)
         lengths = data_combinations.apply(len)
         if (lengths > 0).sum() == 0:
             return None
 
         data_combinations = data_combinations.apply(pd.Series).stack().apply(pd.Series)
         data_combinations.columns = [self.timestamp_col,'next_platform_timestamp']
+
+        data_combinations[['platform_first','nodeTime']] = data_combinations['nodeTime'].str.split('_',expand=True)
+        data_combinations['nodeTime'] = pd.to_datetime(data_combinations['nodeTime'])
+
+        data_combinations[['platform_second','next_platform_timestamp']] = data_combinations['next_platform_timestamp'].str.split('_',expand=True)
+        data_combinations['next_platform_timestamp'] = pd.to_datetime(data_combinations['next_platform_timestamp'])
+
         #get time differences for each pair of time stamps
         data_combinations['time_diff'] = data_combinations['next_platform_timestamp'] - data_combinations[self.timestamp_col]
-        data_combinations = data_combinations.reset_index()
-
-        #merge to get first platform
-        data_combinations = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
-                                                    on=group_col + [self.timestamp_col],how='left')
-
-        #merge to get second platform
-        data = data_combinations.merge(data[group_col + [self.platform_col,self.timestamp_col]],
-                                       right_on=group_col + [self.timestamp_col],
-                                       left_on=group_col + ['next_platform_timestamp'],
-                                       how='left',suffixes=('_first','_second'))
+        data = data_combinations.reset_index()
 
         data = data[group_col + ['platform_first','platform_second','time_diff']]
         data = data.rename(columns={'time_diff':'value'})
-
         data['value'] = data['value'].apply(lambda x: self.get_time_diff_granularity(x,time_granularity))
+
+        #filter out time differences of zero because the platforms occur simultaneously
+        data = data[data['value'] > 0]
 
         if node_level:
             data = dict(tuple(data.groupby(self.content_col)))
@@ -314,7 +317,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
     def overlapping_users(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[]):
+                        nodes=[], communities=[], date_range=[]):
         """
         Measurement: overlapping_users (population_overlapping_users, community_overlapping_users, node_overlapping_users)        
 
@@ -334,7 +337,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
  
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -395,7 +398,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return meas
 
     def size_of_audience(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[]):
+                        nodes=[], communities=[], date_range=[]):
         """
         Measurement: size_of_audience (population_size_of_audience, community_size_of_audience, node_size_of_audience)
         
@@ -415,7 +418,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -455,7 +458,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
     def speed_of_spread(self, time_unit='h', node_level = False, community_level = False, 
-                        nodes=[], communities=[],):
+                        nodes=[], communities=[],date_range=[]):
         """
         Measurement: speed_of_spread (population_speed_of_spread, community_speed_of_spread, node_speed_of_spread)
         Description: Determine the speed at which the information is spreading
@@ -474,7 +477,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -522,7 +525,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return speeds
 
     def size_of_shares(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[]):
+                        nodes=[], communities=[], date_range=[]):
         """
         Measurement: size_of_shares (population_size_of_shares, community_size_of_shares, community_size_of_shares, node_size_of_shares)
 
@@ -542,7 +545,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -577,7 +580,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         return share_counts
 
     def temporal_correlation(self, measure="share", time_granularity="D",node_level = False, community_level = False, 
-                             nodes=[], communities=[]):
+                             nodes=[], communities=[], date_range=[]):
         """
         Measurement: temporal_correlation_share (population_temporal_correlation_share, community_correlation_share, node_correlation_share), temporal_correlation_audience (population_temporal_correlation_audience, community_correlation_audience, node_correlation_audience)
 
@@ -599,7 +602,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -657,7 +660,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         
 
     def lifetime_of_spread(self, node_level = False, community_level = False, 
-                        nodes=[], communities=[],time_unit='D'):
+                        nodes=[], communities=[],time_unit='D', date_range=[]):
 
         """
         Measurement: lifetime_of_spread (population_lifetime_of_spread, community_lifetime_of_spread, node_lifetime_of_spread)
@@ -679,7 +682,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
                 If node level, a dictionary mapping each node to a dataframe
         """
 
-        data = self.preprocess(node_level, nodes, community_level, communities)
+        data = self.preprocess(node_level, nodes, community_level, communities, date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 
@@ -725,7 +728,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
 
 
     def correlation_of_information(self, measure="share", time_unit='D',
-                                   community_level=False,communities=[]):
+                                   community_level=False,communities=[], date_range=[]):
         """
         Measurement: correlation_of_audiences, correlation_of_lifetimes, correlation_of_shares, correlation_of_speeds
 
@@ -757,7 +760,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         elif not community_level:
            communities = []
 
-        data = self.select_data(communities=communities)
+        data = self.select_data(communities=communities,date_range=date_range)
 
         platforms = sorted(data[self.platform_col].unique())
 

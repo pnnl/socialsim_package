@@ -104,6 +104,36 @@ def has_link_external(domains, platform):
             return 1
     return 0
 
+def parse_url(url):
+    """
+    Parse URL and resolve to base URL if includes a reference to a specific time in video, element on page,
+    or if is a redirect, resolve to the link users would be redirected to on click.
+    :param url: url (string)
+    :return: url (string) after parsing (if applied, otherwise returns the original url string)
+    """
+    # consolidate youtube video URLs that may reference a specific time within the video etc. to the main video url
+    if 'youtube.com/watch' in url:
+        base, ext = url.split('?')
+        split = ext.replace('&amp;','&').split('&')
+        ext = [x for x in split if x[:2] == 'v=']
+        url = '?'.join([base]+ext)
+    # consolidate youtube redirects to relect the URL being redirected to when clicking on link
+    elif 'https://www.youtube.com/redirect?' in url:
+        url = url.replace('&amp;', '&').split('&')
+        # select the url in the redirect "q="
+        url = [x for x in url if x[:2] == 'q='][0][2:]
+        # format
+        url = url.replace('%3A', ':').replace('%2F', '/')
+    # consolidate references to users' page on youtube that may include query, e.g. whether to display videos in grid view
+    # to simply url for user page with no query
+    elif 'youtube.com/user/' in url:
+        url = '/'.join([x for x in url.split('/') if '?' not in x])
+    # consolidate urls that include a "referrer reference via "utm_source"
+    elif '?utm_source' in url:
+        url = url.split('?utm_source')[0]
+
+    return url
+
 
 def load_json(fn):
 
@@ -248,9 +278,10 @@ def extract_youtube_data(fn='youtube_data.json',
                          anonymized=False,
                          username_map = {}):
 
+    platform = 'youtube'
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
-    
+
     get_info_ids = False
     if not info_id_fields is None or len(keywords) > 0:
         get_info_ids = True
@@ -267,18 +298,22 @@ def extract_youtube_data(fn='youtube_data.json',
     if get_info_ids:
         output_columns.append('informationIDs')
 
-
-
     print('Deduplicating...')
     if '_id' in data.columns:
         del data['_id']
     data['row_str']=['&'.join(cols) for cols in data.astype(str).values]
-    data=data.drop_duplicates(subset=['row_str']).reset_index(drop=True)
+    data=data.drop_duplicates(subset=['row_str']).reset_index(drop=True).copy()
 
 
-    platform = 'youtube'
 
     print('Extracting fields...')
+    print('extracting urls...')
+    # extract URLS then add: has_URL, links_to_external, domain_linked
+    urls_in_text = get_youtube_urls(data, text_suffix)
+    data.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in data['urls_linked']]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in data['urls_linked']]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
 
     # Video + Caption merge and extraction
     # info_id_fields of caption (right table: y)
@@ -318,14 +353,6 @@ def extract_youtube_data(fn='youtube_data.json',
         videos.loc[:,'informationIDs']=pd.Series(index=videos.index,data=[get_vid_keywords(c,info_id_fields,vidCaps)
                                                                           for i,c in videos.iterrows()])
 
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = get_youtube_urls(videos, text_suffix)
-    videos.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
-    videos.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
-    videos.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in videos['domain_linked']]
-
-
-    
     to_concat.append(videos)
     
     # Top-level comment extraction 
@@ -343,12 +370,6 @@ def extract_youtube_data(fn='youtube_data.json',
     elif not info_id_fields is None:
         comments.loc[:,'informationIDs'] = pd.Series(index=comments.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in comments.iterrows()])
 
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = get_youtube_urls(comments, text_suffix)
-    comments.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
-    comments.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
-    comments.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in comments['domain_linked']]
-
     to_concat.append(comments)
     
     # Reply extraction
@@ -364,13 +385,6 @@ def extract_youtube_data(fn='youtube_data.json',
         replies.loc[:,'informationIDs'] = replies['snippet'].apply(lambda x: get_info_id_from_text([x['textDisplay' + text_suffix]], keywords))
     elif not info_id_fields is None:
         replies.loc[:,'informationIDs'] = pd.Series(index=replies.index,data=[get_info_id_from_fields(r,info_id_fields) for i,r in replies.iterrows()])
-
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = get_youtube_urls(replies, text_suffix)
-    replies.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
-    replies.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
-    replies.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in replies['domain_linked']]
-
 
     to_concat.append(replies)
 
@@ -414,7 +428,10 @@ def extract_youtube_data(fn='youtube_data.json',
     youtube_data = convert_timestamps(youtube_data)
 
     youtube_data['nodeUserID'] = youtube_data['nodeUserID'].replace(username_map)
-    youtube_data = youtube_data[youtube_data['informationID']!=''].copy()
+
+    if get_info_ids:
+        youtube_data = youtube_data[youtube_data['informationID']!=''].copy()
+
 
     print('Done!')
     return youtube_data
@@ -431,7 +448,8 @@ def extract_telegram_data(fn='telegram_data.json',
     :param fn: A filename or list of filenames which contain the JSON Telegram data
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
-    
+
+    platform = 'telegram'
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
 
@@ -454,6 +472,13 @@ def extract_telegram_data(fn='telegram_data.json',
     
     print('Extracting fields...')
 
+    # extract URLS then add: has_URL, links_to_external, domain_linked
+    urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
+    data.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in data['urls_linked']]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in data['urls_linked']]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
+
     if len(keywords) > 0:
         data.loc[:,'informationIDs'] = data['doc'].apply(lambda x: get_info_id_from_text([x['text' + text_suffix]], keywords))
     elif not info_id_fields is None:
@@ -472,7 +497,7 @@ def extract_telegram_data(fn='telegram_data.json',
     data.loc[:,'nodeUserID'] = data['doc'].apply(lambda x: x['from_id' + name_suffix] if 'from_id' + name_suffix in x.keys() else None)
     data.loc[data['nodeUserID'].isnull(),'nodeUserID'] = data.loc[data['nodeUserID'].isnull(),'norm'].apply(lambda x: x['author'])
     
-    data.loc[:,'platform'] = 'telegram'
+    data.loc[:,'platform'] = platform
     
     data.loc[:,'parentID'] = data['doc'].apply(lambda x: str(x['fwd_from']['channel_id']) + '_' + str(x['fwd_from']['channel_post']) if 'fwd_from' in x.keys() and not x['fwd_from'] is None and not x['fwd_from']['channel_id'] is None and not x['fwd_from']['channel_post'] is None else None)
 
@@ -483,14 +508,7 @@ def extract_telegram_data(fn='telegram_data.json',
 
     data.loc[data['parentID'].isna(),'parentID'] = data.loc[data['parentID'].isna(),'nodeID']
 
-    platform = 'telegram'
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = data['text' + text_suffix].apply(lambda x: get_urls(x))
-    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
-    data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
-    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
-
-    data = data[output_columns]
+    data = data[output_columns].copy()
     
     data = get_reply_cascade_root_tweet(data)
         
@@ -559,6 +577,7 @@ def extract_reddit_data(fn='reddit_data.json',
     :param info_id_fields: A list of field paths from which to extract the information IDs. If None, don't extract any.
     """
 
+    platform = 'reddit'
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
 
@@ -586,6 +605,14 @@ def extract_reddit_data(fn='reddit_data.json',
     data['text'] = data['body' + text_suffix].replace(np.nan, '', regex=True) + data['selftext' + text_suffix].replace(
         np.nan, '', regex=True) + data['title' + text_suffix].replace(np.nan, '', regex=True)
 
+
+    # extract URLS then add: has_URL, links_to_external, domain_linked
+    urls_in_text = data['text'].apply(lambda x: get_urls(x))
+    data.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in data['urls_linked']]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in data['urls_linked']]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
+
     if len(keywords) > 0:
         data.loc[:,'informationIDs'] = data['text'].apply(lambda x: get_info_id_from_text([x], keywords))
     elif not info_id_fields is None:
@@ -608,20 +635,12 @@ def extract_reddit_data(fn='reddit_data.json',
 
     data.loc[:,'communityID'] = data['subreddit_id']
 
-    data.loc[:,'platform'] = 'reddit'
+    data.loc[:,'platform'] = platform
     
     print('Sorting...')
     data = data.sort_values('nodeTime').reset_index(drop=True)
 
-    platform = 'reddit'
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = data['text'].apply(lambda x: get_urls(x))
-    data.loc[:,'has_URL']= [int(len(x) > 0) for x in urls_in_text]
-    data.loc[:,'domain_linked']= [get_domains(x) for x in urls_in_text]
-    data.loc[:,'links_to_external']= [has_link_external(domains, platform) for domains in data['domain_linked']]
-
-
-    data = data[output_columns]
+    data = data[output_columns].copy()
     
     #initialize info ID column with empty lists
     data['threadInfoIDs'] = [[] for i in range(len(data))]
@@ -688,7 +707,8 @@ def extract_twitter_data(fn='twitter_data.json',
     :param keywords:
     :params anonymized: Whether the data is in raw Twitter API format (False) or if it is in the processed and anonymized SocialSim data format (True).  The anonymized format has several modifications to field names.
     """
-    
+
+    platform = 'twitter'
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
 
@@ -713,6 +733,14 @@ def extract_twitter_data(fn='twitter_data.json',
     
     print('Extracting fields...')
     tweets = data
+
+    # extract URLS then add: has_URL, links_to_external, domain_linked
+    urls_in_text = get_twitter_urls(tweets, name_suffix)
+    tweets.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
+    tweets.loc[:, 'has_URL'] = [int(len(x) > 0) for x in tweets['urls_linked']]
+    tweets.loc[:, 'domain_linked'] = [get_domains(x) for x in tweets['urls_linked']]
+    tweets.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in tweets['domain_linked']]
+
     if len(keywords) > 0:
         tweets.loc[:,'informationIDs'] = tweets['text' + text_suffix].apply(lambda x: get_info_id_from_text([x], keywords))
     elif not info_id_fields is None:
@@ -726,7 +754,7 @@ def extract_twitter_data(fn='twitter_data.json',
                            'timestamp_ms': 'nodeTime'}, inplace=True)
 
 
-    tweets.loc[:,'platform'] = 'twitter'
+    tweets.loc[:,'platform'] = platform
     tweets.loc[:,'nodeTime'] = pd.to_datetime(tweets['nodeTime'],unit='ms')
     tweets.loc[:,'nodeTime'] = tweets['nodeTime'].apply(lambda x: datetime.strftime(x,'%Y-%m-%dT%H:%M:%SZ'))
 
@@ -734,12 +762,6 @@ def extract_twitter_data(fn='twitter_data.json',
     
     tweets.loc[:,'is_reply'] = (tweets['in_reply_to_status_id_str' + name_suffix] != '') & (~tweets['in_reply_to_status_id_str' + name_suffix].isna())
 
-    platform = 'twitter'
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = get_twitter_urls(tweets, name_suffix)
-    tweets.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
-    tweets.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
-    tweets.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in tweets['domain_linked']]
 
     if 'retweeted_status.in_reply_to_status_id_str' + name_suffix not in tweets:
         tweets.loc[:,'retweeted_status.in_reply_to_status_id_str' + name_suffix] = ''
@@ -953,6 +975,7 @@ def extract_github_data(fn='github_data.json',
                         anonymized=False,
                         username_map = {}):
 
+    platform = 'github'
     json_data = load_json(fn)
     data = pd.DataFrame(json_data)
 
@@ -996,7 +1019,7 @@ def extract_github_data(fn='github_data.json',
         data.rename(columns={'created_at': 'nodeTime',
                                    'type':'actionType'}, inplace=True)
         
-    data.loc[:,'platform'] = 'github'
+    data.loc[:,'platform'] = platform
 
 
     def get_text_field(row):
@@ -1017,6 +1040,15 @@ def extract_github_data(fn='github_data.json',
             
         return text
 
+
+    # extract URLS then add: has_URL, links_to_external, domain_linked
+    urls_in_text = data.apply(get_text_field, axis=1).apply(lambda x: get_urls(x))
+    data.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
+    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in data['urls_linked']]
+    data.loc[:, 'domain_linked'] = [get_domains(x) for x in data['urls_linked']]
+    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
+
+
     if len(keywords) > 0:
         data.loc[:,'text_field'] = data.apply(get_text_field,axis=1)
         data = data.dropna(subset=['text_field'])
@@ -1027,13 +1059,6 @@ def extract_github_data(fn='github_data.json',
             data.loc[:,'informationIDs'] = pd.Series(data['socialsim_details'].apply(lambda x: list(itertools.chain.from_iterable([get_info_id_from_fields(m,info_id_fields) for m in x]))))
         else:
             data.loc[:, 'informationIDs'] = pd.Series([get_info_id_from_fields(t, info_id_fields) for i, t in data.iterrows()])
-
-    platform = 'github'
-    # has_URL, links_to_external, domain_linked
-    urls_in_text = data.apply(get_text_field, axis=1).apply(lambda x: get_urls(x))
-    data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in urls_in_text]
-    data.loc[:, 'domain_linked'] = [get_domains(x) for x in urls_in_text]
-    data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
 
 
     events = data[output_columns]

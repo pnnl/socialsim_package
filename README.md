@@ -32,8 +32,8 @@ conda install matplotlib
 ```
 
 #### Step 3: Install the SocialSim package using pip
-``` bash
-python setup.py install 
+``` bash 
+python setup.py install
 ```
 
 You can ignore the following user warnings, if they appear:

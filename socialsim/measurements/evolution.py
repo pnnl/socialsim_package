@@ -933,11 +933,9 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         res = []
         for ts in self.time_series_dfs[platform]:
             domains_linked = list(self.time_series_dfs[platform][ts]['domain_linked'])
-            #print(ts,'\n', self.time_series_dfs[platform][ts][['nodeID', 'nodeUserID','nodeTime','domain_linked']].head())
             domains_linked_not_list = list(set([y for y in domains_linked if type(y) is str]))
             domains_linked = list(set([x for y in domains_linked for x in y if x!= '' and type(y) is list]))
             domains_linked = set(domains_linked + domains_linked_not_list)
-            #print(ts, domains_linked)
             res.append(
                 {TIMESTEP_COLUMN: ts, VALUE_COLUMN: len(domains_linked)})
         return pd.DataFrame(res)
@@ -949,7 +947,6 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         mean shortest path length of cumulative snapshots of the graph over time
 
         """
-        total_start_time = tMeasures.time()
         if not self.time_series_gUNig:
             self.load_time_series_graphs()
         if platform not in self.time_series_gUNig:
@@ -1432,7 +1429,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
+            warning_message = 'Data does not contain parent event details for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
@@ -1492,7 +1489,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
+            warning_message = 'Data does not contain parent event details for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
