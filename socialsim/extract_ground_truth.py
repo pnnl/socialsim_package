@@ -432,7 +432,6 @@ def extract_youtube_data(fn='youtube_data.json',
     if get_info_ids:
         youtube_data = youtube_data[youtube_data['informationID']!=''].copy()
 
-
     print('Done!')
     return youtube_data
 
@@ -507,6 +506,7 @@ def extract_telegram_data(fn='telegram_data.json',
     data.loc[data['parentID'].isna(),'rootID'] = data.loc[data['parentID'].isna(),'nodeID']
 
     data.loc[data['parentID'].isna(),'parentID'] = data.loc[data['parentID'].isna(),'nodeID']
+
 
     data = data[output_columns].copy()
     
@@ -1040,14 +1040,12 @@ def extract_github_data(fn='github_data.json',
             
         return text
 
-
     # extract URLS then add: has_URL, links_to_external, domain_linked
     urls_in_text = data.apply(get_text_field, axis=1).apply(lambda x: get_urls(x))
     data.loc[:, 'urls_linked'] = [[parse_url(y) for y in x] for x in urls_in_text]
     data.loc[:, 'has_URL'] = [int(len(x) > 0) for x in data['urls_linked']]
     data.loc[:, 'domain_linked'] = [get_domains(x) for x in data['urls_linked']]
     data.loc[:, 'links_to_external'] = [has_link_external(domains, platform) for domains in data['domain_linked']]
-
 
     if len(keywords) > 0:
         data.loc[:,'text_field'] = data.apply(get_text_field,axis=1)

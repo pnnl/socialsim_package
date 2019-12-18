@@ -947,6 +947,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
         mean shortest path length of cumulative snapshots of the graph over time
 
         """
+        total_start_time = tMeasures.time()
         if not self.time_series_gUNig:
             self.load_time_series_graphs()
         if platform not in self.time_series_gUNig:
@@ -1490,6 +1491,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             return
         elif len(df) == 0:
             warning_message = 'Data does not contain parent event details for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
+
             warnings.warn(warning_message)
             return
 
