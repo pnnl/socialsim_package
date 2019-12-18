@@ -32,6 +32,7 @@ conda install matplotlib
 ```
 
 #### Step 3: Install the SocialSim package using pip
+<<<<<<< HEAD
 ``` bash 
 python setup.py install
 ```

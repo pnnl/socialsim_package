@@ -81,7 +81,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                         print('{}) {}: {}'.format(count + 1, f, desc))
                         count += 1
 
-    def select_data(self, nodes=[], communities=[], platform="all", action_types=[]):
+    def select_data(self, nodes=[], communities=[], platform="all", action_types=[],date_range=[]):
         """
         Subset the data based on the given communities or pieces of content
         :param nodes: List of specific content
@@ -114,10 +114,13 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         if len(action_types) > 0:
             data = data[data[self.event_col].isin(action_types)]            
 
+        if len(date_range) == 2:
+            data = data[ (data[self.timestamp_col] >= date_range[0] ) & (data[self.timestamp_col] < date_range[1]) ]
+
         return data
 
 
-    def preprocess(self, node_level, nodes, community_level, communities, platform, action_types):
+    def preprocess(self, node_level, nodes, community_level, communities, platform, action_types,date_range=[]):
         """
         Determine the node list and community list and ubset the data based on the given 
         communities or pieces of content
@@ -142,9 +145,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
             communities = []
-        
-    
-        data = self.select_data(nodes, communities, platform=platform, action_types=action_types)
+
+        data = self.select_data(nodes, communities, platform=platform, action_types=action_types, date_range=date_range)
 
         return data
 
@@ -427,8 +429,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return(meas)
 
 
-
-    def number_of_shares(self, node_level=False, community_level=False, nodes=[], communities=[], platform="all", action_types=[]):
+    def number_of_shares(self, node_level=False, community_level=False, nodes=[], 
+                         communities=[], platform="all", action_types=[], date_range=[]):
         """
         Measurement: number_of_shares (population_number_of_shares, community_number_of_shares, node_number of shares)
 
@@ -450,7 +452,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                       mean number of shares per unit of information in that community
                 If node level: a dictionary mapping between each node and a scalar number of shares
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         num_shares = self.scalar_measurement(data, self.id_col, self.get_shares,
                                              node_level=node_level, 
@@ -461,7 +464,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
     def number_of_shares_over_time(self, time_bin='D',delta_t = False,
                                    node_level=False, community_level=False,
-                                   nodes=[], communities=[], platform="all", action_types=[]):
+                                   nodes=[], communities=[], platform="all", action_types=[],
+                                   date_range=[]):
         """
         Measurement: number_of_shares_over_time (population_number_of_shares_over_time, community_number_of_shares_over_time, population_number_of_shares_over_time)
 
@@ -486,7 +490,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                      average number of shares at each time
                 If node level: a dictionary mapping each node to a dataframe of counts at each time
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types,date_range)
 
         shares_time_series = self.temporal_measurement(data, self.id_col, self.get_shares, 
                                                        node_level=node_level, 
@@ -497,7 +501,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def distribution_of_shares(self, node_level=False, community_level=False, 
-                               nodes=[], communities=[], platform="all", action_types=[]):
+
+                               nodes=[], communities=[], platform="all", action_types=[],
+                               date_range=[]):
         """
         Measurement: distribution_of_shares (population_distribution_of_shares, community_distribution_of_shares, node_distribution_of_shares)
 
@@ -518,7 +524,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe with each info ID and number of shares
                                Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform,action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform,action_types,date_range)
+
 
         shares_distribution = self.distribution_measurement(data, self.id_col, self.get_shares, 
                                                             node_level=node_level, 
@@ -528,7 +535,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def top_info_shared(self, k=5, node_level=False, community_level=False, 
-                        nodes=[], communities=[], platform="all", action_types=[]):
+
+                        nodes=[], communities=[], platform="all", action_types=[],
+                        date_range=[]):
+
         """
         Measurement: top_info_shared (population_top_info_shared, community_top_info_shared, node_top_info_shared)
 
@@ -550,7 +560,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a sorted dataframe with the top k nodes and their counts.
                                Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
+
 
         shares_topk = self.topk_measurement(data, self.id_col, self.get_shares, 
                                             node_level=node_level, community_level = community_level,
@@ -558,8 +570,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         return shares_topk
 
-    def unique_users(self, node_level=False, community_level=False, 
-                     nodes=[], communities=[], platform="all", action_types=[]):
+    def unique_users(self, node_level=False, community_level=False,
+                     nodes=[], communities=[], platform="all", action_types=[],
+                     date_range = []):
+
         """
         Measurement: unique_users (population_unique_users, community_unique_users, node_unique_users)        
 
@@ -579,7 +593,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                     in that community.
                 If node level: a dictionary with the number of unique users for each info ID
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
+
 
         num_unique_users = self.scalar_measurement(data, self.user_col, self.get_audience,
                                                    community_level=community_level,
@@ -589,7 +605,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
     def unique_users_over_time(self, time_bin='D',delta_t = False,
                                node_level=False, community_level=False,
-                               nodes=[], communities=[], platform="all", action_types=[]):
+                               nodes=[], communities=[], platform="all", action_types=[],
+                               date_range=[]):
+
         """
         Measurement: uniqe_users_over_time (population_unique_users_over_time, community_unique_users_over_time, node_unique_users_over_time)
 
@@ -614,7 +632,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe where each node is a row and the columns contain the number of unique users
                                at each time step
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform,action_types)
+
+        data = self.preprocess(node_level, nodes, community_level, communities, platform,action_types,date_range)
+
 
 
         unique_users_time_series = self.temporal_measurement(data, self.user_col, self.get_audience,
@@ -627,7 +647,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def distribution_of_users(self, node_level=False, community_level=False,
-                              nodes=[], communities=[], platform="all", action_types=[]):
+                              nodes=[], communities=[], platform="all", action_types=[],
+                              date_range=[]):
+
         """
         Measurement: distribution_of_users (population_distribution_of_users, community_distribution_of_users, node_distribution_of_users)
 
@@ -649,7 +671,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe of the number of unique users and their counts.
                                Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         unique_users_distribution = self.distribution_measurement(data, self.user_col, self.get_audience,
                                                                   community_level=community_level,
@@ -660,7 +682,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def top_audience_reach(self, k, node_level=False, community_level=False,
-                           nodes=[], communities=[], platform="all", action_types=[]):
+                           nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: top_audience_reach (population_top_audience_reach, community_top_audiene_reach, node_top_audience_reach)
 
@@ -682,7 +705,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a sorted dataframe with the top k nodes and the size of audience reached.
                                 Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
+
 
         unique_users_topk = self.topk_measurement(data, self.user_col, self.get_audience,
                                                   community_level=community_level,
@@ -693,8 +718,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def lifetime_of_info(self, time_unit='D',
-                         node_level=False, community_level=False, 
-                         nodes=[], communities=[], platform="all", action_types=[]):
+                         node_level=False, community_level=False,
+                         nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: lifetime_of_info (population_lifetime_of_info, community_lifetime_of_info, node_lifetime_of_info)
 
@@ -714,7 +740,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                     in that community
                 If node level: a dictionary mapping each node to its lifetime
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         lifetime = self.scalar_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                            community_level=community_level,
@@ -724,8 +750,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def lifetime_of_info_distribution(self, time_unit='D',
-                                      node_level=False, community_level=False, 
-                                      nodes=[], communities=[], platform="all", action_types=[]):
+                                      node_level=False, community_level=False,
+                                      nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: distribution_of_lifetimes (population_distribution_of_lifetimes, community_distribution_of_lifetimes, node_distribution_of_lifetimes)
 
@@ -746,7 +773,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                     in that community
                 If node level: a dictionary mapping each node to its lifetime
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
+
 
         lifetime = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                  community_level=community_level,
@@ -756,8 +784,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
 
-    def lifetime_of_threads(self, time_unit = 'D', node_level=False, community_level=False, 
-                            nodes=[], communities=[], platform="all", action_types=[]):
+    def lifetime_of_threads(self, time_unit = 'D', node_level=False, community_level=False,
+                            nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: lifetime_of_threads (population_lifetime_of_threads, community_lifetime_of_threads, node_lifetime_of_threads)
 
@@ -780,7 +809,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dictionary of nodes with a dataframe of all root shares and their lifetimes for the
                                node.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         data.loc[data[self.root_col].isna(),self.root_col] = data.loc[data[self.root_col].isna(),self.id_col]
 
@@ -794,7 +823,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def distribution_of_lifetimes(self, time_unit="D", node_level=False, community_level=False,
-                                  nodes=[], communities=[], platform="all", action_types=[]):
+                                  nodes=[], communities=[], platform="all", action_types=[],
+                                  date_range=[]):
+
         """
         Description: Calculate the distributions of the information lifetimes
 
@@ -814,7 +845,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe of the lifetimes of nodes and their counts.
                                 Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         speed_distribution = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                            community_level=community_level,
@@ -823,8 +854,9 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
 
-    def top_lifetimes(self, time_unit='D', k=5, node_level=False, community_level=False, 
-                      nodes=[], communities=[], platform="all", action_types=[]):
+    def top_lifetimes(self, time_unit='D', k=5, node_level=False, community_level=False,
+                      nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: top_lifetimes (population_top_lifetimes, community_top_lifetimes, node_top_lifetimes)
 
@@ -846,7 +878,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a sorted dataframe with the top k nodes and lifetimes.
                                Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         lifetime_topk = self.topk_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                               community_level=community_level,
@@ -857,7 +889,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def speed_of_info(self, time_unit="D", node_level=False, community_level=False,
-                      nodes=[], communities=[], platform="all", action_types=[]):
+                      nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: speed_of_info (population_speed_of_info, community_speed_of_info, node_speed_of_info)
 
@@ -878,8 +911,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                      in that community
                 If node level: a dictionary of nodes and their speeds
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
-
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         speed = self.scalar_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                         community_level=community_level,
@@ -889,7 +921,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
     def speed_of_info_over_time(self, time_unit="D", time_bin='D', delta_t = False,
                                 node_level=False, community_level=False,
-                                nodes=[], communities=[], platform="all", action_types=[]):
+                                nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: speed_of_info_over_time (population_speed_of_info_over_time, community_speed_of_info_over_time, node_speed_of_info_over_time)
         Description: Determine the speed (default = shares/day) of information over time
@@ -913,8 +946,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                     time step of every node in the community
                 If node level: a dictionary mapping each node to a dataframe of speeds at each time step
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
-
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
         speed_time_series = self.temporal_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                                       community_level=community_level,
@@ -925,7 +957,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def distribution_of_speed(self, time_unit="D", node_level=False, community_level=False,
-                              nodes=[], communities=[], platform="all", action_types=[]):
+                              nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: distribution_of_speed (population_distribution_of_speed, community_distribution_of_speed, node_distribution_of_speed)
 
@@ -947,7 +980,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: a dataframe of the speeds of nodes and their counts.
                                 Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
 
         speed_distribution = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
@@ -958,7 +991,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
 
     def top_speeds(self, k, time_unit="D", node_level=False, community_level=False,
-                   nodes=[], communities=[], platform="all", action_types=[]):
+                   nodes=[], communities=[], platform="all", action_types=[], date_range=[]):
+
         """
         Measurement: top_speeds (population_top_speeds, community_top_speeds, node_top_speeds)
 
@@ -982,7 +1016,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 If node level: dataframe with the top k nodes ranked descending order by speed. Position
                                 in dataframe is rank. Only differs from Population if subset of nodes is passed.
         """
-        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
 
         speed_topk = self.topk_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
