@@ -36,6 +36,7 @@ from collections import Counter
 from socialsim.utils import gini, palma_ratio
 
 
+
 def get_edge_string(x, y):
     x, y = sorted(list([x, y]))
     return '{}_{}'.format(x, y)
@@ -1430,7 +1431,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = 'Data does not contain parent event details for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
+            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
@@ -1490,8 +1491,7 @@ class CascadeEvolutionMeasurements(MeasurementsBaseClass):
             warnings.warn(warning_message)
             return
         elif len(df) == 0:
-            warning_message = 'Data does not contain parent event details for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
-
+            warning_message = 'Data does not contain parent events for platform \'{}\' for informationID: {}'.format(platform, self.infoID)
             warnings.warn(warning_message)
             return
 
