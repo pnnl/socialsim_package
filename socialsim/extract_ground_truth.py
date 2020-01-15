@@ -42,13 +42,7 @@ def get_twitter_urls(df, name_suffix):
     twitter_urls = []
     for row in df.iterrows():
         rowdata = row[1]
-        api_urls = [get_twitter_api_url_rep(x, name_suffix) for x in rowdata['entities']['urls'] if x != '']
-        if 'socialsim_resolved_urls' in rowdata['extension'].keys():
-            resolved_urls = rowdata['extension']['socialsim_resolved_urls']
-            internal_urls = [x for x in api_urls if 'twitter.com' in x]
-            urls = list(set(resolved_urls + internal_urls))
-        else:
-            urls = api_urls
+        urls = [get_twitter_api_url_rep(x, name_suffix) for x in rowdata['entities']['urls'] if x != '']
         twitter_urls.append(urls)
     return twitter_urls
 
