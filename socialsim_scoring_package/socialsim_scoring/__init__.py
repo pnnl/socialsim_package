@@ -1,4 +1,4 @@
-from socialsim_scoring._version import __version__
+#from socialsim_scoring._version import __version__
 
 from .definitions import *
 from .load import *

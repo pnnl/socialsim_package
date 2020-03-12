@@ -145,30 +145,44 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
             num_plots += 1
 
     def run_content_level_measurement(self, measurement_name, scale='node',
-                                      selected_content=None, **kwargs):
-        # determine selected nodes in order of priority from the argument to this function, the selected nodes from the metadata, and all nodes
-        if scale == 'node':
-            if self.metadata is None:
-                metadatanodelist = None
-            else:
-                metadatanodelist = self.metadata.node_list
-            selected_content = next(x for x in [selected_content, self.selected_content, metadatanodelist,
-                                                self.content_recurrence_measurements.keys()] if
-                                    x is not None)
+                                      selected_content=None, fill_missing=False,
+                                      **kwargs):
+
+        if self.metadata is None:
+            metadatanodelist = None
         else:
-            selected_content = self.dataset_df[self.content_col].unique()
+            metadatanodelist = self.metadata.node_list
+
+        selected_content = next(x for x in [selected_content, self.selected_content, metadatanodelist,
+                                            self.content_recurrence_measurements.keys()] if
+                                x is not None)
+
+        if scale == 'population':
+            selected_content = list(set(list(self.dataset_df[self.content_col].unique()) + selected_content))
 
         contentid_value = {
             content_id: getattr(self.content_recurrence_measurements[content_id], measurement_name)(**kwargs) for
             content_id
             in selected_content if content_id in self.content_recurrence_measurements.keys()}
-        contentid_value = {k: v for k, v in contentid_value.items() if not v is None and not np.isnan(v)}
+    
+        if fill_missing:
+            for node in selected_content:
+                if node not in contentid_value.keys():
+                    contentid_value[node] = 0
+
+            contentid_value = {k: (v if not v is None and not np.isnan(v) else 0.0) for k, v in contentid_value.items()}
+
+
+        else:
+            contentid_value = {k: v for k, v in contentid_value.items() if not v is None and not np.isnan(v)}
         if scale == 'node':
             return contentid_value
         elif scale == 'population':
             return pd.DataFrame(list(contentid_value.items()), columns=[self.content_col, 'value'])
 
-    def run_community_level_measurement(self, measurement_name, selected_communties=None, **kwargs):
+    def run_community_level_measurement(self, measurement_name, selected_communties=None, fill_missing=False, 
+                                        **kwargs):
+
         if self.community_contentids is None:
             print('No communities provided')
             return
@@ -181,6 +195,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
             meas[community] = pd.DataFrame(list(self.run_content_level_measurement(measurement_name,
                                                                                    selected_content=
                                                                                    self.community_contentids[community],
+                                                                                   fill_missing=fill_missing,
                                                                                    **kwargs).items()),
                                            columns=[self.content_col, 'value'])
 
@@ -194,7 +209,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='number_of_bursts')
+        return self.run_content_level_measurement(measurement_name='number_of_bursts',fill_missing=True)
 
     def node_time_between_bursts(self):
         """
@@ -214,7 +229,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_size_of_each_burst')
+        return self.run_content_level_measurement(measurement_name='average_size_of_each_burst',fill_missing=True)
 
     def node_average_number_of_users_per_burst(self):
         """
@@ -224,7 +239,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_number_of_users_per_burst')
+        return self.run_content_level_measurement(measurement_name='average_number_of_users_per_burst',fill_missing=True)
 
     def node_burstiness_of_burst_timing(self):
         """
@@ -244,7 +259,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='new_users_per_burst')
+        return self.run_content_level_measurement(measurement_name='new_users_per_burst',fill_missing=True)
 
     def node_lifetime_of_each_burst(self):
         """
@@ -254,7 +269,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='lifetime_of_each_burst')
+        return self.run_content_level_measurement(measurement_name='lifetime_of_each_burst',fill_missing=True)
 
     def node_average_proportion_of_top_platform_per_burst(self):
         """
@@ -264,7 +279,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst')
+        return self.run_content_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst',fill_missing=True)
 
     def community_distribution_of_number_of_bursts(self):
         """
@@ -274,7 +289,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='number_of_bursts')
+        return self.run_community_level_measurement(measurement_name='number_of_bursts',fill_missing=True)
 
     def community_distribution_of_time_between_bursts(self):
         """
@@ -294,7 +309,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='average_size_of_each_burst')
+        return self.run_community_level_measurement(measurement_name='average_size_of_each_burst',fill_missing=True)
 
     def community_distribution_of_average_number_of_users_per_burst(self):
         """
@@ -304,7 +319,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='average_number_of_users_per_burst')
+        return self.run_community_level_measurement(measurement_name='average_number_of_users_per_burst',fill_missing=True)
 
     def community_distribution_of_burst_timing_burstiness(self):
         """
@@ -324,7 +339,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='new_users_per_burst')
+        return self.run_community_level_measurement(measurement_name='new_users_per_burst',fill_missing=True)
 
     def community_distribution_of_burst_lifetime(self):
         """
@@ -334,7 +349,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='lifetime_of_each_burst')
+        return self.run_community_level_measurement(measurement_name='lifetime_of_each_burst',fill_missing=True)
 
     def community_distribution_of_burst_platform_proportion(self):
         """
@@ -344,7 +359,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_community_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst')
+        return self.run_community_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst',fill_missing=True)
 
     def population_distribution_of_number_of_bursts(self):
         """
@@ -354,7 +369,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='number_of_bursts',scale='population')
+        return self.run_content_level_measurement(measurement_name='number_of_bursts',scale='population',fill_missing=True)
 
     def population_distribution_of_time_between_bursts(self):
         """
@@ -374,7 +389,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_size_of_each_burst',scale='population')
+        return self.run_content_level_measurement(measurement_name='average_size_of_each_burst',scale='population',fill_missing=True)
 
     def population_distribution_of_average_number_of_users_per_burst(self):
         """
@@ -384,7 +399,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_number_of_users_per_burst',scale='population')
+        return self.run_content_level_measurement(measurement_name='average_number_of_users_per_burst',scale='population', fill_missing=True)
 
     def population_distribution_of_burst_timing_burstiness(self):
         """
@@ -404,7 +419,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='new_users_per_burst',scale='population')
+        return self.run_content_level_measurement(measurement_name='new_users_per_burst',scale='population',fill_missing=True)
 
     def population_distribution_of_burst_lifetime(self):
         """
@@ -414,7 +429,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='lifetime_of_each_burst',scale='population')
+        return self.run_content_level_measurement(measurement_name='lifetime_of_each_burst',scale='population',fill_missing=True)
 
     def population_distribution_of_burst_platform_proportion(self):
         """
@@ -424,7 +439,7 @@ class RecurrenceMeasurements(MeasurementsBaseClass):
 
         Input:
         """
-        return self.run_content_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst',scale='population')
+        return self.run_content_level_measurement(measurement_name='average_proportion_of_top_platform_per_burst',scale='population',fill_missing=True)
 
 class BurstDetection():
     def __init__(self, dataset_df, metadata, id_col='nodeID', timestamp_col="nodeTime",
