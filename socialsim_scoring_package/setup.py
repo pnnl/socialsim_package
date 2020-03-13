@@ -6,6 +6,10 @@ package_structure = [
     'socialsim_scoring'
     ]
 
+package_data = {
+      'socialsim_scoring': ['cp3_s1_measurement_categories.csv', 'cp3_s2_measurement_categories.csv']
+      }
+
 requirements = [
     'pandas',
     'numpy',
@@ -26,5 +30,6 @@ setup(
     long_description='NA',
     maintainer='Zachary New',
     maintainer_email='zachary.new@pnnl.gov',
-    install_requires=requirements
+    install_requires=requirements,
+    include_package_data=True
     )

@@ -5,5 +5,5 @@
 *__pycache__/*
 socialsim.egg-info/*
 build/*
-dist/*
+
 *.egg

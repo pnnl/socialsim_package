@@ -16,8 +16,12 @@ NON_MEAS_BY_COLUMNS = [
     'node',
 ]
 
-S1_MEASUREMENT_CATEGORIES = pd.read_csv('socialsim_scoring/cp3_s1_measurement_categories.csv')
-S2_MEASUREMENT_CATEGORIES = pd.read_csv('socialsim_scoring/cp3_s2_measurement_categories.csv')
+script_filepath = __file__
+filepath = '/'.join(__file__.split('/')[:-1])
+ 
+S1_MEASUREMENT_CATEGORIES = pd.read_csv(filepath + '/cp3_s1_measurement_categories.csv')
+S2_MEASUREMENT_CATEGORIES = pd.read_csv(filepath + '/cp3_s2_measurement_categories.csv')
+
 
 # scale_of_spread, structure_of_spread, social_network_of_spread, cross_platform_spread
 meas_type_to_class = {'multi_platform':'scale_of_spread',

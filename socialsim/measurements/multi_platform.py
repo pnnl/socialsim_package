@@ -45,6 +45,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         else:
             community_directory = metadata.community_directory
             communities = metadata.communities
+            self.community_dict = communities
             self.community_set = add_communities_to_dataset(dataset,
                                                             community_directory,
                                                             communities)
@@ -199,7 +200,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return speed
 
 
-    def scalar_measurement(self, data, agg_col, agg_func, node_level=False, community_level=False):
+    def scalar_measurement(self, data, agg_col, agg_func, node_level=False, community_level=False, fill_missing=False):
         """
         Description: Calculate a scalar measurement
 
@@ -228,6 +229,20 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         result = data.groupby(group_cols)[agg_col].apply(agg_func)
         result.name = 'value'
  
+        if fill_missing:
+            if not community_level:
+                for node in self.node_list:
+                    if node not in result.index:
+                        result.loc[node] = 0.0
+            else:
+                to_add = []
+                for community in self.community_dict.keys():
+                    for node in self.community_dict[community]:
+                        if node not in result.index:
+                            to_add.append((node,community))
+                for addition in to_add:
+                    result.loc[addition] = 0.0
+
         if node_level:
             meas = result.replace({pd.np.nan: None}).to_dict()
         elif community_level:
@@ -240,7 +255,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return meas
 
     def distribution_measurement(self, data, agg_col, agg_func, extra_group_cols=[], 
-                                 node_level=False, community_level=False):
+                                 node_level=False, community_level=False, fill_missing=False):
         """
         Description: Determine the distribution of a property across different information IDs
 
@@ -273,6 +288,23 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             
         values = data.groupby(group_cols + extra_group_cols)[agg_col].apply(agg_func)
         values.name = 'value'
+        
+        if fill_missing:
+            if not community_level:
+                for node in self.node_list:
+                    if node not in values.index:
+                        values.loc[node] = 0.0
+            else:
+                to_add = []
+                for community in self.community_dict.keys():
+                    for node in self.community_dict[community]:
+                        if node not in values.index:
+                            addition = [node,community]
+                            for col in extra_group_cols:
+                                addition += ['']
+                            to_add.append(tuple(addition))
+                for addition in to_add:
+                    values.loc[addition] = 0.0
 
         if len(extra_group_cols) > 0:
             values = values.reset_index().groupby(group_cols)#.mean()
@@ -338,7 +370,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return meas
 
     def temporal_measurement(self, data, agg_col, agg_func, time_bin='D',delta_t = False, 
-                             node_level=False, community_level=False):
+                             node_level=False, community_level=False, fill_missing=False):
         """
         Description: Calculate a time series of quantity of interest
 
@@ -372,6 +404,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         if agg_col == self.timestamp_col:
             data.loc[:,'agg_col'] = data.loc[:,self.timestamp_col]
             agg_col = 'agg_col'
+
             
         if not delta_t:
             #get time series in absolute time
@@ -397,6 +430,19 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             data = pd.pivot_table(data,index=self.timestamp_col,columns=self.content_col,values=agg_col).fillna(0)
         else:
 
+            if fill_missing:
+                to_add = []
+                for community in self.community_dict.keys():
+                    for node in self.community_dict[community]:
+                        if node not in data[self.content_col].values:
+                            for time in data[self.timestamp_col].unique():
+                                to_add.append([time,node,community,0.0])
+                if len(to_add):
+                    to_add = pd.DataFrame(to_add)
+                    to_add.columns = [self.timestamp_col,self.content_col,self.community_col,agg_col]
+                    data = pd.concat([data,to_add])
+
+
             def pivot_group(grp):
 
                 grp = pd.pivot_table(grp,
@@ -406,7 +452,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 return grp
 
             data = data.groupby(self.community_col).apply(lambda x: pivot_group(x))
-            
+ 
+           
             if 'nodeTime' not in data.index.names:
                 #when there are two or less time bins the structure of the DF comes out wrong
                 #fixing it here
@@ -416,6 +463,12 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             data.name = 'value'
             data = data.reset_index()
 
+        if fill_missing:
+            if not community_level:
+                for node in self.node_list:
+                    if node not in data.columns:
+                        data[node] = np.zeros(len(data))
+                    
         if node_level:
             meas = {col:pd.DataFrame(data[col]).rename(columns={col:'value'}).reset_index() for col in data.columns}
         elif community_level:
@@ -457,7 +510,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         num_shares = self.scalar_measurement(data, self.id_col, self.get_shares,
                                              node_level=node_level, 
-                                             community_level=community_level)
+                                             community_level=community_level,
+                                             fill_missing=True)
 
         return num_shares
 
@@ -495,7 +549,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         shares_time_series = self.temporal_measurement(data, self.id_col, self.get_shares, 
                                                        node_level=node_level, 
                                                        community_level = community_level,
-                                                       delta_t=delta_t,time_bin=time_bin)
+                                                       delta_t=delta_t,time_bin=time_bin,
+                                                       fill_missing=True)
 
         return shares_time_series
 
@@ -527,7 +582,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         shares_distribution = self.distribution_measurement(data, self.id_col, self.get_shares, 
                                                             node_level=node_level, 
-                                                            community_level = community_level)
+                                                            community_level = community_level,
+                                                            fill_missing=True)
 
         return shares_distribution
 
@@ -590,7 +646,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         num_unique_users = self.scalar_measurement(data, self.user_col, self.get_audience,
                                                    community_level=community_level,
-                                                   node_level=node_level)
+                                                   node_level=node_level,
+                                                   fill_missing=True)
 
         return num_unique_users
 
@@ -624,10 +681,12 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform,action_types,date_range)
 
+
         unique_users_time_series = self.temporal_measurement(data, self.user_col, self.get_audience,
                                                              community_level=community_level,
                                                              node_level=node_level,
-                                                             time_bin=time_bin, delta_t=delta_t)
+                                                             time_bin=time_bin, delta_t=delta_t,
+                                                             fill_missing=True)
 
         return unique_users_time_series
 
@@ -661,7 +720,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         unique_users_distribution = self.distribution_measurement(data, self.user_col, self.get_audience,
                                                                   community_level=community_level,
-                                                                  node_level=node_level)
+                                                                  node_level=node_level,
+                                                                  fill_missing=True)
                                                        
         return unique_users_distribution
 
@@ -726,7 +786,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         lifetime = self.scalar_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                            community_level=community_level,
-                                           node_level=node_level)
+                                           node_level=node_level,
+                                           fill_missing=True)
         
         return lifetime
 
@@ -758,7 +819,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         lifetime = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                  community_level=community_level,
-                                                 node_level=node_level)
+                                                 node_level=node_level,
+                                                 fill_missing=True)
 
         return lifetime
 
@@ -792,11 +854,16 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         data.loc[data[self.root_col].isna(),self.root_col] = data.loc[data[self.root_col].isna(),self.id_col]
 
+        fill_missing=True
+        if node_level:
+            fill_missing=False
+
 
         lifetime = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                  extra_group_cols = [self.root_col],
                                                  community_level=community_level,
-                                                 node_level=node_level)
+                                                 node_level=node_level,
+                                                 fill_missing=fill_missing)
         
         return lifetime
 
@@ -827,7 +894,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         speed_distribution = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_lifetime(x, time_unit),
                                                            community_level=community_level,
-                                                           node_level=node_level)
+                                                           node_level=node_level,
+                                                           fill_missing=True)
         return speed_distribution
 
 
@@ -890,9 +958,10 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
+
         speed = self.scalar_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                         community_level=community_level,
-                                        node_level=node_level)
+                                        node_level=node_level,fill_missing=True)
         return speed
 
 
@@ -924,10 +993,11 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         """
         data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types, date_range)
 
+
         speed_time_series = self.temporal_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                                       community_level=community_level,
                                                       node_level=node_level,
-                                                      time_bin=time_bin, delta_t=delta_t)
+                                                      time_bin=time_bin, delta_t=delta_t,fill_missing=True)
         
         return speed_time_series
 
@@ -960,7 +1030,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
 
         speed_distribution = self.distribution_measurement(data, self.timestamp_col, lambda x: self.get_speed(x, time_unit),
                                                            community_level=community_level,
-                                                           node_level=node_level)
+                                                           node_level=node_level,
+                                                           fill_missing=True)
         
         return speed_distribution
 
