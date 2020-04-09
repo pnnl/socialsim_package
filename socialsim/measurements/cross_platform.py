@@ -275,7 +275,7 @@ class CrossPlatformMeasurements(MeasurementsBaseClass):
         data.sort_values(by=[self.timestamp_col], inplace=True, ascending=True)
 
         data.drop_duplicates(subset=group_col, inplace=True)
-
+            
         group_col = [c for c in group_col if c != self.platform_col]
 
         data['platform_timestamp'] = data[self.platform_col] + '_' + data[self.timestamp_col].astype(str)

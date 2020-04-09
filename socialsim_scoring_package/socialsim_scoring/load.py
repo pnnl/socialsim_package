@@ -60,7 +60,6 @@ def format_metrics_results_data_with_categories(df, cp3=True):
 
     return df
 
-
 def split_measurement_and_args(meas_str, sub_types=['_sliding_','_expanding_']): 
         for sub_type in sub_types:
             if sub_type in meas_str:
@@ -112,7 +111,7 @@ def read_metrics_files_to_dataframe(filepaths, sep=DEFAULT_SEPARATOR):
         m = json.load(open(fpath, 'r'))
         m['fn'] = fpath
         metrics.append(flatten(m, sep=sep))
-    df = pd.DataFrame(metrics)
+    df = pd.DataFrame(metrics)  
     df['scenario'] = df['scenario'].astype(str)
     return df
 
@@ -192,4 +191,5 @@ def load_averaged_model_metrics_json(list_of_metrics_filepaths, model_renaming_m
          
     return get_metrics_averages(df).drop(columns=['team_alias','variable','eval_ver','domain'])
  
+
 

@@ -146,7 +146,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             communities = self.community_set[self.community_col].dropna().unique()
         elif not community_level:
             communities = []
-
+        
+    
         data = self.select_data(nodes, communities, platform=platform, action_types=action_types, date_range=date_range)
 
         return data
@@ -555,7 +556,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return shares_time_series
 
 
-    def distribution_of_shares(self, node_level=False, community_level=False,
+    def distribution_of_shares(self, node_level=False, community_level=False, 
                                nodes=[], communities=[], platform="all", action_types=[],
                                date_range=[]):
         """
@@ -588,7 +589,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         return shares_distribution
 
 
-    def top_info_shared(self, k=5, node_level=False, community_level=False,
+    def top_info_shared(self, k=5, node_level=False, community_level=False, 
                         nodes=[], communities=[], platform="all", action_types=[],
                         date_range=[]):
         """
@@ -897,7 +898,6 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                                            node_level=node_level,
                                                            fill_missing=True)
         return speed_distribution
-
 
 
 

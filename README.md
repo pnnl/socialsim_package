@@ -1,7 +1,7 @@
 ## Install Instructions
 It is highly recommended that you install the SocialSim measurements package in a conda environment. SocialSim TA1 performers, please see the Wiki for information on how to [run evaluation as a self-contained service](https://wiki.socialsim.info/x/PADUAQ).
 
-#### Step 1: Create and activate a conda environment 
+#### Step 1: Create and activate a conda environment
 ``` bash
 conda create --name myenv python=3.7
 source activate myenv 
@@ -20,12 +20,6 @@ python setup.py install
 # Note: The iGraph installation process may vary from system to system
 conda install -c conda-forge/label/gcc7 python-igraph 
 
-# rtree installation
-conda install rtree
-
-# pysal installation
-conda install pysal
-
 # For Mac OSX, you may to need install matplotlib with conda rather than 
 # relying on the pip install below
 conda install matplotlib
@@ -33,12 +27,12 @@ conda install matplotlib
 
 #### Step 3: Install the SocialSim package using pip
 ``` bash
-python setup.py install 
+python setup.py install
 ```
 
 You can ignore the following user warnings, if they appear:
 
-``` 
+```
 UserWarning: You need pandana and urbanaccess to work with segregation's network module
 You can install them with  `pip install urbanaccess pandana` or `conda install -c udst pandana urbanaccess`
   "You need pandana and urbanaccess to work with segregation's network module\n"
