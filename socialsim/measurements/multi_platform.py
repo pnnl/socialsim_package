@@ -50,8 +50,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                                             community_directory,
                                                             communities)
             
-            
-        if metadata is None or metadata.node_list is None:
+
+        if metadata is None or metadata.node_list is None or metadata.node_list == 'all':
             if node_list == "all":
                 self.node_list = self.dataset[self.content_col].tolist()
             elif node_list is not None:
@@ -69,7 +69,11 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         else:
             self.community_list = []
 
-
+        if metadata is None or metadata.previous_user_data is None:       
+            self.previous_user_data = pd.DataFrame(columns=[self.user_col,self.content_col])
+        else:
+            self.previous_user_data = metadata.previous_user_data
+            
     def list_measurements(self):
         count = 0
         for f in dir(self):
@@ -1070,3 +1074,111 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                            k=k)
         
         return speed_topk
+    
+    
+    def activated_users(self,ratio=False, node_level=False,
+                        nodes=[], platform="all", action_types=[]):
+        """
+        Measurement: activated_users 
+        Description: Calculate the total number of new users that have not been active previously
+
+        Input:
+            ratio: If true, compute the ratio of new users to total unique users
+            node_level: If true, compute measurement for each node
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata if node_level is true
+            If node_level is set to False, computes population level
+
+        Output: If population level: scalar which is the total number of activated users
+                If node level: a dictionary where keys indicate the node and the values contain the total number of activated users
+        """
+        community_level = False
+        communities=[]
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        previous = self.previous_user_data
+        if ratio:
+            total_unique = data[self.user_col].nunique()
+            node_unique = data.groupby(self.content_col)[self.user_col].apply(lambda x: x.nunique())
+        if node_level:
+            meas = {}
+            for content, content_df in data.groupby(self.content_col):
+                meas[content] = len(set(content_df[self.user_col])-set(previous[previous[self.content_col]==content][self.user_col]))
+                if ratio:
+                    meas[content] = meas[content]/node_unique.loc[content]
+        else:
+            meas = len((set(data[self.user_col])-set(previous[self.user_col])))
+            if ratio: 
+                meas = meas/total_unique
+                
+        return meas
+    
+    
+    def activated_users_over_time(self,time_bin="D",ratio=False,
+                                  node_level=False,
+                                  nodes=[], platform="all", action_types=[]):
+        """
+        Measurement: activated_users_over_time
+
+        Description: Calculate the number of new users at each time step
+
+        Input:
+            time_bin: The time granularity of the time series
+            ratio: If true, compute the ratio of new users to total unique users
+            node_level: If true, compute measurement for each node
+            nodes: List of specific nodes to calculate measurement, or keyword "all" to calculate on all nodes, or
+                    empty list (default) to calculate nodes provided in metadata if node_level is true
+            If node_level is set to False, computes population level
+
+        Output: If population level: a time series with total activated users at each time step
+                If node level: a dataframe where each node is a row and the columns contain the number of activated users
+                               at each time step
+        """
+        community_level = False
+        communities=[]
+        data = self.preprocess(node_level, nodes, community_level, communities, platform, action_types)
+        
+        #get rid of unnecessary columns
+        data = data[[self.timestamp_col,self.user_col,self.content_col]]
+        
+        #set previous nodetime earlier than all new data
+        previous_users = self.previous_user_data
+        previous_users[self.timestamp_col]= data[self.timestamp_col].min()-pd.Timedelta("2 {}".format(time_bin))
+
+        #set a value to be able to remove previous events later
+        previous_users["is_previous"]=True
+        data["is_previous"]=False
+
+        data = pd.concat([previous_users,data],sort=True)
+        data = data.sort_values(self.timestamp_col)
+
+        if node_level:
+            if ratio:
+                unique_users = data[~data.is_previous].set_index(self.timestamp_col).groupby([self.content_col,pd.Grouper(freq=time_bin)])[self.user_col].apply(lambda x: x.nunique())
+                unique_users = unique_users.reset_index(0).pivot(columns="informationID")["nodeUserID"]
+                
+            data = data.drop_duplicates(subset=[self.content_col,self.user_col],keep="first")
+            data = data[~data.is_previous]
+            if len(data)==0:
+                meas = {}
+                for node in self.node_list:
+                    if node not in data.columns:
+                        meas[node] = pd.DataFrame(columns=[self.timestamp_col,'value'])
+            else:
+                data = data.set_index(self.timestamp_col).groupby([self.content_col,pd.Grouper(freq=time_bin)]).apply(len)
+                data = data.reset_index(0).pivot(columns=self.content_col)[0]
+                if ratio:
+                    data = data/unique_users
+                meas = {col:pd.DataFrame(data[col]).rename(columns={col:'value'}).reset_index().fillna(0) for col in data.columns}
+            
+        else:
+            if ratio:
+                unique_users = data[~data.is_previous].set_index(self.timestamp_col).groupby([pd.Grouper(freq=time_bin)])[self.user_col].apply(lambda x: x.nunique())
+                
+            data = data.drop_duplicates(subset=[self.user_col],keep="first")
+            data = data[~data.is_previous]
+            data = data.set_index(self.timestamp_col).groupby(pd.Grouper(freq=time_bin)).apply(len)
+            if ratio:
+                data = data/unique_users
+            meas = pd.DataFrame(data).reset_index().rename({0:"value"},axis=1).fillna(0)
+
+        return meas

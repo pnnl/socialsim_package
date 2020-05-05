@@ -8,7 +8,7 @@ dataset = ss.load_data(dataset)
 dataset = dataset[dataset['platform']=='twitter']
 
 # Load the configuration file
-config = 'data/cp3_s1_configuration.json'
+config = 'data/cp4_configuration.json'
 config = ss.load_config(config)
 
 # Subset the configuration for the given task 
