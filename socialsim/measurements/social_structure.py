@@ -400,7 +400,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         Output: DataFrame
 
         """
-        
+
         if not node_level:
             graphs = {'all':self.gUNig}
         else:
@@ -499,7 +499,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         tweet_uids = pd.Series(df[user_col].values, index=df[node_col]).to_dict()
 
         df['parentUserID'] = df[parent_node_col].map(tweet_uids)
-        
+
         df.loc[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull()), 'parentUserID'] = \
             df[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull())][root_node_col].map(tweet_uids)
         
@@ -534,9 +534,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 self.gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 self.gUNsn.AddEdge(e.source,e.target)
 
         return gUNig
@@ -575,9 +575,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in graph.vs:
                 self.gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in graph.es:
                 self.gUNsn.AddEdge(e.source, e.target)
 
 
@@ -604,9 +604,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 self.gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
 
         return gUNig
@@ -632,9 +632,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 self.gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
 
         return gUNig
@@ -656,9 +656,9 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
-            for v in self.gUNig.vs:
+            for v in gUNig.vs:
                 self.gUNsn.AddNode(v.index)
-            for e in self.gUNig.es:
+            for e in gUNig.es:
                 self.gUNsn.AddEdge(e.source, e.target)
 
 
