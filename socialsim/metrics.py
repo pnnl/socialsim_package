@@ -3,10 +3,12 @@ from scipy.stats import ks_2samp
 from scipy.stats import pearsonr
 from scipy.stats import iqr
 from scipy.stats import spearmanr
+from scipy.stats import wasserstein_distance
 
 from scipy.spatial.distance import euclidean
 from scipy.optimize import minimize_scalar
 from sklearn.metrics        import r2_score
+from bisect import bisect
 
 import fastdtw as fdtw
 import pandas  as pd
@@ -40,7 +42,7 @@ def list_metrics():
                     count += 1
 
 class Metrics:
-    def __init__(self, ground_truth, simulation, configuration, 
+    def __init__(self, ground_truth, simulation, configuration,
         log_file='metrics_log.txt', plot=False):
         """
         Description:
@@ -54,7 +56,7 @@ class Metrics:
             None
 
         """
-        self.plot = plot 
+        self.plot = plot
 
         self.ground_truth  = ground_truth
         self.simulation    = simulation
@@ -73,7 +75,7 @@ class Metrics:
             Note to reader:
                 p for platform
                 t for measurement type
-                s for scale 
+                s for scale
                 m for measurement
 
         Input:
@@ -105,7 +107,7 @@ class Metrics:
                 t_logs    = {}
 
                 for s in t_configuration.keys():
-                    
+
                     if t_ground_truth is None:
                         s_ground_truth = t_ground_truth
                     else:
@@ -135,8 +137,8 @@ class Metrics:
 
                         configuration = s_configuration[m]
 
-                        result, log = self._evaluate_metrics(ground_truth, 
-                                simulation, configuration, verbose, p, 
+                        result, log = self._evaluate_metrics(ground_truth,
+                                simulation, configuration, verbose, p,
                                 t, s, m, plot_dir)
 
                         s_results.update({m:result})
@@ -154,7 +156,7 @@ class Metrics:
         return results, logs
 
 
-    def _evaluate_metrics(self, ground_truth, simulation, configuration, 
+    def _evaluate_metrics(self, ground_truth, simulation, configuration,
         verbose, p, t, s, m, plot_dir):
         """
         Description: Evaluate metrics on a single measurement.
@@ -183,8 +185,8 @@ class Metrics:
 
         if self.plot:
             generate_plot(
-                simulation=simulation, 
-                ground_truth=ground_truth, 
+                simulation=simulation,
+                ground_truth=ground_truth,
                 measurement_name=m,
                 plot_dir=plot_dir
                 )
@@ -229,13 +231,13 @@ class Metrics:
                     for a in ground_truth.keys():
                         if a in simulation.keys():
                             try:
-                                sub_result = metric_function(ground_truth[a], 
+                                sub_result = metric_function(ground_truth[a],
                                                              simulation[a], **metric_args)
                                 result.update({a:sub_result})
                             except:
                                 result.update({a:None})
                 else:
-                    result = metric_function(ground_truth, simulation, 
+                    result = metric_function(ground_truth, simulation,
                         **metric_args)
             except Exception as error:
                 result = metric_name+' failed to run.'
@@ -267,7 +269,7 @@ class Metrics:
             :ground_truth: (unknown) Output of measurements code.
             :simulation: (unknown) Output of measurements code.
         Outputs:
-            :ground_truth: (np.array) Standardized ground truth measurements 
+            :ground_truth: (np.array) Standardized ground truth measurements
                 data.
             :simulation: (np.array) Standardized simulation measurements data.
         """
@@ -291,7 +293,7 @@ class Metrics:
         Inputs:
             ground_truth: Ground truth measurement
             simulation: Simulation measurement
-            method: Method of bin calculation corresponding the np.histogram bin 
+            method: Method of bin calculation corresponding the np.histogram bin
                 argument
 
         Outputs:
@@ -321,7 +323,7 @@ class Metrics:
         """
 
         on = [c for c in ground_truth.columns if c!='value']
-        
+
         suffixes = ('_gt', '_sim')
 
         df = ground_truth.merge(simulation, on=on, suffixes=suffixes, how=join)
@@ -361,12 +363,12 @@ class Metrics:
 
         Input:
         """
-        
+
         if not ground_truth is None and not simulation is None:
             result = np.abs(float(simulation) - float(ground_truth))
         else:
             result = None
-        
+
         return result
 
 
@@ -434,7 +436,7 @@ class Metrics:
             return None
 
 
-    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01, 
+    def kl_divergence_smoothed(self, ground_truth, simulation, alpha=0.01,
         discrete=False):
         """
         Metric: kl_divergence_smoothed
@@ -639,9 +641,123 @@ class Metrics:
 
         return rbo_score
 
+    def earth_movers(self,ground_truth,simulation):
+        """
+        Metric: earth_movers
 
-    def rmse(self, ground_truth, simulation, join='inner', fill_value=0, 
-        relative=False):
+        Description: Earth movers distance
+
+        Inputs:
+        ground_truth - ground truth measurement (data frame) with measurement in
+            the "value" column
+        simulation - simulation measurement (data frame) with measurement in the
+            "value" column
+        """
+
+        result = wasserstein_distance(ground_truth['value'],simulation['value'])
+
+        return result
+
+    def rh_distance(self,ground_truth,simulation):
+        """
+        Metric: rh_distance
+
+        Description: Relative Hausdorff distance between the ground
+        truth and simulation data.
+        Meant for degree sequence measurements
+
+        Inputs:
+        ground_truth - ground truth measurement (data frame) with measurement in
+            the "value" column; measurement must be integers
+        simulation - simulation measurement (data frame) with measurement in the
+            "value" column; measurement must be integers
+
+        Citation:
+        Aksoy, S.G., K.E. Nowak, S.J. Young,
+        "A linear time algorithm and analysis of graph Relative Hausdorff
+        distance", SIAM Journal on Mathematics of Data Science 1,
+        no. 4 (2019): 647-666.
+        """
+
+        #Rename for notional convience, convert to lists for speed
+        G=list(ground_truth['value'])
+        F=list(simulation['value'])
+
+        #convert degree sequence to CCDH sequence
+        G.sort() 
+        F.sort()
+        G=[len(G) - bisect(G, z) for z in range(0,max(G))]
+        F=[len(F) - bisect(F, z) for z in range(0,max(F))]
+
+        #Convert CCDH sequence to dictionary of CCDH values
+        #keyed by degrees 1 to max degree.
+        mDegF = len(F)
+        degF = {i : F[i-1] for i in range(1, mDegF+1)}
+        mDegG = len(G)
+        degG = {i : G[i-1] for i in range(1, mDegG+1)}
+
+        # Main subroutine: Return max of epsilon, delta, where delta is
+        # min size box around (d,Fd) containing smooth path through G.
+        def epsilon_box(d,Fd,G,mDegG,epsilon):
+            right = d*(1+epsilon)
+            r = int(np.floor(right))
+            r_frac = right - r
+            rightF = Fd*(1+epsilon)
+
+            left = d*(1-epsilon)
+            k = int(np.ceil(left))
+            k_frac = k - left
+            leftF = Fd*(1-epsilon)
+
+            if ((leftF <= mDegG)
+                and (rightF >= G.get(r,0)*(1-r_frac) + G.get(r+1,0)*r_frac)
+                and (leftF <= G.get(k,G[1])*(1-k_frac) + G.get(k-1,G[1])*k_frac)):
+                return epsilon
+
+            if ((mDegG < leftF) and (leftF <= mDegG+1)
+                and (rightF >= G.get(r,0)*(1-r_frac) + G.get(r+1,0)*r_frac)
+                and (leftF <= G[mDegG]*k_frac)):
+                return epsilon
+
+            # If here, G doesn't pass through current epsilon box,
+            # must find necessary epsilon box size. If G pass below box
+            if G.get(d,0) < Fd:
+                while k > mDegG + 1 or G.get(k-1,G[1]) < Fd*float(k-1)/d:
+                    k -= 1
+                if k == mDegG + 1:
+                    return 1 - float(G[mDegG]*(mDegG+1))/(Fd + G[mDegG]*d)
+                else:
+                    return 1 - float((1-k)*G.get(k,G[1])
+                            + k*G.get(k-1,G[1]))/(Fd + d*(G.get(k-1,G[1])
+                            - G.get(k,G[1])))
+            # otherwise, G pass above box
+            else:
+                while G.get(r+1,0) > Fd*float(r+1)/d:
+                    r += 1
+                return float((1+r)*G.get(r,0)
+                            - r*G.get(r+1,0))/(d*(G.get(r,0)
+                            - G.get(r+1,0)) + Fd) - 1
+
+        #Compute RH distance
+        checkF = set([1,mDegF] + [j for j in range(2,mDegF)
+                    if not ((degF[j] == degF[j-1]) and (degF[j] == degF[j+1]))])
+        checkG = set([1,mDegG] + [j for j in range(2,mDegG)
+                    if not ((degG[j] == degG[j-1]) and (degG[j] == degG[j+1]))])
+        epsilon = 0.0
+        for d in range(1,max(mDegG,mDegF)+1):
+            if d in checkF:
+                epsilon_prime = epsilon_box(d,degF[d],degG,mDegG,epsilon)
+                if epsilon_prime > epsilon:
+                    epsilon = epsilon_prime
+            if d in checkG:
+                epsilon_prime = epsilon_box(d,degG[d],degF,mDegF,epsilon)
+                if epsilon_prime > epsilon:
+                    epsilon = epsilon_prime
+        return epsilon
+
+
+    def rmse(self, ground_truth, simulation, join='inner', fill_value=0,
+        relative=False, cumulative=False, normed=False):
         """
         Metric: rmse
 
@@ -656,28 +772,38 @@ class Metrics:
         fill_value - fill value for non-overlapping joins
         """
 
-        if type(ground_truth) is np.ndarray: 
-            result = ground_truth - simulation 
+        if type(ground_truth) is np.ndarray:
+            result = ground_truth - simulation
             result = (result ** 2).mean()
             result = np.sqrt(result)
             return result
 
         if type(ground_truth) is list:
-            
+
             ground_truth = np.nan_to_num(ground_truth)
             simulation   = np.nan_to_num(simulation)
-            
+
             result = np.asarray(ground_truth) - np.asarray(simulation)
             result = (result ** 2).mean()
-            result = np.sqrt(result) 
-            
+            result = np.sqrt(result)
+
             return result
 
-        df = self.join_dfs(ground_truth, simulation, join=join, 
+        df = self.join_dfs(ground_truth, simulation, join=join,
             fill_value=fill_value)
 
 
         if len(df.index) > 0:
+
+            if cumulative:
+                df['value_sim'] = df['value_sim'].cumsum()
+                df['value_gt'] = df['value_gt'].cumsum()
+
+            if normed:
+                epsilon = 0.001*df[df['value_gt'] != 0.0]['value_gt'].min()
+                df['value_sim'] = (df['value_sim'] + epsilon)/(df['value_sim'].max() + epsilon)
+                df['value_gt'] = (df['value_gt'] + epsilon)/(df['value_gt'].max() + epsilon)
+
             if not relative:
                 return np.sqrt(((df["value_sim"]-df["value_gt"])**2).mean())
             else:
@@ -696,7 +822,7 @@ class Metrics:
                     else:
                         return None
 
-                return result 
+                return result
         else:
             return None
 
@@ -809,7 +935,7 @@ class Metrics:
 
         metrics = []
         for g, grp in grouped:
-            
+
             gt = grp[grp['source'] == 'ground_truth']
             sim = grp[grp['source'] == 'simulation']
 

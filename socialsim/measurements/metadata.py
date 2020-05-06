@@ -10,13 +10,18 @@ class MetaData:
     def __init__(self, content_data=False, user_data=False, info_data=False,
                  community_directory=None, node_file=None, verbose=False,
                  content_node_ids='all', user_node_ids=[], do_build_communities=False,
-                 communities=None):
+                 communities=None,previous_user_data=None,save_previous_user_data="",
+                 user_col="nodeUserID",content_col="informationID"):
 
         """
         Description:
 
         Input:
-
+        :param previous_user_data: dataframe or string. As a dataframe: contains previously occurring content events with (at minimum) user id and content id values for each row. As a string: path to a csv file of previously occuring content events in the same format
+        :param save_previous_user_data: the path to save the previous user data at
+        :param user_col: name of the column containing the user ids of each piece of content
+        :param content_col: name of the column where the content can be found
+        
         Output:
         
         """
@@ -77,7 +82,19 @@ class MetaData:
         model_filepath = model_filepath+'/model_parameters/best_model.pkl'
 
         self.estimator = joblib.load(model_filepath)
-
+    
+        if previous_user_data is not None:
+            if type(previous_user_data)== str:
+                previous_user_data = pd.read_csv(previous_user_data,index_col=0,dtype=str)
+                
+            if type(previous_user_data)== pd.core.frame.DataFrame:
+                self.previous_user_data = previous_user_data[[user_col,content_col]].drop_duplicates()
+            
+            if save_previous_user_data != "":
+                self.previous_user_data.to_csv(save_previous_user_data)
+        else:
+            self.previous_user_data=None
+            
     def read_communities(self):
 
         community_fns = glob.glob(self.community_directory + '/*')

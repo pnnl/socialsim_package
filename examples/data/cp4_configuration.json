@@ -1,0 +1,208 @@
+{
+    "twitter":{
+	"multi_platform":{
+	    "node":{
+		"number_of_shares": {
+                    "measurement": "number_of_shares",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "absolute_percentage_error": {
+                            "metric": "absolute_percentage_error",
+                            "metric_args": {}
+                        }
+                    }
+                },
+		"activated_users": {
+                    "measurement": "activated_users",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "absolute_percentage_error": {
+                            "metric": "absolute_percentage_error",
+                            "metric_args": {}
+                        }
+                    }
+                },
+		"number_of_shares_over_time": {
+                    "measurement": "number_of_shares_over_time",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Temporal",
+                    "metrics": {
+                        "rmse": {
+                            "metric": "rmse",
+			    "metric_args": {
+				"join": "outer",
+				"normed": true,
+				"cumulative": true
+                            }
+                        }
+                    }
+                },
+		"activated_users_over_time": {
+                    "measurement": "activated_users_over_time",
+                    "measurement_args": {
+                        "node_level": true,
+			"ratio": false
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Temporal",
+                    "metrics": {
+                        "rmse": {
+                            "metric": "rmse",
+			    "metric_args": {
+				"join": "outer",
+				"normed": true,
+				"cumulative": true
+                            }
+                        }
+                    }
+                }
+	    }
+	},
+	"social_structure":{
+	    "node":{
+		"degree_distribution":{
+                    "measurement": "degree_distribution",
+                    "measurement_args": {
+			"node_level":true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "rh": {
+                            "metric": "rh_distance",
+                            "metric_args": {}
+                        }
+                    }
+		},
+		"page_rank":{
+		    "measurement": "pagerank_distribution",
+                    "measurement_args": {
+			"node_level":true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "earth_movers_dist": {
+                            "metric": "earth_movers",
+                            "metric_args": {}
+                        }
+		    }
+		}
+	    }
+	}
+    },
+    "youtube":{
+	"multi_platform":{
+	    "node":{
+		"number_of_shares": {
+                    "measurement": "number_of_shares",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "absolute_percentage_error": {
+                            "metric": "absolute_percentage_error",
+                            "metric_args": {}
+                        }
+                    }
+                },
+		"activated_users": {
+                    "measurement": "activated_users",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "absolute_percentage_error": {
+                            "metric": "absolute_percentage_error",
+                            "metric_args": {}
+                        }
+                    }
+                },
+		"number_of_shares_over_time": {
+                    "measurement": "number_of_shares_over_time",
+                    "measurement_args": {
+                        "node_level": true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Temporal",
+                    "metrics": {
+                        "rmse": {
+                            "metric": "rmse",
+			    "metric_args": {
+				"join": "outer",
+				"normed": true,
+				"cumulative": true
+                            }
+                        }
+                    }
+                },
+		"activated_users_over_time": {
+                    "measurement": "activated_users_over_time",
+                    "measurement_args": {
+                        "node_level": true,
+			"ratio": false
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Temporal",
+                    "metrics": {
+                        "rmse": {
+                            "metric": "rmse",
+			    "metric_args": {
+				"join": "outer",
+				"normed": true,
+				"cumulative": true
+                            }
+                        }
+                    }
+                }
+	    }
+	},
+	"social_structure":{
+	    "node":{
+		"degree_distribution":{
+                    "measurement": "degree_distribution",
+                    "measurement_args": {
+			"node_level":true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "rh": {
+                            "metric": "rh_distance",
+                            "metric_args": {}
+                        }
+                    }
+		},
+		"page_rank":{
+		    "measurement": "pagerank_distribution",
+                    "measurement_args": {
+			"node_level":true
+		    },
+                    "scale": "node",
+                    "temporal_or_batch": "Batch",
+                    "metrics": {
+                        "earth_movers_dist": {
+                            "metric": "earth_movers",
+                            "metric_args": {}
+                        }
+		    }
+		}
+	    }
+	}
+    }
+}
