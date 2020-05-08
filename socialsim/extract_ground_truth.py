@@ -12,7 +12,7 @@ import networkx as nx
 
 from datetime import datetime
 
-from twitter_cascade_reconstruction import full_reconstruction, get_reply_cascade_root_tweet
+from .twitter_cascade_reconstruction import full_reconstruction, get_reply_cascade_root_tweet
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 
@@ -951,7 +951,7 @@ def extract_twitter_data(fn='twitter_data.json',
         replies.loc[:, 'partialParentID'] = tweets['in_reply_to_status_id_str' + name_suffix]
 
         to_concat.append(replies)
-
+        
     retweets = tweets[(tweets['is_retweet']) & (~tweets['is_quote'])].copy()
     if len(retweets) > 0:
         # for retweets we know the root but not the immediate parent
@@ -961,7 +961,7 @@ def extract_twitter_data(fn='twitter_data.json',
         retweets.loc[:, 'partialParentID'] = retweets['retweeted_status'].apply(lambda x: x['id_str' + name_suffix])
 
         to_concat.append(retweets)
-
+    
     retweets_of_replies = tweets[tweets['is_retweet_of_reply']].copy()
     if len(retweets_of_replies) > 0:
         # for retweets of replies the "root" is actually the reply not the ultimate root
@@ -987,7 +987,7 @@ def extract_twitter_data(fn='twitter_data.json',
         retweets_of_quotes.loc[:, 'actionType'] = 'retweet'
 
         to_concat.append(retweets_of_quotes)
-
+        
     retweets_of_quotes_of_replies = tweets[tweets['is_retweet_of_quote_of_reply']].copy()
     if len(retweets_of_quotes_of_replies) > 0:
         # for retweets of quotes of replies we don't know the root or the parent. the quoted status refers back to the reply not the final root
@@ -1000,7 +1000,7 @@ def extract_twitter_data(fn='twitter_data.json',
         retweets_of_quotes_of_replies.loc[:, 'actionType'] = 'retweet'
 
         to_concat.append(retweets_of_quotes_of_replies)
-
+        
     quotes = tweets[tweets['is_quote']].copy()
     if len(quotes) > 0:
         # for quotes we know the root but not the parent
@@ -1010,7 +1010,7 @@ def extract_twitter_data(fn='twitter_data.json',
         quotes.loc[:, 'partialParentID'] = quotes['quoted_status'].apply(lambda x: x['id_str' + name_suffix])
 
         to_concat.append(quotes)
-
+        
     quotes_of_replies = tweets[tweets['is_quote_of_reply']].copy()
     if len(quotes_of_replies) > 0:
         # for quotes of replies we don't know the root or the parent
@@ -1023,7 +1023,7 @@ def extract_twitter_data(fn='twitter_data.json',
         quotes_of_replies.loc[:, 'actionType'] = 'quote'
 
         to_concat.append(quotes_of_replies)
-
+        
     quotes_of_quotes = tweets[tweets['is_quote_of_quote']].copy()
     if len(quotes_of_quotes) > 0:
         # for quotes of quotes we don't know the parent or the root
@@ -1036,7 +1036,7 @@ def extract_twitter_data(fn='twitter_data.json',
         quotes_of_quotes.loc[:, 'actionType'] = 'quote'
 
         to_concat.append(quotes_of_quotes)
-
+        
     orig_tweets = tweets[tweets['is_orig']].copy()
     if len(orig_tweets) > 0:
         # for original tweets assign parent and root to be itself
@@ -1045,8 +1045,9 @@ def extract_twitter_data(fn='twitter_data.json',
         orig_tweets.loc[:, 'rootID'] = orig_tweets['nodeID']
         orig_tweets.loc[:, 'partialParentID'] = orig_tweets['nodeID']
         to_concat.append(orig_tweets)
-
+        
     tweets = pd.concat(to_concat, ignore_index=True, sort=False)
+    tweets['nodeID'] = tweets['nodeID'].astype(str)
     tweets = tweets[output_columns]
     tweets = tweets.sort_values("nodeTime").reset_index(drop=True)
 
