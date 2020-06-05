@@ -74,7 +74,8 @@
 		"degree_distribution":{
                     "measurement": "degree_distribution",
                     "measurement_args": {
-			"node_level":true
+			"node_level":true,
+			"mode":"IN"
 		    },
                     "scale": "node",
                     "temporal_or_batch": "Batch",
@@ -177,7 +178,8 @@
 		"degree_distribution":{
                     "measurement": "degree_distribution",
                     "measurement_args": {
-			"node_level":true
+			"node_level":true,
+			"mode":"IN"
 		    },
                     "scale": "node",
                     "temporal_or_batch": "Batch",
