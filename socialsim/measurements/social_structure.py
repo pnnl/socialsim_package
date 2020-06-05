@@ -390,7 +390,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             return meas
 
 
-    def degree_distribution(self,node_level=False):
+    def degree_distribution(self,node_level=False, mode='ALL'):
         """
         Measurement: degree_distribution
 
@@ -415,7 +415,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 continue
 
             vertices = [ v.attributes()['name'] for v in graph.vs]
-            degVals = graph.degree(vertices)
+            degVals = graph.degree(vertices,mode=mode)
             meas[key] = pd.DataFrame([{'node': vertices[idx],
                 'value': degVals[idx]} for idx in range(len(vertices))])
 

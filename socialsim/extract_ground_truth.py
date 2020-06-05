@@ -69,7 +69,11 @@ def get_twitter_urls(df, name_suffix):
             try:
                 api_urls = [get_twitter_api_url_rep(x, name_suffix) for x in j_json["extension"]['entities']['urls'] if
                             x != '']
-                if 'socialsim_resolved_urls' in j_json['extension'].keys():
+                if 'resolved_urls' in j_json['extension'].keys():
+                    resolved_urls = j_json['extension']['resolved_urls']
+                    internal_urls = [x for x in api_urls if 'twitter.com' in x]
+                    urls = list(set(resolved_urls + internal_urls))
+                elif 'socialsim_resolved_urls' in j_json['extension'].keys():
                     resolved_urls = j_json['extension']['socialsim_resolved_urls']
                     internal_urls = [x for x in api_urls if 'twitter.com' in x]
                     urls = list(set(resolved_urls + internal_urls))
@@ -106,8 +110,9 @@ def get_youtube_urls(df, text_suffix):
     for i, row in enumerate(df.iterrows()):
         rowdata = row[1]
         row_data_type = rowdata['kind']
-
-        if 'socialsim_resolved_urls' in rowdata['extension'].keys():
+        if 'resolved_urls' in rowdata['extension'].keys():
+            urls = list(rowdata['extension']['resolved_urls'])
+        elif 'socialsim_resolved_urls' in rowdata['extension'].keys():
             urls = list(rowdata['extension']['socialsim_resolved_urls'])
         else:
             if row_data_type == 'youtube#video':
