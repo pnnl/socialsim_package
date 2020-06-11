@@ -35,7 +35,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, platform='', configuration = {},
                  metadata = None, test=False,
                  log_file='network_measurements_log.txt', plot_graph=False,
-                 node="", weight_filter=1,directed=True):
+                 node="", weight_filter=1, directed=True):
 
         super(SocialStructureMeasurements, self).__init__(dataset,
             configuration, log_file=log_file)
@@ -49,16 +49,10 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
         random.seed(37)
 
-        if platform=='reddit':
-            build_graph = self.reddit_build_graph
-        elif platform=='twitter':
-            build_graph = self.twitter_build_graph
-        elif platform=='telegram':
-            build_graph = self.telegram_build_graph
+        if platform in ['twitter', 'reddit', 'telegram', 'youtube']:
+            build_graph = self.social_media_build_graph
         elif platform=='github':
             build_graph = self.github_build_graph
-        elif platform=='youtube':
-            build_graph = self.youtube_build_graph
         else:
             # unknown platform, skip graph creation
             return
@@ -500,7 +494,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         tweet_uids = pd.Series(df[user_col].values, index=df[node_col]).to_dict()
 
         df['parentUserID'] = df[parent_node_col].map(tweet_uids)
-        
+
         df.loc[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull()), 'parentUserID'] = \
             df[(df[root_node_col] != df[node_col]) & (df['parentUserID'].isnull())][root_node_col].map(tweet_uids)
         
@@ -532,6 +526,10 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             gUNig = p2
 
+        #if graph empty, convert to singleton graph
+        if gUNig.vcount()==0:
+            gUNig.add_vertex('dummy')
+
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
@@ -559,7 +557,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
         return edgelist
 
-    def twitter_build_graph(self, df, weight_filter=1,directed=True):
+    def social_media_build_graph(self, df, weight_filter=1, directed=False):
         """
         Description:
 
@@ -577,6 +575,10 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         graph = ig.Graph.TupleList(edgelist, directed=directed, weights=True)
         graph.simplify(combine_edges='sum')
 
+        #if graph empty, convert to singleton graph
+        if graph.vcount()==0:
+            graph.add_vertex('dummy')
+
         if SNAP_LOADED:
             #SNAP graph object construction
             self.gUNsn = sn.TUNGraph.New()
@@ -589,82 +591,5 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         return(graph)
 
 
-    def telegram_build_graph(self, df, weight_filter=1, directed=True):
-        """
-        Description:
-
-        Input:
-
-        Output:
-
-        """
-        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-
-        edgelist = self.get_edgelist(df, weight_filter,directed=directed)
-
-        #iGraph graph object construction
-        gUNig = ig.Graph.TupleList(edgelist, directed=directed)
-        gUNig.simplify(combine_edges='sum')
-
-        if SNAP_LOADED:
-            #SNAP graph object construction
-            self.gUNsn = sn.TUNGraph.New()
-            for v in gUNig.vs:
-                self.gUNsn.AddNode(v.index)
-            for e in gUNig.es:
-                self.gUNsn.AddEdge(e.source, e.target)
-
-        return gUNig
-
-    def reddit_build_graph(self, df, weight_filter=1, directed=True):
-        """
-        Description:
-
-        Input:
-
-        Output:
-
-        """
-        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-
-        edgelist = self.get_edgelist(df, weight_filter, directed=directed)
-
-        #iGraph Graph object construction
-        gUNig = ig.Graph.TupleList(edgelist, directed=directed, weights = True)
-        gUNig.simplify(combine_edges='sum')
 
 
-        if SNAP_LOADED:
-            #SNAP graph object construction
-            self.gUNsn = sn.TUNGraph.New()
-            for v in gUNig.vs:
-                self.gUNsn.AddNode(v.index)
-            for e in gUNig.es:
-                self.gUNsn.AddEdge(e.source, e.target)
-
-        return gUNig
-
-    def youtube_build_graph(self, df, weight_filter=1, directed=True):
-        """
-        build youtube graph
-        """
-
-        df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-
-        edgelist = self.get_edgelist(df, weight_filter, directed=directed)
-
-        #iGraph Graph object construction
-        gUNig = ig.Graph.TupleList(edgelist, directed=directed, weights = True)
-        gUNig.simplify(combine_edges='sum')
-
-
-        if SNAP_LOADED:
-            #SNAP graph object construction
-            self.gUNsn = sn.TUNGraph.New()
-            for v in gUNig.vs:
-                self.gUNsn.AddNode(v.index)
-            for e in gUNig.es:
-                self.gUNsn.AddEdge(e.source, e.target)
-
-
-        return gUNig

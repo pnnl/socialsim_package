@@ -683,8 +683,14 @@ class Metrics:
         G=list(ground_truth['value'])
         F=list(simulation['value'])
 
+        #If no edges, RH computed on closest nonzero degree sequence of [1]
+        if max(G)==0:
+            G=[1]
+        if max(F)==0:
+            F=[1]
+
         #convert degree sequence to CCDH sequence
-        G.sort() 
+        G.sort()
         F.sort()
         G=[len(G) - bisect(G, z) for z in range(0,max(G))]
         F=[len(F) - bisect(F, z) for z in range(0,max(F))]
