@@ -148,10 +148,10 @@ def check_records(submission_filepath, nodelist, simulation_period):
             maxday_str = maxday.split(' ')[0]
             subm['nodeTime'] = pd.to_datetime(subm['nodeTime']).astype(str)
             subm_minday, subm_maxday = subm['nodeTime'].min(), subm['nodeTime'].max()
-            if subm_minday > maxday:
+            if subm_maxday <= minday:
                 errors.append(
                     f'There is no data within the simulation period, all nodeTime values occur before the simulation period ({minday} - {maxday_str}).\n\tSubmission nodeTime values -- Min: {subm_minday} Max: {subm_maxday}')
-            elif subm_maxday <= minday:
+            elif subm_minday > maxday:
                 errors.append(
                     f'There is no data within the simulation period, all nodeTime values occur after the simulation period ({minday} - {maxday_str}).\n\tSubmission nodeTime values -- Min: {subm_minday} Max: {subm_maxday}')
             elif subm_minday < minday:
