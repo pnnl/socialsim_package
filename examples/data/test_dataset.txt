@@ -1,4 +1,4 @@
-{"identifier": "sample data set submission", "team": "pnnl", "scenario": "1"}
+{"model_identifier": "sample data set submission", "team": "pnnl", "scenario": "1", "simulation_period":"day1-dayN"}
 {"urlDomains": ["kwifkegqsu"], "nodeUserID": "ufmgvgoure", "informationID": "tyaekgxmsr", "nodeID": "phkmqmzpbv", "nodeTime": "2019-03-05 13:10:51", "actionType": "usszgbjcuz", "platform": "twitter", "parentID": "sgdibnesgi", "rootID": "impiovxbpk"}
 {"urlDomains": [], "nodeUserID": "fhffxqbsoa", "informationID": "bolwagblhx", "nodeID": "ugtkjodxer", "nodeTime": "2019-03-04 14:09:58", "actionType": "jqldsxwjnl", "platform": "github"}
 {"urlDomains": ["uluplsmgvx", "aykqiwtqbi"], "nodeUserID": "qccqocykfm", "informationID": "cagyezgppo", "nodeID": "alwwtfyunw", "nodeTime": "2019-03-05 01:37:58", "actionType": "sutcucmtuq", "platform": "twitter", "parentID": "orjhhcvomh", "rootID": "kfdgvkslwt"}

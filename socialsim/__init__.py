@@ -3,6 +3,7 @@ from .load import load_config
 
 from .run  import TaskRunner
 from .run  import run_measurements
+from .run  import EvaluationRunner
 
 from .measurements import SocialActivityMeasurements
 from .measurements import InformationCascadeMeasurements

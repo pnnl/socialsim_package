@@ -23,9 +23,13 @@ from .visualizations import transformer
 
 from .visualizations.visualization_config import measurement_plot_params
 
-from .load   import load_measurements
+from .load   import load_measurements, load_data
 from .record import RecordKeeper
 from .utils  import subset_for_test
+
+import json
+import warnings
+import pickle
 
 class TaskRunner:
     def __init__(self, ground_truth, configuration, metadata=None, test=False, plot_dir="./plots"):
@@ -267,4 +271,67 @@ def run_metrics(simulation, ground_truth, configuration, verbose, plot_dir):
     results, logs = metrics_object.run(verbose=verbose, plot_dir=plot_dir)
 
     return results, logs
+
+
+
+class EvaluationRunner:
+    def __init__(self, ground_truth, configuration, metadata=None, test=False, plot_dir="./plots"):
+        """
+        Description: Initializes the EvaluationRunner object.
+
+        Inputs:
+            :ground_truth: (pd.DataFrame)
+            :metadata: (ss.MetaData)
+            :configuration: (dict)
+            :test: (boolean)
+            :plot_dir: directory to save plots generated(string)
+        Outputs:
+            None
+        """
+        # Instantiate Task Runner
+        self.task_runner = TaskRunner(ground_truth, configuration, metadata=metadata, test=test, plot_dir=plot_dir)
+        # Set object variables
+        self.ground_truth = ground_truth
+        self.metadata = metadata
+        self.configuration = configuration
+        self.test = test
+        self.plot_dir = plot_dir
+
+
+
+    def __call__(self, simulation_filepath, timing=False, verbose=False, save=False,
+                 save_directory='./', save_format='json', submission_meta=True):
+        """
+        Description: This function runs the measurements and metrics code at
+            across all measurement types. It does not deal with multiple
+            platforms.
+
+        """
+
+        dataset = load_data(simulation_filepath, ignore_first_line=submission_meta, verbose=False)
+
+        # Run measurements and metrics on the simulation data
+        results, logs = self.task_runner(dataset, verbose=True)
+
+        if submission_meta:
+            try:
+                # test that meta is valid json object
+                with open(simulation_filepath, 'r') as f:
+                    submission_meta = f.readline()
+                submission_meta = json.loads(submission_meta)
+                for k in submission_meta.keys():
+                    if k in results.keys() or k in logs.keys():
+                        results[f'{k}_submission_meta'] = submission_meta[k]
+                        logs[f'{k}_submission_meta'] = submission_meta[k]
+                    else:
+                        results[k] = submission_meta[k]
+                        logs[k] = submission_meta[k]
+            except:
+                warnings.warn(f'Submission Metadata is not a valid json object. No Metadata will be added to the results or logs.')
+
+        return results, logs
+
+
+    def get_results(self):
+        return self.task_runner.ground_truth_results, self.task_runner.ground_truth_logs
 
