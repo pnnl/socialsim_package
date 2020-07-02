@@ -140,7 +140,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 return meas
 
 
-    def number_of_nodes(self):
+    def number_of_nodes(self, node_level=False):
         """
         Measurement: number_of_nodes
 
@@ -166,7 +166,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             return meas
 
-    def number_of_edges(self):
+    def number_of_edges(self, node_level=False):
         """
         Measurement: number_of_edges
 
@@ -193,7 +193,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             return meas
 
 
-    def density(self):
+    def density(self, node_level=False):
         """
         Measurement: density
 
@@ -221,7 +221,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             return meas
 
 
-    def assortativity_coefficient(self):
+    def assortativity_coefficient(self, node_level=False):
         """
         Measurement: assortativity_coefficient
 
@@ -247,7 +247,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             return meas
 
-    def number_of_connected_components(self):
+    def number_of_connected_components(self, node_level=False):
         """
         Measurement: number_of_connected_components
 
@@ -273,7 +273,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             return meas
 
-    def largest_connected_component(self):
+    def largest_connected_component(self, node_level=False):
 
         if not node_level:
             graphs = {'all':self.gUNig}
@@ -290,7 +290,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             return meas
 
 
-    def average_clustering_coefficient(self):
+    def average_clustering_coefficient(self, node_level=False):
         """
         Measurement: average_clustering_coefficient
 
@@ -320,7 +320,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 return meas
 
 
-    def max_node_degree(self):
+    def max_node_degree(self, node_level=False):
         """
         Measurement: max_node_degree
 
@@ -352,7 +352,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
             return meas
 
 
-    def mean_node_degree(self):
+    def mean_node_degree(self, node_level=False):
         """
         Measurement: mean_node_degree
 
@@ -452,7 +452,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             return meas
 
-    def community_modularity(self):
+    def community_modularity(self, node_level=False):
         """
         Measurement: community_modularity
 
@@ -503,24 +503,20 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         return df
 
 
-    def github_build_graph(self, df, project_on='nodeID', weight_filter=1, directed=False):
-        #self.main_df = self.main_df[['nodeUserID','nodeID']]
+    def github_build_graph(self, df, project_on='nodeID', directed=False):
         df = df[['nodeUserID','nodeID']]
 
-        # below line will be deleted if commenting it out produces no errors
-        # left_nodes = np.array(self.main_df['nodeUserID'].unique().tolist())
-        right_nodes = np.array(self.main_df['nodeID'].unique().tolist())
-        el = self.main_df.apply(tuple, axis=1).tolist()
+        right_nodes = np.array(df['nodeID'].unique().tolist())
+        el = df.apply(tuple, axis=1).tolist()
         edgelist = list(set(el))
 
         #iGraph graph object construction
-        B = ig.Graph.TupleList(edgelist, directed=False)
+        B = ig.Graph.TupleList(edgelist, directed=directed)
         names = np.array(B.vs["name"])
         types = np.isin(names, right_nodes)
         B.vs["type"] = types
         p1, p2 = B.bipartite_projection(multiplicity=False)
 
-        gUNig = None
         if project_on=="user":
             gUNig = p1
         else:
