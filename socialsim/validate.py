@@ -146,7 +146,7 @@ def check_records(submission_filepath, nodelist, simulation_period, challenge):
         try:
             simulation_window = VALID_OPTIONS[challenge]['simulation_windows'][simulation_period]
             minday = f'2019-{simulation_window[0]}'
-            maxday = f'2019-{simulation_window[1]} 23:59'
+            maxday = f'2019-{simulation_window[1]} 23:59:59'
             maxday_str = maxday.split(' ')[0]
             subm['nodeTime'] = pd.to_datetime(subm['nodeTime']).astype(str)
             subm_minday, subm_maxday = subm['nodeTime'].min(), subm['nodeTime'].max()
@@ -233,7 +233,7 @@ def validation_report(submission_filepath, challenge='cp4', nodelist_filepath=No
                 '*** No nodelist filepath was specified so validation did not check for missing/extra informationIDs. ***\n')
         else:
             with open(nodelist_filepath, 'r') as f:
-                nodelist = [x.strip() for x in f.readlines()]
+                nodelist = set([x.strip() for x in f.readlines()])
     except Exception as e:
         validation_report.append('Error loading nodelist from file. ' + str(e))
 
