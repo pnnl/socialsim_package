@@ -3,6 +3,7 @@ from .load import load_config
 
 from .run  import TaskRunner
 from .run  import run_measurements
+from .run  import EvaluationRunner
 
 from .measurements import SocialActivityMeasurements
 from .measurements import InformationCascadeMeasurements
@@ -23,3 +24,5 @@ from .visualizations import generate_plot
 
 from .utils import subset_for_test
 from .utils import add_communities_to_dataset
+
+from .validate  import validation_report

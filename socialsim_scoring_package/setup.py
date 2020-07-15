@@ -3,7 +3,8 @@ from setuptools import setup
 import json 
 
 package_structure = [
-    'socialsim_scoring'
+    'socialsim_scoring',
+    'socialsim_scoring.cp4'
     ]
 
 package_data = {
