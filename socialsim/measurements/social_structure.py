@@ -408,7 +408,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 warnings.warn('Empty graph',key)
                 continue
 
-            vertices = [ v.attributes()['name'] for v in graph.vs]
+            vertices = [ str(v.attributes()['name']) for v in graph.vs]
             degVals = graph.degree(vertices,mode=mode)
             meas[key] = pd.DataFrame([{'node': vertices[idx],
                 'value': degVals[idx]} for idx in range(len(vertices))])
@@ -442,7 +442,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 warnings.warn('Empty graph',key)
                 continue
 
-            vertices = [ v.attributes()['name'] for v in graph.vs]
+            vertices = [ str(v.attributes()['name']) for v in graph.vs]
             prVals=graph.pagerank(vertices,weights='weight')
             meas[key] = pd.DataFrame([{'node': vertices[idx],
                 'value': prVals[idx]} for idx in range(len(vertices))])
@@ -544,8 +544,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         else:
             edgelist_df['edge'] = [[n,p] for n,p in zip(df['nodeUserID'],df['parentUserID'])]
 
-        edgelist_df['userA'] = [x[0] for x in edgelist_df['edge']]
-        edgelist_df['userB'] = [x[1] for x in edgelist_df['edge']]
+        edgelist_df['userA'] = ['u-' + str(x[0]) for x in edgelist_df['edge']]
+        edgelist_df['userB'] = ['u-' + str(x[1]) for x in edgelist_df['edge']]
 
         edgelist_df = edgelist_df.groupby(['userA','userB']).size().reset_index().rename(columns={0:'count'})
         edgelist_df = edgelist_df[edgelist_df['count'] >= weight_filter]
@@ -564,7 +564,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         """
         print('Building directed=',directed,'graph')
         df = self.get_parent_uids(df).dropna(subset=['parentUserID'])
-
+        
         edgelist = self.get_edgelist(df, weight_filter, directed=directed)
 
         #iGraph graph object construction

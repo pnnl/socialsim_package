@@ -6,7 +6,7 @@ import pickle
 import pandas as pd
 import numpy as np
 
-def load_metrics(fns, narratives=[]):
+def load_metrics(fns, narratives=[],platforms=[]):
 
     dfs = []
     model_counts = {}
@@ -21,7 +21,7 @@ def load_metrics(fns, narratives=[]):
         else:
             model_counts[model] += 1
         
-        for platform in res['metrics'].keys():
+        for platform in platforms:
             for meas_type in res['metrics'][platform].keys():
                 metrics = res['metrics'][platform][meas_type]['node']
                 for m in metrics.keys():
@@ -187,7 +187,7 @@ def strip_plot(grouped,platforms=[],meas_list=[],log=True,narrative='',
 
             plt.ylabel(metric_list[m])
             plt.xlabel('Model')
-            plt.xticks(range(len(model_names)),model_names)
+            plt.xticks(range(len(model_names)),model_names,rotation=90)
 
             if subset['mean'].max() / (subset['mean'][subset['mean'] > 0]).min() > 100 and log:
                 plt.yscale('log')
