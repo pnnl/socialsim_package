@@ -397,8 +397,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                                      average aggregation value at each time
                 If node level: a dataframe of every node and their aggregation value at each time
         """
-
-
+        
         group_cols = [self.content_col]
         if community_level:
             group_cols += [self.community_col]
@@ -410,7 +409,13 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             data.loc[:,'agg_col'] = data.loc[:,self.timestamp_col]
             agg_col = 'agg_col'
 
-            
+        if len(data) == 0:
+            meas = {}
+            for node in self.node_list:
+                meas[node] = pd.DataFrame(columns = ['nodeTime','value'])
+            return meas
+        
+        
         if not delta_t:
             #get time series in absolute time
             data = data.set_index(self.timestamp_col)
@@ -473,7 +478,8 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
                 for node in self.node_list:
                     if node not in data.columns:
                         data[node] = np.zeros(len(data))
-                    
+
+                        
         if node_level:
             meas = {col:pd.DataFrame(data[col]).rename(columns={col:'value'}).reset_index() for col in data.columns}
         elif community_level:
@@ -1077,7 +1083,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
     
     
     def activated_users(self,ratio=False, node_level=False,
-                        nodes=[], platform="all", action_types=[]):
+                        nodes=[], platform="all", action_types=[],fill_missing=True):
         """
         Measurement: activated_users 
         Description: Calculate the total number of new users that have not been active previously
@@ -1099,14 +1105,23 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
         if ratio:
             total_unique = data[self.user_col].nunique()
             node_unique = data.groupby(self.content_col)[self.user_col].apply(lambda x: x.nunique())
+            
         if node_level:
             meas = {}
             for content, content_df in data.groupby(self.content_col):
                 meas[content] = len(set(content_df[self.user_col])-set(previous[previous[self.content_col]==content][self.user_col]))
                 if ratio:
                     meas[content] = meas[content]/node_unique.loc[content]
+
+
+            if fill_missing:
+                for node in self.node_list:
+                    if node not in meas.keys():
+                        meas[node] = 0.0
+                        
         else:
             meas = len((set(data[self.user_col])-set(previous[self.user_col])))
+            
             if ratio: 
                 meas = meas/total_unique
                 
@@ -1115,7 +1130,7 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
     
     def activated_users_over_time(self,time_bin="D",ratio=False,
                                   node_level=False,
-                                  nodes=[], platform="all", action_types=[]):
+                                  nodes=[], platform="all", action_types=[],fill_missing=True):
         """
         Measurement: activated_users_over_time
 
@@ -1166,10 +1181,15 @@ class MultiPlatformMeasurements(MeasurementsBaseClass):
             else:
                 data = data.set_index(self.timestamp_col).groupby([self.content_col,pd.Grouper(freq=time_bin)]).apply(len)
                 data = data.reset_index(0).pivot(columns=self.content_col)[0]
+                if fill_missing:
+                    for node in self.node_list:
+                        if node not in list(data.columns):
+                            data[node] = np.zeros(len(data))
+                            
                 if ratio:
                     data = data/unique_users
                 meas = {col:pd.DataFrame(data[col]).rename(columns={col:'value'}).reset_index().fillna(0) for col in data.columns}
-            
+
         else:
             if ratio:
                 unique_users = data[~data.is_previous].set_index(self.timestamp_col).groupby([pd.Grouper(freq=time_bin)])[self.user_col].apply(lambda x: x.nunique())

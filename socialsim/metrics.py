@@ -777,7 +777,7 @@ class Metrics:
         join - type of join to perform between ground truth and simulation
         fill_value - fill value for non-overlapping joins
         """
-
+        
         if type(ground_truth) is np.ndarray:
             result = ground_truth - simulation
             result = (result ** 2).mean()
@@ -804,9 +804,15 @@ class Metrics:
             if cumulative:
                 df['value_sim'] = df['value_sim'].cumsum()
                 df['value_gt'] = df['value_gt'].cumsum()
-
+                
             if normed:
-                epsilon = 0.001*df[df['value_gt'] != 0.0]['value_gt'].min()
+                if df['value_gt'].min() > 0:
+                    epsilon = 0.001*df[df['value_gt'] != 0.0]['value_gt'].min()
+                elif df['value_sim'].min() > 0:
+                    epsilon = 0.001*df[df['value_sim'] != 0.0]['value_sim'].min()
+                else:
+                    epsilon = 1.0
+                    
                 df['value_sim'] = (df['value_sim'] + epsilon)/(df['value_sim'].max() + epsilon)
                 df['value_gt'] = (df['value_gt'] + epsilon)/(df['value_gt'].max() + epsilon)
 
