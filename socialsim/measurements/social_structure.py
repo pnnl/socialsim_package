@@ -35,7 +35,7 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
     def __init__(self, dataset, platform='', configuration = {},
                  metadata = None, test=False,
                  log_file='network_measurements_log.txt', plot_graph=False,
-                 node="", weight_filter=1, directed=True):
+                 node="", weight_filter=1, directed=True, node_list=None):
 
         super(SocialStructureMeasurements, self).__init__(dataset,
             configuration, log_file=log_file)
@@ -47,6 +47,16 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
         if node != "":
             self.main_df = self.main_df.loc[self.main_df["informationID"]==node].copy()
 
+        if metadata is None or metadata.node_list is None or metadata.node_list == 'all':
+            if node_list == "all":
+                self.node_list = self.main_df['informationID'].tolist()
+            elif node_list is not None:
+                self.node_list = node_list
+            else:
+                self.node_list = []
+        else:
+            self.node_list = metadata.node_list
+            
         random.seed(37)
 
         if platform in ['twitter', 'reddit', 'telegram', 'youtube']:
@@ -59,7 +69,8 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
 
 
         self.gUNigs = {}
-        for info_id in self.main_df['informationID'].unique():
+        for info_id in self.node_list:
+#        for info_id in self.main_df['informationID'].unique():
             graph = build_graph(self.main_df[self.main_df['informationID'] == info_id],
                                                           weight_filter=weight_filter,
                                            directed=directed)
@@ -409,7 +420,12 @@ class SocialStructureMeasurements(MeasurementsBaseClass):
                 continue
 
             vertices = [ str(v.attributes()['name']) for v in graph.vs]
-            degVals = graph.degree(vertices,mode=mode)
+
+            if ig.Graph.vcount(graph) > 1:
+                degVals = graph.degree(vertices,mode=mode)
+            elif ig.Graph.vcount(graph) == 1:
+                degVals = [1]
+                
             meas[key] = pd.DataFrame([{'node': vertices[idx],
                 'value': degVals[idx]} for idx in range(len(vertices))])
 
